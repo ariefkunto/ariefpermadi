@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Request Pipeline — SELIS After-Sales</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c12; --surface: #0e1420; --surface2: #131b28; --surface3: #181f2e;
+  --border: rgba(0,200,255,0.1);
+  --cyan: #00c8ff; --cyan2: #00e5c8;
+  --red: #ff4d6d; --yellow: #ffd166; --green: #06d6a0;
+  --purple: #a78bfa; --orange: #fb923c;
+  --text: #e2eaf5; --muted: #5a7090; --muted2: #8a9ab5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.brand { display: flex; align-items: center; gap: 0.6rem; }
+.brand-icon { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, var(--orange), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #080c12; }
+.brand-name { font-size: 0.95rem; font-weight: 700; }
+.brand-name span { color: var(--cyan); }
+.divider-v { width: 1px; height: 20px; background: var(--border); }
+.page-title { font-size: 0.82rem; color: var(--muted2); }
+.topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+
+/* FILTERS BAR */
+.filters-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-shrink: 0; flex-wrap: wrap; }
+.filter-label { font-size: 0.72rem; color: var(--muted2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+.filter-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.9rem; font-size: 0.75rem; font-weight: 500; color: var(--muted2); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.filter-btn:hover, .filter-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,200,255,0.06); }
+.stats-bar { margin-left: auto; display: flex; gap: 1.5rem; }
+.stat-pill { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* BOARD */
+.board-wrap { flex: 1; overflow-x: auto; padding: 1.2rem 1.5rem; display: flex; gap: 1rem; min-height: 0; }
+
+.column { flex-shrink: 0; width: 260px; display: flex; flex-direction: column; gap: 0; }
+.col-header { padding: 0.8rem 1rem; border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: space-between; }
+.col-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.col-count { font-size: 0.72rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.col-body { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; padding: 0.7rem; display: flex; flex-direction: column; gap: 0.6rem; min-height: 200px; flex: 1; }
+
+/* Column colors */
+.col-new .col-header    { background: rgba(90,112,144,0.15); }
+.col-new .col-title     { color: var(--muted2); }
+.col-new .col-count     { background: rgba(90,112,144,0.2); color: var(--muted2); }
+
+.col-open .col-header   { background: rgba(0,200,255,0.08); }
+.col-open .col-title    { color: var(--cyan); }
+.col-open .col-count    { background: rgba(0,200,255,0.15); color: var(--cyan); }
+
+.col-parts .col-header  { background: rgba(255,209,102,0.08); }
+.col-parts .col-title   { color: var(--yellow); }
+.col-parts .col-count   { background: rgba(255,209,102,0.15); color: var(--yellow); }
+
+.col-resolved .col-header { background: rgba(6,214,160,0.08); }
+.col-resolved .col-title  { color: var(--green); }
+.col-resolved .col-count  { background: rgba(6,214,160,0.15); color: var(--green); }
+
+.col-closed .col-header { background: rgba(167,139,250,0.08); }
+.col-closed .col-title  { color: var(--purple); }
+.col-closed .col-count  { background: rgba(167,139,250,0.15); color: var(--purple); }
+
+/* CARD */
+.ticket-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.ticket-card:hover { border-color: rgba(0,200,255,0.35); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.ticket-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 8px 0 0 8px; }
+.prio-critical::before { background: var(--red); }
+.prio-high::before    { background: var(--orange); }
+.prio-medium::before  { background: var(--yellow); }
+.prio-low::before     { background: var(--green); }
+
+.ticket-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.ticket-id { font-size: 0.68rem; font-weight: 700; color: var(--cyan); }
+.prio-badge { font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+.prio-critical.badge { background: rgba(255,77,109,0.15); color: var(--red); }
+.prio-high.badge     { background: rgba(251,146,60,0.15); color: var(--orange); }
+.prio-medium.badge   { background: rgba(255,209,102,0.15); color: var(--yellow); }
+.prio-low.badge      { background: rgba(6,214,160,0.15); color: var(--green); }
+
+.ticket-issue { font-size: 0.82rem; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 0.5rem; }
+.ticket-customer { font-size: 0.73rem; color: var(--muted2); margin-bottom: 0.5rem; }
+
+.ticket-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.meta-chip { font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 5px; background: rgba(255,255,255,0.04); color: var(--muted2); border: 1px solid rgba(255,255,255,0.06); }
+
+.ticket-footer { margin-top: 0.6rem; display: flex; align-items: center; justify-content: space-between; }
+.ticket-tech { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--muted2); }
+.tech-avatar { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; color: #080c12; flex-shrink: 0; }
+.ticket-time { font-size: 0.65rem; color: var(--muted); }
+.time-overdue { color: var(--red) !important; font-weight: 600; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid rgba(0,200,255,0.25); border-radius: 14px; padding: 1.8rem; max-width: 480px; width: 100%; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.2rem; }
+.modal-id { font-size: 0.75rem; color: var(--cyan); font-weight: 700; }
+.modal-close { background: none; border: none; color: var(--muted2); font-size: 1.2rem; cursor: pointer; padding: 0; }
+.modal-close:hover { color: var(--text); }
+.modal-issue { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1rem; }
+.modal-field { background: var(--surface2); border-radius: 8px; padding: 0.7rem 0.9rem; }
+.modal-field-label { font-size: 0.65rem; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+.modal-field-val { font-size: 0.85rem; font-weight: 500; }
+.modal-notes { background: var(--surface2); border-radius: 8px; padding: 0.9rem; font-size: 0.82rem; color: var(--muted2); line-height: 1.6; }
+.modal-actions { margin-top: 1.2rem; display: flex; gap: 0.7rem; }
+.btn { padding: 0.55rem 1.2rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all 0.15s; }
+.btn-primary { background: var(--cyan); color: #080c12; }
+.btn-primary:hover { background: var(--cyan2); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted2); }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="brand"><div class="brand-icon">🎫</div><div class="brand-name">SELIS <span>Ops</span></div></div>
+    <div class="divider-v"></div>
+    <div class="page-title">Service Request Pipeline — After-Sales Kanban Board</div>
+  </div>
+  <div class="topbar-right">
+    <div style="font-size:0.75rem;color:var(--muted2)">Periode: <strong style="color:var(--text)">Des 2023</strong></div>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="filterCards('all',this)">Semua</button>
+  <button class="filter-btn" onclick="filterCards('critical',this)">🔴 Critical</button>
+  <button class="filter-btn" onclick="filterCards('high',this)">🟠 High</button>
+  <button class="filter-btn" onclick="filterCards('medium',this)">🟡 Medium</button>
+  <button class="filter-btn" onclick="filterCards('low',this)">🟢 Low</button>
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="stat-dot" style="background:var(--red)"></div><span>12 Critical</span></div>
+    <div class="stat-pill"><div class="stat-dot" style="background:var(--orange)"></div><span>28 High</span></div>
+    <div class="stat-pill"><div class="stat-dot" style="background:var(--yellow)"></div><span>45 Medium</span></div>
+    <div class="stat-pill"><div class="stat-dot" style="background:var(--green)"></div><span>31 Low</span></div>
+  </div>
+</div>
+
+<div class="board-wrap">
+
+  <!-- NEW -->
+  <div class="column col-new">
+    <div class="col-header"><span class="col-title">⬛ New</span><span class="col-count">8</span></div>
+    <div class="col-body">
+      <div class="ticket-card prio-critical" onclick="openModal('SLS-4835','Baterai drop drastis — tidak bisa menyala','Bpk. Darmawan Susilo • Bekasi','Critical','Kerusakan Baterai','Teknisi: Belum assign','Masuk 35 menit lalu','Unit mati total, pelanggan tidak bisa menggunakan motor. Perlu pengecekan segera ke lokasi pelanggan.','Belum ditugaskan','-','35 mnt lalu','Masuk antrian')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4835</span><span class="prio-badge prio-critical badge">Critical</span></div>
+        <div class="ticket-issue">Baterai drop drastis — tidak bisa menyala</div>
+        <div class="ticket-customer">👤 Bpk. Darmawan Susilo • Bekasi</div>
+        <div class="ticket-meta"><span class="meta-chip">⚡ Baterai</span><span class="meta-chip">📍 Jabodetabek</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">?</span>Belum assign</span><span class="ticket-time time-overdue">35 mnt lalu</span></div>
+      </div>
+      <div class="ticket-card prio-high" onclick="openModal('SLS-4834','Charging port tidak terbaca','Ibu Sari Wulandari • Depok','High','Charging Port','Belum assign','1 jam lalu','Port charger tidak detect konektor. Unit masih bisa menyala tapi tidak bisa di-charge.','Belum ditugaskan','-','1j lalu','Masuk antrian')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4834</span><span class="prio-badge prio-high badge">High</span></div>
+        <div class="ticket-issue">Charging port tidak terbaca oleh adapter</div>
+        <div class="ticket-customer">👤 Ibu Sari Wulandari • Depok</div>
+        <div class="ticket-meta"><span class="meta-chip">🔌 Charging</span><span class="meta-chip">📍 Jabodetabek</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">?</span>Belum assign</span><span class="ticket-time">1j lalu</span></div>
+      </div>
+      <div class="ticket-card prio-medium" onclick="openModal('SLS-4833','Speedometer tidak akurat','Bpk. Ridwan Hakim • Bogor','Medium','Speedometer','Belum assign','2 jam lalu','Speedometer menunjukkan angka tidak konsisten. Sudah coba restart tapi masalah berlanjut.','Belum ditugaskan','-','2j lalu','Masuk antrian')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4833</span><span class="prio-badge prio-medium badge">Medium</span></div>
+        <div class="ticket-issue">Speedometer tidak akurat — angka berubah sendiri</div>
+        <div class="ticket-customer">👤 Bpk. Ridwan Hakim • Bogor</div>
+        <div class="ticket-meta"><span class="meta-chip">📱 Software</span><span class="meta-chip">📍 Jabodetabek</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">?</span>Belum assign</span><span class="ticket-time">2j lalu</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="column col-open">
+    <div class="col-header"><span class="col-title">🔵 In Progress</span><span class="col-count">14</span></div>
+    <div class="col-body">
+      <div class="ticket-card prio-critical" onclick="openModal('SLS-4821','Motor penggerak bergetar tidak normal','Bpk. Hendri Cahyono • Jakarta Selatan','Critical','Motor Penggerak','Agus S.','5j lalu','Getaran abnormal terasa di seluruh badan motor. Teknisi sudah on-site, sedang melakukan diagnosis.','Agus Santoso','Diagnosis on-site','5j lalu','Sedang diagnosis di lokasi')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4821</span><span class="prio-badge prio-critical badge">Critical</span></div>
+        <div class="ticket-issue">Motor penggerak bergetar tidak normal</div>
+        <div class="ticket-customer">👤 Bpk. Hendri Cahyono • Jakarta Selatan</div>
+        <div class="ticket-meta"><span class="meta-chip">⚙️ Motor</span><span class="meta-chip">📍 Jabodetabek</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">AS</span>Agus S.</span><span class="ticket-time time-overdue">5j lalu ⚠</span></div>
+      </div>
+      <div class="ticket-card prio-high" onclick="openModal('SLS-4818','Firmware update gagal, unit hang','Ibu Mega Pertiwi • Bandung','High','Software/Firmware','Rudi H.','6j lalu','Unit hang setelah OTA update. Teknisi sedang melakukan factory reset dan re-flash firmware.','Rudi Hermawan','Re-flash firmware','6j lalu','Proses re-flash firmware')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4818</span><span class="prio-badge prio-high badge">High</span></div>
+        <div class="ticket-issue">Firmware update gagal — unit hang total</div>
+        <div class="ticket-customer">👤 Ibu Mega Pertiwi • Bandung</div>
+        <div class="ticket-meta"><span class="meta-chip">📱 Firmware</span><span class="meta-chip">📍 Jawa Barat</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">RH</span>Rudi H.</span><span class="ticket-time">6j lalu</span></div>
+      </div>
+      <div class="ticket-card prio-medium" onclick="openModal('SLS-4812','Lampu indikator mati','Bpk. Fauzan Rahman • Yogyakarta','Medium','Lampu & Kelistrikan','Budi P.','8j lalu','Lampu depan dan indikator dashboard tidak menyala. Pengecekan kabel dan fuse sedang dilakukan.','Budi Prasetyo','Cek kelistrikan','8j lalu','Pengecekan kelistrikan')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4812</span><span class="prio-badge prio-medium badge">Medium</span></div>
+        <div class="ticket-issue">Lampu indikator dashboard tidak menyala</div>
+        <div class="ticket-customer">👤 Bpk. Fauzan Rahman • Yogyakarta</div>
+        <div class="ticket-meta"><span class="meta-chip">💡 Kelistrikan</span><span class="meta-chip">📍 Jawa Tengah</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">BP</span>Budi P.</span><span class="ticket-time">8j lalu</span></div>
+      </div>
+      <div class="ticket-card prio-low" onclick="openModal('SLS-4808','Kaca spion kanan longgar','Bpk. Suharno • Surakarta','Low','Komponen Fisik','Budi P.','10j lalu','Spion kanan mudah bergerak karena baut longgar. Penggantian bracket sedang diproses.','Budi Prasetyo','Penggantian bracket','10j lalu','Menunggu baut pengganti')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4808</span><span class="prio-badge prio-low badge">Low</span></div>
+        <div class="ticket-issue">Kaca spion kanan longgar — perlu penggantian bracket</div>
+        <div class="ticket-customer">👤 Bpk. Suharno • Surakarta</div>
+        <div class="ticket-meta"><span class="meta-chip">🔩 Fisik</span><span class="meta-chip">📍 Jawa Tengah</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">BP</span>Budi P.</span><span class="ticket-time">10j lalu</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING PARTS -->
+  <div class="column col-parts">
+    <div class="col-header"><span class="col-title">🟡 Pending Parts</span><span class="col-count">9</span></div>
+    <div class="col-body">
+      <div class="ticket-card prio-critical" onclick="openModal('SLS-4790','Motor listrik perlu penggantian','Bpk. Ahmad Firdaus • Medan','Critical','Motor Penggerak','Rizal M.','3 hari lalu','Motor sudah dipastikan rusak dan perlu diganti. Menunggu stok motor dari gudang pusat Jakarta.','Rizal Maulana','Menunggu spare part','3hr lalu','Stok motor ETA 2 hari lagi')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4790</span><span class="prio-badge prio-critical badge">Critical</span></div>
+        <div class="ticket-issue">Motor listrik rusak — perlu unit pengganti</div>
+        <div class="ticket-customer">👤 Bpk. Ahmad Firdaus • Medan</div>
+        <div class="ticket-meta"><span class="meta-chip">⚙️ Motor</span><span class="meta-chip">📍 Sumatera</span><span class="meta-chip">⏳ ETA 2hr</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">RM</span>Rizal M.</span><span class="ticket-time time-overdue">3 hari lalu</span></div>
+      </div>
+      <div class="ticket-card prio-high" onclick="openModal('SLS-4782','Baterai perlu penggantian','Ibu Nurul Hidayah • Surabaya','High','Baterai','Eko W.','2 hari lalu','Baterai sudah di bawah 60% kapasitas normal, perlu diganti. Menunggu baterai dari supplier.','Eko Widodo','Menunggu baterai baru','2hr lalu','Baterai ETA 1 hari lagi')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4782</span><span class="prio-badge prio-high badge">High</span></div>
+        <div class="ticket-issue">Baterai degradasi parah — kapasitas 58% normal</div>
+        <div class="ticket-customer">👤 Ibu Nurul Hidayah • Surabaya</div>
+        <div class="ticket-meta"><span class="meta-chip">⚡ Baterai</span><span class="meta-chip">📍 Jawa Timur</span><span class="meta-chip">⏳ ETA 1hr</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">EW</span>Eko W.</span><span class="ticket-time time-overdue">2 hari lalu</span></div>
+      </div>
+      <div class="ticket-card prio-medium" onclick="openModal('SLS-4771','Controller board perlu ganti','Bpk. Yusuf Effendi • Semarang','Medium','Controller','Hendra K.','1 hari lalu','Controller board mati. Menunggu pengiriman dari gudang regional Jawa Tengah.','Hendra Kusuma','Menunggu controller','1hr lalu','Controller ETA hari ini')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4771</span><span class="prio-badge prio-medium badge">Medium</span></div>
+        <div class="ticket-issue">Controller board tidak responsif — perlu diganti</div>
+        <div class="ticket-customer">👤 Bpk. Yusuf Effendi • Semarang</div>
+        <div class="ticket-meta"><span class="meta-chip">🖥️ Controller</span><span class="meta-chip">📍 Jawa Tengah</span><span class="meta-chip">⏳ Hari ini</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">HK</span>Hendra K.</span><span class="ticket-time">1 hari lalu</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESOLVED -->
+  <div class="column col-resolved">
+    <div class="col-header"><span class="col-title">🟢 Resolved</span><span class="col-count">22</span></div>
+    <div class="col-body">
+      <div class="ticket-card prio-high" onclick="openModal('SLS-4756','Rem tidak pakem','Bpk. Irfan Hamdani • Tangerang','High','Sistem Rem','Agus S.','Kemarin','Kampas rem habis dan per rem lemah. Sudah diganti, unit sudah test ride dan dikembalikan ke pelanggan.','Agus Santoso','Selesai - Rem normal kembali','Kemarin','Pelanggan puas, CSAT 5⭐')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4756</span><span class="prio-badge prio-high badge">High</span></div>
+        <div class="ticket-issue">Rem tidak pakem — kampas dan per diganti ✓</div>
+        <div class="ticket-customer">👤 Bpk. Irfan Hamdani • Tangerang</div>
+        <div class="ticket-meta"><span class="meta-chip">🛑 Rem</span><span class="meta-chip">⭐ CSAT 5/5</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">AS</span>Agus S.</span><span class="ticket-time">Kemarin</span></div>
+      </div>
+      <div class="ticket-card prio-medium" onclick="openModal('SLS-4748','Suara berisik di roda belakang','Ibu Dewi Anggraini • Bekasi','Medium','Roda & Ban','Rudi H.','2 hari lalu','Baut roda belakang longgar. Sudah dikencangkan dan dilakukan alignment. Unit aman dikendarai.','Rudi Hermawan','Selesai - Baut dikencangkan','2hr lalu','Selesai dalam 45 menit')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4748</span><span class="prio-badge prio-medium badge">Medium</span></div>
+        <div class="ticket-issue">Suara berisik roda belakang — baut longgar ✓</div>
+        <div class="ticket-customer">👤 Ibu Dewi Anggraini • Bekasi</div>
+        <div class="ticket-meta"><span class="meta-chip">🔩 Roda</span><span class="meta-chip">⭐ CSAT 4/5</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">RH</span>Rudi H.</span><span class="ticket-time">2 hari lalu</span></div>
+      </div>
+      <div class="ticket-card prio-low" onclick="openModal('SLS-4741','Lampu sein kanan mati','Bpk. Dedi Kurniawan • Depok','Low','Kelistrikan','Budi P.','3 hari lalu','Bohlam sein kanan putus. Sudah diganti dengan yang baru. Unit langsung bisa dipakai.','Budi Prasetyo','Selesai - Bohlam diganti','3hr lalu','Selesai dalam 20 menit')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4741</span><span class="prio-badge prio-low badge">Low</span></div>
+        <div class="ticket-issue">Lampu sein kanan mati — bohlam diganti ✓</div>
+        <div class="ticket-customer">👤 Bpk. Dedi Kurniawan • Depok</div>
+        <div class="ticket-meta"><span class="meta-chip">💡 Lampu</span><span class="meta-chip">⭐ CSAT 5/5</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">BP</span>Budi P.</span><span class="ticket-time">3 hari lalu</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSED -->
+  <div class="column col-closed">
+    <div class="col-header"><span class="col-title">✅ Closed</span><span class="col-count">63</span></div>
+    <div class="col-body">
+      <div class="ticket-card prio-high" onclick="openModal('SLS-4720','Masalah baterai — garansi klaim','Bpk. Gunawan Saputra • Bandung','High','Baterai','Agus S.','5 hari lalu','Klaim garansi disetujui, baterai diganti unit baru. Pelanggan sangat puas dengan proses.','Agus Santoso','Closed - Garansi disetujui','5hr lalu','⭐⭐⭐⭐⭐ Pelanggan memberikan review positif')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4720</span><span class="prio-badge prio-high badge">High</span></div>
+        <div class="ticket-issue">Baterai lemah — klaim garansi disetujui ✓</div>
+        <div class="ticket-customer">👤 Bpk. Gunawan Saputra • Bandung</div>
+        <div class="ticket-meta"><span class="meta-chip">✅ Garansi</span><span class="meta-chip">⭐ CSAT 5/5</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">AS</span>Agus S.</span><span class="ticket-time">5 hari lalu</span></div>
+      </div>
+      <div class="ticket-card prio-medium" onclick="openModal('SLS-4705','Service rutin 6 bulan','Ibu Anita Rahmawati • Jakarta','Medium','Service Berkala','Rudi H.','1 minggu lalu','Service rutin 6 bulanan selesai. Cek komponen, pelumas, dan firmware diperbarui.','Rudi Hermawan','Closed - Service selesai','1mgg lalu','⭐⭐⭐⭐ Normal service')">
+        <div class="ticket-top"><span class="ticket-id">#SLS-4705</span><span class="prio-badge prio-medium badge">Medium</span></div>
+        <div class="ticket-issue">Service rutin 6 bulan — selesai ✓</div>
+        <div class="ticket-customer">👤 Ibu Anita Rahmawati • Jakarta</div>
+        <div class="ticket-meta"><span class="meta-chip">🔧 Rutin</span><span class="meta-chip">⭐ CSAT 4/5</span></div>
+        <div class="ticket-footer"><span class="ticket-tech"><span class="tech-avatar">RH</span>Rudi H.</span><span class="ticket-time">1 minggu lalu</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-id" id="m-id"></span>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-issue" id="m-issue"></div>
+    <div class="modal-grid">
+      <div class="modal-field"><div class="modal-field-label">Pelanggan</div><div class="modal-field-val" id="m-customer"></div></div>
+      <div class="modal-field"><div class="modal-field-label">Prioritas</div><div class="modal-field-val" id="m-prio"></div></div>
+      <div class="modal-field"><div class="modal-field-label">Kategori</div><div class="modal-field-val" id="m-cat"></div></div>
+      <div class="modal-field"><div class="modal-field-label">Teknisi</div><div class="modal-field-val" id="m-tech"></div></div>
+      <div class="modal-field"><div class="modal-field-label">Waktu Masuk</div><div class="modal-field-val" id="m-time"></div></div>
+      <div class="modal-field"><div class="modal-field-label">Status</div><div class="modal-field-val" id="m-status"></div></div>
+    </div>
+    <div class="modal-notes" id="m-notes"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary">Update Status</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal').classList.remove('open')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(id, issue, customer, prio, cat, tech, time, notes, techFull, status, timeIn, notes2) {
+  document.getElementById('m-id').textContent = '#' + id;
+  document.getElementById('m-issue').textContent = issue;
+  document.getElementById('m-customer').textContent = customer;
+  document.getElementById('m-prio').textContent = prio;
+  document.getElementById('m-cat').textContent = cat;
+  document.getElementById('m-tech').textContent = techFull;
+  document.getElementById('m-time').textContent = timeIn;
+  document.getElementById('m-status').textContent = status;
+  document.getElementById('m-notes').textContent = notes;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e) { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); }
+
+function filterCards(prio, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ticket-card').forEach(card => {
+    if (prio === 'all') { card.style.display = ''; return; }
+    card.style.display = card.classList.contains('prio-' + prio) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

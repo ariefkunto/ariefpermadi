@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly After-Sales Report Generator — Alqolam</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;--surface:#fff;--card:#fdfaf4;--border:#e4d9c4;
+  --ink:#1a1510;--muted:#7a7060;
+  --gold:#c4862a;--gold-bg:#fdf3e3;
+  --green:#276232;--green-bg:#eaf4eb;
+  --red:#a83228;--red-bg:#fbeae8;
+  --blue:#1a4f8a;--blue-bg:#e8f0fb;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--ink);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.badge{background:var(--gold);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:3px 9px;border-radius:3px;margin-right:10px}
+.brand-title{font-size:13px;font-weight:700;color:#fff}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px}
+.topbar-btns{display:flex;gap:8px}
+.btn-top{padding:7px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:none}
+.btn-gen{background:var(--gold);color:#fff}
+.btn-print{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)!important}
+
+.layout{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 52px)}
+
+/* INPUT PANEL */
+.input-panel{background:var(--surface);border-right:1px solid var(--border);padding:24px;overflow-y:auto}
+.panel-section{margin-bottom:24px}
+.panel-sec-title{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;font-weight:600;color:var(--muted)}
+.form-input,.form-select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--ink);outline:none;font-family:inherit;transition:border-color .2s}
+.form-input:focus,.form-select:focus{border-color:var(--gold)}
+.num-input{display:flex;align-items:center;gap:8px}
+.num-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.num-btn:hover{border-color:var(--gold);color:var(--gold)}
+.num-val{flex:1;text-align:center;font-size:16px;font-weight:800;color:var(--ink)}
+.num-lbl{font-size:10px;color:var(--muted);text-align:center}
+
+/* REPORT PANEL */
+.report-panel{background:var(--bg);padding:28px;overflow-y:auto}
+.report-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;opacity:.5}
+.report-placeholder-icon{font-size:3rem;margin-bottom:12px}
+.report-placeholder-text{font-size:14px;font-weight:600;color:var(--muted)}
+
+/* REPORT OUTPUT */
+#reportOutput{display:none}
+.report-doc{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:720px}
+.report-letterhead{background:var(--ink);padding:24px 28px;display:flex;align-items:flex-start;justify-content:space-between}
+.lh-left{}
+.lh-badge{background:var(--gold);color:#fff;font-size:9px;font-weight:800;letter-spacing:2px;padding:3px 8px;border-radius:3px;display:inline-block;margin-bottom:8px}
+.lh-title{font-size:18px;font-weight:900;color:#fff;margin-bottom:3px}
+.lh-period{font-size:12px;color:rgba(255,255,255,.5)}
+.lh-right{text-align:right}
+.lh-id{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:4px}
+.lh-author{font-size:12px;color:rgba(255,255,255,.7);font-weight:600}
+
+.report-body{padding:24px 28px}
+
+/* Metric summary */
+.metric-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ms-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.ms-val{font-size:1.6rem;font-weight:900;line-height:1;margin-bottom:3px}
+.ms-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.ms-delta{font-size:11px;margin-top:5px;font-weight:600}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--red)}
+
+/* Report sections */
+.rep-section{margin-bottom:22px}
+.rep-sec-title{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+.rep-table{width:100%;border-collapse:collapse;font-size:12px}
+.rep-table th{background:var(--card);padding:8px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border)}
+.rep-table td{padding:9px 12px;border:1px solid var(--border)}
+.rep-table tr:nth-child(even) td{background:var(--card)}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.sb-green{background:var(--green-bg);color:var(--green)}
+.sb-gold{background:var(--gold-bg);color:var(--gold)}
+.sb-red{background:var(--red-bg);color:var(--red)}
+
+.prog-bar{background:var(--border);border-radius:4px;height:8px;overflow:hidden;display:inline-block;width:80px;vertical-align:middle;margin-right:6px}
+.prog-fill{height:100%;border-radius:4px;background:var(--gold)}
+.prog-fill.green{background:var(--green)}
+
+.highlight-box{background:var(--gold-bg);border:1px solid var(--gold-border,#f0d090);border-radius:8px;padding:14px;margin-bottom:10px}
+.highlight-box.red{background:var(--red-bg);border-color:var(--red)}
+.hb-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.hb-text{font-size:12px;line-height:1.65;color:var(--muted)}
+
+.sign-row{display:flex;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);gap:40px}
+.sign-item{text-align:center}
+.sign-line{border-top:1px solid var(--ink);margin-bottom:6px;padding-top:40px}
+.sign-name{font-size:12px;font-weight:700}
+.sign-role{font-size:11px;color:var(--muted)}
+
+@media print{
+  .layout{grid-template-columns:1fr}
+  .input-panel{display:none}
+  .report-panel{padding:0}
+  .report-doc{border:none;border-radius:0;box-shadow:none}
+  #reportOutput{display:block!important}
+  .report-placeholder{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center">
+    <div class="badge">ALQOLAM</div>
+    <div>
+      <div class="brand-title">Weekly After-Sales Report Generator</div>
+      <div class="brand-sub">Generate laporan mingguan otomatis · After-Sales Operations</div>
+    </div>
+  </div>
+  <div class="topbar-btns">
+    <button class="btn-top btn-gen" onclick="generateReport()">⚡ Generate Report</button>
+    <button class="btn-top btn-print" onclick="window.print()">🖨️ Print</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- INPUT -->
+  <div class="input-panel">
+
+    <div class="panel-section">
+      <div class="panel-sec-title">📅 Informasi Laporan</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Minggu ke-</label>
+          <input class="form-input" id="weekNum" value="24" type="number" min="1" max="52">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bulan / Tahun</label>
+          <input class="form-input" id="monthYear" value="Juni 2023">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Periode (Tgl)</label>
+          <input class="form-input" id="period" value="12 — 16 Juni 2023">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Region / Coverage</label>
+          <input class="form-input" id="region" value="Nasional — Seluruh Service Area">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-sec-title">🎫 Data Tiket Keluhan</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Total Masuk</label>
+          <div class="num-input">
+            <button class="num-btn" onclick="adj('ticketsIn',-1)">−</button>
+            <div><div class="num-val" id="ticketsIn">47</div><div class="num-lbl">tiket</div></div>
+            <button class="num-btn" onclick="adj('ticketsIn',1)">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Diselesaikan</label>
+          <div class="num-input">
+            <button class="num-btn" onclick="adj('ticketsDone',-1)">−</button>
+            <div><div class="num-val" id="ticketsDone">44</div><div class="num-lbl">tiket</div></div>
+            <button class="num-btn" onclick="adj('ticketsDone',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Eskalasi</label>
+          <div class="num-input">
+            <button class="num-btn" onclick="adj('escalated',-1)">−</button>
+            <div><div class="num-val" id="escalated">3</div><div class="num-lbl">kasus</div></div>
+            <button class="num-btn" onclick="adj('escalated',1)">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keluhan Berulang</label>
+          <div class="num-input">
+            <button class="num-btn" onclick="adj('repeat',-1)">−</button>
+            <div><div class="num-val" id="repeat">2</div><div class="num-lbl">kasus</div></div>
+            <button class="num-btn" onclick="adj('repeat',1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-sec-title">⏱ SLA & Response Time</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">SLA Rate (%)</label>
+          <input class="form-input" id="slaRate" value="97" type="number" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Avg Response (jam)</label>
+          <input class="form-input" id="avgResponse" value="2.3" type="number" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">FCR Rate (%)</label>
+          <input class="form-input" id="fcrRate" value="94" type="number" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CSAT Score (/5)</label>
+          <input class="form-input" id="csatScore" value="4.6" type="number" step="0.1" min="1" max="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-sec-title">✅ Highlights & ⚠️ Issues</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Pencapaian Minggu Ini</label>
+        <input class="form-input" id="highlight1" value="SLA 97% tercapai selama 3 minggu berturut-turut">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Pencapaian ke-2</label>
+        <input class="form-input" id="highlight2" value="Rollout SOP baru berhasil, 0 eskalasi dari region baru">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Issue / Tantangan</label>
+        <input class="form-input" id="issue1" value="Lonjakan tiket kategori konten digital (+15% dari minggu lalu)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rencana Minggu Depan</label>
+        <input class="form-input" id="nextPlan" value="Training tim CS untuk handling konten digital, review SOP eskalasi">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- REPORT PREVIEW -->
+  <div class="report-panel">
+    <div class="report-placeholder" id="reportPlaceholder">
+      <div class="report-placeholder-icon">📊</div>
+      <div class="report-placeholder-text">Isi data di kiri, klik "Generate Report"</div>
+    </div>
+
+    <div id="reportOutput">
+      <div class="report-doc" id="reportDoc"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const vals = {ticketsIn:47,ticketsDone:44,escalated:3,repeat:2};
+function adj(id, d) {
+  vals[id] = Math.max(0, vals[id]+d);
+  document.getElementById(id).textContent = vals[id];
+}
+
+function generateReport() {
+  const wk = document.getElementById('weekNum').value;
+  const my = document.getElementById('monthYear').value;
+  const period = document.getElementById('period').value;
+  const region = document.getElementById('region').value;
+  const sla = document.getElementById('slaRate').value;
+  const resp = document.getElementById('avgResponse').value;
+  const fcr = document.getElementById('fcrRate').value;
+  const csat = document.getElementById('csatScore').value;
+  const h1 = document.getElementById('highlight1').value;
+  const h2 = document.getElementById('highlight2').value;
+  const i1 = document.getElementById('issue1').value;
+  const plan = document.getElementById('nextPlan').value;
+  const tIn = vals.ticketsIn, tDone = vals.ticketsDone, tEsc = vals.escalated, tRep = vals.repeat;
+  const resRate = Math.round((tDone/tIn)*100);
+  const pending = tIn - tDone;
+  const slaStatus = sla >= 95 ? 'sb-green' : sla >= 90 ? 'sb-gold' : 'sb-red';
+  const slaLabel = sla >= 95 ? '✅ On Target' : sla >= 90 ? '⚠️ Near Threshold' : '❌ Below Target';
+
+  document.getElementById('reportPlaceholder').style.display = 'none';
+  document.getElementById('reportOutput').style.display = 'block';
+
+  document.getElementById('reportDoc').innerHTML = `
+    <div class="report-letterhead">
+      <div class="lh-left">
+        <div class="lh-badge">ALQOLAM</div>
+        <div class="lh-title">Weekly After-Sales Report</div>
+        <div class="lh-period">Minggu ke-${wk} · ${period} · ${region}</div>
+      </div>
+      <div class="lh-right">
+        <div class="lh-id">RPT-W${wk}-${new Date().getFullYear()}</div>
+        <div class="lh-author">Arief Permadi Kuntoaji</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">After Sales Manager</div>
+      </div>
+    </div>
+
+    <div class="report-body">
+
+      <div class="metric-summary">
+        <div class="ms-card"><div class="ms-val" style="color:var(--ink)">${tIn}</div><div class="ms-lbl">Tiket Masuk</div><div class="ms-delta" style="color:var(--muted)">minggu ini</div></div>
+        <div class="ms-card"><div class="ms-val" style="color:var(--green)">${tDone}</div><div class="ms-lbl">Diselesaikan</div><div class="ms-delta delta-up">▲ ${resRate}% resolution</div></div>
+        <div class="ms-card"><div class="ms-val" style="color:var(--gold)">${sla}%</div><div class="ms-lbl">SLA Rate</div><div class="ms-delta ${sla>=95?'delta-up':'delta-down'}">${slaLabel}</div></div>
+        <div class="ms-card"><div class="ms-val" style="color:var(--blue)">${csat}</div><div class="ms-lbl">CSAT Score</div><div class="ms-delta delta-up">▲ dari 5.0</div></div>
+      </div>
+
+      <div class="rep-section">
+        <div class="rep-sec-title">📊 Ringkasan Kinerja</div>
+        <table class="rep-table">
+          <thead><tr><th>Metrik</th><th>Target</th><th>Actual</th><th>Progress</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>SLA Compliance</td><td>≥ 95%</td><td><b>${sla}%</b></td><td><div class="prog-bar"><div class="prog-fill ${sla>=95?'green':''}" style="width:${Math.min(sla,100)}%"></div></div></td><td><span class="status-badge ${slaStatus}">${sla>=95?'✅ Achieved':sla>=90?'⚠️ Near':'❌ Miss'}</span></td></tr>
+            <tr><td>First Call Resolution</td><td>≥ 90%</td><td><b>${fcr}%</b></td><td><div class="prog-bar"><div class="prog-fill ${fcr>=90?'green':''}" style="width:${Math.min(fcr,100)}%"></div></div></td><td><span class="status-badge ${fcr>=90?'sb-green':'sb-red'}">${fcr>=90?'✅ Achieved':'❌ Miss'}</span></td></tr>
+            <tr><td>Avg Response Time</td><td>≤ 4 jam</td><td><b>${resp} jam</b></td><td><div class="prog-bar"><div class="prog-fill ${resp<=4?'green':''}" style="width:${Math.min((4/resp)*100,100)}%"></div></div></td><td><span class="status-badge ${resp<=4?'sb-green':'sb-red'}">${resp<=4?'✅ Achieved':'❌ Exceeded'}</span></td></tr>
+            <tr><td>Resolution Rate</td><td>≥ 90%</td><td><b>${resRate}%</b></td><td><div class="prog-bar"><div class="prog-fill ${resRate>=90?'green':''}" style="width:${Math.min(resRate,100)}%"></div></div></td><td><span class="status-badge ${resRate>=90?'sb-green':'sb-gold'}">${resRate>=90?'✅ Achieved':'⚠️ Watch'}</span></td></tr>
+            <tr><td>CSAT Score</td><td>≥ 4.0</td><td><b>${csat} / 5</b></td><td><div class="prog-bar"><div class="prog-fill ${csat>=4?'green':''}" style="width:${(csat/5)*100}%"></div></div></td><td><span class="status-badge ${csat>=4?'sb-green':'sb-gold'}">${csat>=4?'✅ Achieved':'⚠️ Near'}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="rep-section">
+        <div class="rep-sec-title">🎫 Volume Tiket</div>
+        <table class="rep-table">
+          <thead><tr><th>Kategori</th><th>Jumlah</th><th>% dari Total</th><th>Keterangan</th></tr></thead>
+          <tbody>
+            <tr><td>Total Tiket Masuk</td><td><b>${tIn}</b></td><td>100%</td><td>Seluruh region</td></tr>
+            <tr><td>✅ Diselesaikan</td><td><b>${tDone}</b></td><td>${resRate}%</td><td>Dalam periode minggu ini</td></tr>
+            <tr><td>⏳ Pending / Open</td><td><b>${pending}</b></td><td>${100-resRate}%</td><td>Carry-over ke minggu depan</td></tr>
+            <tr><td>⬆️ Dieskalasi</td><td><b>${tEsc}</b></td><td>${Math.round((tEsc/tIn)*100)}%</td><td>Ke level Manager / Direktur</td></tr>
+            <tr><td>🔄 Keluhan Berulang</td><td><b>${tRep}</b></td><td>${Math.round((tRep/tIn)*100)}%</td><td>Sama dalam 30 hari terakhir</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="rep-section">
+        <div class="rep-sec-title">✅ Pencapaian & ⚠️ Tantangan</div>
+        <div class="highlight-box">
+          <div class="hb-title" style="color:var(--gold)">✅ Highlights Minggu Ini</div>
+          <div class="hb-text">• ${h1}<br>• ${h2}</div>
+        </div>
+        <div class="highlight-box red">
+          <div class="hb-title" style="color:var(--red)">⚠️ Issue & Tantangan</div>
+          <div class="hb-text">• ${i1}</div>
+        </div>
+      </div>
+
+      <div class="rep-section">
+        <div class="rep-sec-title">📌 Rencana Minggu Depan</div>
+        <div class="highlight-box" style="background:var(--blue-bg);border-color:#90b8f0">
+          <div class="hb-title" style="color:var(--blue)">📋 Action Plan — Minggu ke-${parseInt(wk)+1}</div>
+          <div class="hb-text">• ${plan}</div>
+        </div>
+      </div>
+
+      <div class="sign-row">
+        <div class="sign-item"><div class="sign-line"></div><div class="sign-name">Arief Permadi Kuntoaji</div><div class="sign-role">After Sales Manager · Alqolam</div></div>
+      </div>
+
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

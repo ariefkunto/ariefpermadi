@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root Cause Analysis Tool — Alqolam After Sales</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f3ec;--surface:#fff;--card:#fdfaf5;--border:#e4d9c4;
+  --ink:#1a1510;--muted:#7a7060;--muted2:#b5a990;
+  --gold:#c4862a;--gold-bg:#fdf3e3;--gold-border:#f0d090;
+  --green:#276232;--green-bg:#eaf4eb;
+  --red:#a83228;--red-bg:#fbeae8;
+  --blue:#1a4f8a;--blue-bg:#e8f0fb;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--ink);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.badge{background:var(--gold);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:3px;margin-right:12px}
+.brand-title{font-size:14px;font-weight:700;color:#fff}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px}
+.topbar-right{display:flex;gap:10px}
+.btn-print{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:6px;font-size:11px;cursor:pointer}
+.btn-print:hover{background:rgba(255,255,255,.2)}
+
+.main{max-width:960px;margin:0 auto;padding:28px}
+
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.section-num{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.section-title{font-size:14px;font-weight:800}
+.section-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:10px 13px;font-size:13px;color:var(--ink);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,134,42,.12)}
+.form-textarea{resize:vertical;min-height:72px}
+
+/* 5 WHY */
+.why-chain{display:flex;flex-direction:column;gap:0}
+.why-item{display:flex;gap:14px;padding:10px 0}
+.why-num{font-size:11px;font-weight:800;color:var(--gold);width:52px;flex-shrink:0;padding-top:12px;text-align:right}
+.why-input-wrap{flex:1;position:relative}
+.why-arrow{position:absolute;left:-18px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:14px}
+.why-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted2);font-weight:600}
+
+/* FISHBONE */
+.fishbone-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;overflow-x:auto}
+.fishbone{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;min-width:600px}
+.fish-left,.fish-right{display:flex;flex-direction:column;gap:10px}
+.fish-bone{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
+.fish-bone-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.fish-bone-input{width:100%;border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;font-family:inherit;line-height:1.5;resize:none}
+.fish-center{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fish-arrow{color:var(--muted2);font-size:1.2rem}
+.fish-problem{background:var(--red-bg);border:2px solid var(--red);border-radius:8px;padding:12px 16px;text-align:center;font-size:12px;font-weight:700;color:var(--red);min-width:120px}
+
+/* CORRECTIVE */
+.corrective-list{display:flex;flex-direction:column;gap:10px}
+.corrective-item{display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
+.corr-num{font-size:11px;font-weight:800;color:var(--gold);width:20px;flex-shrink:0}
+.priority-sel{background:transparent;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:11px;color:var(--ink);outline:none}
+.deadline-in{background:transparent;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:11px;color:var(--ink);outline:none;width:110px}
+.btn-add-corr{background:var(--gold-bg);color:var(--gold);border:1px dashed var(--gold-border);border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;width:100%;text-align:center}
+
+/* SIGN OFF */
+.sign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.sign-box{border-top:2px solid var(--border);padding-top:12px}
+.sign-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sign-name{font-size:13px;color:var(--muted2)}
+
+/* SUBMIT */
+.btn-submit{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;margin:0 auto}
+.btn-submit:hover{background:#2d2820}
+
+@media print{
+  .topbar-right,.btn-submit,.btn-add-corr{display:none!important}
+  body{background:#fff}
+  .main{padding:16px}
+  .section-card{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center">
+    <div class="badge">ALQOLAM</div>
+    <div>
+      <div class="brand-title">Root Cause Analysis (RCA) Tool</div>
+      <div class="brand-sub">After-Sales Operations · Standar Investigasi Keluhan</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Export PDF</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SECTION 1: IDENTIFIKASI -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div><div class="section-title">Identifikasi Masalah</div><div class="section-sub">Deskripsikan keluhan atau insiden yang akan dianalisis</div></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nomor Tiket / RCA ID</label>
+        <input class="form-input" id="rcaId" placeholder="RCA-2024-001" oninput="autoId(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal Kejadian</label>
+        <input class="form-input" type="date" id="incDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori Produk</label>
+        <select class="form-select">
+          <option>E-Book Reader</option>
+          <option>Tablet Edukasi</option>
+          <option>Software / Aplikasi</option>
+          <option>Konten Digital</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipe Masalah</label>
+        <select class="form-select">
+          <option>Kerusakan Hardware</option>
+          <option>Bug Software</option>
+          <option>Keluhan Berulang</option>
+          <option>Proses / SOP Failure</option>
+          <option>Kegagalan Komunikasi</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Deskripsi Masalah (What happened?)</label>
+        <textarea class="form-textarea" placeholder="Deskripsikan secara konkret: apa yang terjadi, kapan, di mana, siapa yang terdampak, dan berapa besar dampaknya..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dampak ke Pelanggan</label>
+        <select class="form-select">
+          <option>Rendah — Ketidaknyamanan minor</option>
+          <option>Sedang — Gangguan proses belajar</option>
+          <option>Tinggi — Unit tidak bisa digunakan</option>
+          <option>Kritis — Dampak ke banyak pengguna</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIC Investigasi</label>
+        <input class="form-input" value="Arief Permadi Kuntoaji" placeholder="Nama PIC">
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: 5 WHY -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div><div class="section-title">5 Why Analysis</div><div class="section-sub">Telusuri akar masalah dengan terus bertanya "mengapa" hingga 5 level</div></div>
+    </div>
+    <div class="why-chain">
+      <div class="why-item">
+        <div class="why-num">MASALAH</div>
+        <div class="why-input-wrap"><input class="form-input" placeholder="Apa masalah yang terjadi?"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">WHY 1</div>
+        <div class="why-input-wrap"><input class="form-input" placeholder="Mengapa masalah itu terjadi?"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">WHY 2</div>
+        <div class="why-input-wrap"><input class="form-input" placeholder="Mengapa hal itu bisa terjadi?"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">WHY 3</div>
+        <div class="why-input-wrap"><input class="form-input" placeholder="Mengapa itu bisa terjadi?"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">WHY 4</div>
+        <div class="why-input-wrap"><input class="form-input" placeholder="Mengapa itu bisa terjadi?"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num" style="color:var(--red)">ROOT CAUSE</div>
+        <div class="why-input-wrap"><input class="form-input" style="border-color:var(--gold);background:var(--gold-bg)" placeholder="← Inilah akar masalah yang sebenarnya"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: FISHBONE -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div><div class="section-title">Fishbone Diagram — Analisis Faktor Penyebab</div><div class="section-sub">Identifikasi kontribusi dari berbagai faktor</div></div>
+    </div>
+    <div class="fishbone-wrap">
+      <div class="fishbone">
+        <div class="fish-left">
+          <div class="fish-bone">
+            <div class="fish-bone-title">👤 Manusia / People</div>
+            <textarea class="fish-bone-input" rows="2" placeholder="Faktor SDM: kurang training, human error, kelelahan..."></textarea>
+          </div>
+          <div class="fish-bone">
+            <div class="fish-bone-title">📋 Proses / SOP</div>
+            <textarea class="fish-bone-input" rows="2" placeholder="SOP tidak jelas, tidak diikuti, atau sudah outdated..."></textarea>
+          </div>
+        </div>
+        <div class="fish-center">
+          <div class="fish-arrow">⬅️</div>
+          <div class="fish-problem" id="fishProblem">Masalah Utama</div>
+          <div class="fish-arrow">➡️</div>
+        </div>
+        <div class="fish-right">
+          <div class="fish-bone">
+            <div class="fish-bone-title">🔧 Sistem / Tools</div>
+            <textarea class="fish-bone-input" rows="2" placeholder="Sistem error, tools tidak memadai, tidak ada monitoring..."></textarea>
+          </div>
+          <div class="fish-bone">
+            <div class="fish-bone-title">🌐 Lingkungan</div>
+            <textarea class="fish-bone-input" rows="2" placeholder="Faktor eksternal: kebijakan, vendor, cuaca, infrastruktur..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: CORRECTIVE ACTIONS -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div><div class="section-title">Corrective Action Plan</div><div class="section-sub">Tindakan perbaikan untuk mencegah masalah berulang</div></div>
+    </div>
+    <div class="corrective-list" id="corrList">
+      <div class="corrective-item">
+        <div class="corr-num">#1</div>
+        <input class="form-input" placeholder="Tindakan perbaikan yang akan dilakukan...">
+        <select class="priority-sel"><option>🔴 High</option><option>🟡 Medium</option><option>🟢 Low</option></select>
+        <input class="deadline-in" type="date">
+      </div>
+      <div class="corrective-item">
+        <div class="corr-num">#2</div>
+        <input class="form-input" placeholder="Tindakan perbaikan yang akan dilakukan...">
+        <select class="priority-sel"><option>🔴 High</option><option>🟡 Medium</option><option>🟢 Low</option></select>
+        <input class="deadline-in" type="date">
+      </div>
+      <div class="corrective-item">
+        <div class="corr-num">#3</div>
+        <input class="form-input" placeholder="Update SOP / training jika diperlukan...">
+        <select class="priority-sel"><option>🟡 Medium</option><option>🔴 High</option><option>🟢 Low</option></select>
+        <input class="deadline-in" type="date">
+      </div>
+    </div>
+    <button class="btn-add-corr" onclick="addCorr()" style="margin-top:10px">+ Tambah Action</button>
+  </div>
+
+  <!-- SECTION 5: SIGN OFF -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div><div class="section-title">Review & Sign Off</div><div class="section-sub">Persetujuan dan dokumentasi final</div></div>
+    </div>
+    <div class="form-grid" style="margin-bottom:20px">
+      <div class="form-group">
+        <label class="form-label">Tanggal Selesai RCA</label>
+        <input class="form-input" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select"><option>✅ Approved & Closed</option><option>🔄 In Review</option><option>⏳ Pending Approval</option></select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Kesimpulan & Pembelajaran</label>
+        <textarea class="form-textarea" placeholder="Ringkasan pembelajaran dari insiden ini dan dampak perubahan yang diharapkan..."></textarea>
+      </div>
+    </div>
+    <div class="sign-grid">
+      <div class="sign-box"><div class="sign-label">Dibuat oleh</div><div class="sign-name">Arief Permadi Kuntoaji<br>After Sales Manager</div></div>
+      <div class="sign-box"><div class="sign-label">Diperiksa oleh</div><div class="sign-name">Team Lead After Sales<br>___________________</div></div>
+      <div class="sign-box"><div class="sign-label">Disetujui oleh</div><div class="sign-name">Direktur Operasional<br>___________________</div></div>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitRCA()">💾 Simpan & Generate Report</button>
+
+</div>
+
+<script>
+let corrCount = 3;
+function addCorr() {
+  corrCount++;
+  const item = document.createElement('div');
+  item.className = 'corrective-item';
+  const today = new Date().toISOString().split('T')[0];
+  item.innerHTML = `<div class="corr-num">#${corrCount}</div><input class="form-input" placeholder="Tindakan perbaikan..."><select class="priority-sel"><option>🔴 High</option><option>🟡 Medium</option><option>🟢 Low</option></select><input class="deadline-in" type="date" value="${today}">`;
+  document.getElementById('corrList').appendChild(item);
+}
+function autoId(el) {
+  document.getElementById('fishProblem').textContent = el.value || 'Masalah Utama';
+}
+function submitRCA() {
+  alert('✅ RCA berhasil disimpan!\n\nDi implementasi nyata: dokumen akan tersimpan ke database dan notifikasi dikirim ke seluruh PIC yang terdaftar. PDF report siap untuk didownload.');
+}
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('incDate').value = today;
+</script>
+</body>
+</html>

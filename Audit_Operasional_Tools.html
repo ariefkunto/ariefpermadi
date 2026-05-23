@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Operasional F&B — Arief Permadi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#f0ede8;
+  --text:#1a1a2e;--text2:#666;--text3:#999;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --gold:#C5963A;--gold-bg:#FDF5E4;--gold-text:#7A5A10;
+  --green-bg:#EAF3DE;--green-text:#3B6D11;--green-bar:#4CAF50;
+  --blue-bg:#E6F1FB;--blue-text:#185FA5;--blue-bar:#3b82f6;
+  --amber-bg:#FAEEDA;--amber-text:#854F0B;--amber-bar:#f59e0b;
+  --red-bg:#FCEBEB;--red-text:#A32D2D;--red-bar:#ef4444;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1b2e;--bg2:#252638;--bg3:#1e1f30;
+    --text:#e8e6e0;--text2:#9a9890;--text3:#666;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
+    --gold:#D4A84B;--gold-bg:#2a2210;--gold-text:#D4A84B;
+    --green-bg:#162a0d;--green-text:#7fc45a;--green-bar:#4CAF50;
+    --blue-bg:#0e1e38;--blue-text:#60a5fa;--blue-bar:#3b82f6;
+    --amber-bg:#2a1c08;--amber-text:#fbbf24;--amber-bar:#f59e0b;
+    --red-bg:#2a0d0d;--red-text:#f87171;--red-bar:#ef4444;
+  }
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg3);color:var(--text);
+  min-height:100vh;padding:1rem;
+}
+#app{
+  max-width:640px;margin:0 auto;
+  background:var(--bg);border-radius:16px;
+  padding:1.5rem;min-height:80vh;
+}
+.header{
+  display:flex;align-items:center;gap:12px;
+  padding:0 0 1.25rem;border-bottom:0.5px solid var(--border);
+  margin-bottom:1.5rem;
+}
+.logo{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--gold);display:flex;align-items:center;justify-content:center;
+}
+.logo span{color:#fff;font-weight:700;font-size:13px}
+.header h1{font-size:15px;font-weight:600;color:var(--text)}
+.header p{font-size:12px;color:var(--text2)}
+.btn{
+  cursor:pointer;border:0.5px solid var(--border2);background:transparent;
+  border-radius:var(--radius);padding:9px 16px;font-size:13px;
+  color:var(--text);transition:background .15s;display:inline-flex;
+  align-items:center;gap:6px;font-family:inherit;
+}
+.btn:hover{background:var(--bg2)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn-primary:hover{opacity:.85;background:var(--text)}
+.card{
+  background:var(--bg);border:0.5px solid var(--border);
+  border-radius:var(--radius-lg);padding:1rem 1.25rem;
+}
+.tag{font-size:11px;padding:3px 9px;border-radius:6px;display:inline-block;font-weight:500}
+.progress-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:1.5rem}
+.progress-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+input,select,textarea{
+  width:100%;padding:9px 12px;font-size:13px;border-radius:var(--radius);
+  border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);
+  font-family:inherit;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+label{font-size:13px;color:var(--text2);display:block;margin-bottom:6px}
+footer-bar{
+  margin-top:2rem;padding-top:1rem;border-top:0.5px solid var(--border);
+  text-align:center;font-size:11px;color:var(--text3);
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo"><span>AP</span></div>
+    <div>
+      <h1>Audit Operasional F&B</h1>
+      <p>by Arief Permadi · 085714142712</p>
+    </div>
+  </div>
+  <div id="root"></div>
+  <div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid var(--border);text-align:center;font-size:11px;color:var(--text3)">
+    Arief Permadi · Operations Consultant · arief.kunto@gmail.com · linkedin.com/in/ariefpermadi
+  </div>
+</div>
+
+<script>
+const {useState,useMemo}=React;
+const h=React.createElement;
+
+const G=[
+  {id:'sdm',label:'SDM & Tim',icon:'ti-users',questions:[
+    {id:'g1',text:'Staff hadir tepat waktu secara konsisten'},
+    {id:'g2',text:'Ada sistem pencatatan kehadiran yang berjalan'},
+    {id:'g3',text:'Staff paham tugas dan tanggung jawab masing-masing'},
+    {id:'g4',text:'Turnover dalam 3 bulan terakhir rendah (< 2 orang)'},
+  ]},
+  {id:'sop',label:'SOP & Standar',icon:'ti-clipboard-list',questions:[
+    {id:'g5',text:'Ada SOP tertulis yang bisa diakses staff'},
+    {id:'g6',text:'SOP dijalankan konsisten setiap hari'},
+    {id:'g7',text:'Ada checklist pembukaan & penutupan outlet'},
+    {id:'g8',text:'Staff baru mendapat onboarding sebelum mulai kerja'},
+  ]},
+  {id:'ops',label:'Operasional',icon:'ti-settings',questions:[
+    {id:'g9',text:'Operasional bisa jalan tanpa owner harus standby'},
+    {id:'g10',text:'Ada briefing harian untuk tim'},
+    {id:'g11',text:'Stok dan bahan baku terkontrol dengan baik'},
+    {id:'g12',text:'Tidak ada kebocoran kas atau fraud yang signifikan'},
+  ]},
+  {id:'cs',label:'Customer Service',icon:'ti-message-circle',questions:[
+    {id:'g13',text:'Ada standar greeting dan handling pelanggan'},
+    {id:'g14',text:'Komplain pelanggan ditangani dengan cepat'},
+    {id:'g15',text:'Customer repeat / reguler cukup banyak'},
+    {id:'g16',text:'Rating / review bisnis rata-rata di atas 4.0'},
+  ]},
+  {id:'control',label:'Kontrol & Laporan',icon:'ti-chart-bar',questions:[
+    {id:'g17',text:'Ada laporan penjualan harian yang akurat'},
+    {id:'g18',text:'Owner bisa cek performa tanpa harus di tempat'},
+    {id:'g19',text:'Tim tahu target dan KPI yang harus dicapai'},
+    {id:'g20',text:'Ada evaluasi performa rutin (mingguan / bulanan)'},
+  ]},
+];
+
+const C=[
+  {id:'sdm',label:'SDM & Tim',icon:'ti-users',questions:[
+    {id:'c1',text:'Tingkat kehadiran staff tepat waktu'},
+    {id:'c2',text:'Sistem absensi dan pencatatan kehadiran'},
+    {id:'c3',text:'Kejelasan job description tiap posisi'},
+    {id:'c4',text:'Stabilitas tim — tingkat turnover rendah'},
+    {id:'c5',text:'Kualitas proses rekrutmen dan seleksi'},
+    {id:'c6',text:'Program onboarding karyawan baru'},
+    {id:'c7',text:'Motivasi dan engagement tim sehari-hari'},
+    {id:'c8',text:'Konsistensi penegakan disiplin'},
+  ]},
+  {id:'sop',label:'SOP & Standar',icon:'ti-clipboard-list',questions:[
+    {id:'c9',text:'Ketersediaan SOP tertulis untuk semua posisi'},
+    {id:'c10',text:'SOP mudah diakses dan dipahami staff'},
+    {id:'c11',text:'Konsistensi penerapan SOP setiap hari'},
+    {id:'c12',text:'SOP diupdate secara berkala'},
+    {id:'c13',text:'SOP pembukaan dan penutupan outlet'},
+    {id:'c14',text:'SOP handling produk dan bahan baku'},
+    {id:'c15',text:'SOP eskalasi masalah ke atasan'},
+  ]},
+  {id:'ops',label:'Operasional Harian',icon:'ti-settings',questions:[
+    {id:'c16',text:'Operasional bisa jalan tanpa owner standby'},
+    {id:'c17',text:'Kualitas briefing dan handover antar shift'},
+    {id:'c18',text:'Efisiensi waktu dan manajemen shift'},
+    {id:'c19',text:'Kontrol stok dan inventory harian'},
+    {id:'c20',text:'Kondisi peralatan dan maintenance rutin'},
+    {id:'c21',text:'Alur kerja antar posisi berjalan smooth'},
+    {id:'c22',text:'Kesiapan menghadapi situasi darurat'},
+  ]},
+  {id:'cs',label:'Customer Service',icon:'ti-message-circle',questions:[
+    {id:'c23',text:'Standar greeting dan service pelanggan'},
+    {id:'c24',text:'Kecepatan dan akurasi dalam serving order'},
+    {id:'c25',text:'Proses penanganan komplain pelanggan'},
+    {id:'c26',text:'Customer retention dan tingkat repeat order'},
+    {id:'c27',text:'Konsistensi pengalaman pelanggan antar kunjungan'},
+    {id:'c28',text:'Monitoring dan respons terhadap review / feedback'},
+  ]},
+  {id:'finance',label:'Keuangan & Kontrol',icon:'ti-coin',questions:[
+    {id:'c29',text:'Rekap dan pencatatan penjualan harian'},
+    {id:'c30',text:'Kontrol kas dan proses transaksi'},
+    {id:'c31',text:'Manajemen dan efisiensi biaya operasional'},
+    {id:'c32',text:'Sistem deteksi dan pencegahan fraud'},
+    {id:'c33',text:'Laporan keuangan periodik (mingguan / bulanan)'},
+    {id:'c34',text:'Pencapaian target penjualan'},
+  ]},
+  {id:'facility',label:'Fasilitas & Kebersihan',icon:'ti-building',questions:[
+    {id:'c35',text:'Standar kebersihan area kerja dan outlet'},
+    {id:'c36',text:'Kondisi dan perawatan peralatan'},
+    {id:'c37',text:'Higienitas dalam penanganan produk makanan'},
+    {id:'c38',text:'Ketersediaan perlengkapan kerja yang cukup'},
+    {id:'c39',text:'Kepatuhan terhadap standar sanitasi & food safety'},
+  ]},
+  {id:'product',label:'Produk & Kualitas',icon:'ti-star',questions:[
+    {id:'c40',text:'Konsistensi kualitas produk yang dihasilkan'},
+    {id:'c41',text:'Standar penyajian dan presentation'},
+    {id:'c42',text:'Manajemen bahan baku — kesegaran dan waste'},
+    {id:'c43',text:'Inovasi dan pengembangan menu / produk'},
+    {id:'c44',text:'Pengelolaan sisa bahan dan waste management'},
+  ]},
+  {id:'leadership',label:'Leadership & Manajemen',icon:'ti-crown',questions:[
+    {id:'c45',text:'Kualitas kepemimpinan SPV atau leader tim'},
+    {id:'c46',text:'Komunikasi antara owner dan tim berjalan baik'},
+    {id:'c47',text:'Evaluasi performa tim secara rutin'},
+    {id:'c48',text:'Program pengembangan dan karir staff'},
+    {id:'c49',text:'Budaya kerja dan team culture yang positif'},
+    {id:'c50',text:'Owner mampu delegasi dan lepas dari operasional'},
+  ]},
+];
+
+const REC={
+  sdm:{low:'Audit proses rekrutmen. Buat job description jelas dan sistem absensi anti-manipulasi.',mid:'Perkuat onboarding dan briefing harian. Buat sistem reward & consequence yang transparan.',high:'SDM sudah solid. Fokus pada pengembangan leader internal untuk persiapan scale-up.'},
+  sop:{low:'Buat SOP dasar dari nol — mulai dari SOP pembukaan, closing, dan handling produk.',mid:'SOP ada tapi belum konsisten. Lakukan refresher training dan pasang checklist visual.',high:'SOP sudah baik. Fokus pada update berkala dan pastikan versi terbaru dipakai semua staff.'},
+  ops:{low:'Bisnis terlalu bergantung pada owner. Butuh sistem monitoring dan pendelegasian yang jelas.',mid:'Operasional sudah lumayan tapi ada titik bocor. Audit alur kerja dan identifikasi bottleneck.',high:'Operasional sudah mandiri. Fokus pada efisiensi dan pengurangan waste.'},
+  cs:{low:'Standar service belum ada. Mulai dari training dasar: greeting, serving, complaint handling.',mid:'Service ada tapi tidak konsisten. Buat standar tertulis dan lakukan role-play training rutin.',high:'Customer service sudah kuat. Fokus pada loyalty program dan peningkatan repeat order.'},
+  control:{low:'Kontrol keuangan lemah — risiko fraud tinggi. Segera implementasi daily recap dan audit cash.',mid:'Ada laporan tapi belum real-time. Implementasi sistem pelaporan digital yang sederhana.',high:'Kontrol sudah baik. Fokus pada analisis data untuk pengambilan keputusan strategis.'},
+  finance:{low:'Kontrol keuangan lemah — risiko fraud tinggi. Segera implementasi daily recap dan audit cash.',mid:'Ada laporan tapi belum optimal. Implementasi sistem pelaporan digital yang sederhana.',high:'Kontrol keuangan sudah baik. Manfaatkan data untuk keputusan strategis.'},
+  facility:{low:'Standar kebersihan di bawah standar. Buat checklist kebersihan harian dan audit mingguan.',mid:'Kebersihan cukup tapi tidak konsisten. Assign PIC kebersihan dan jadwal maintenance rutin.',high:'Fasilitas sudah terawat. Pertahankan dan dokumentasikan standar yang ada.'},
+  product:{low:'Konsistensi produk jadi masalah utama. Buat recipe card standar dan training produk.',mid:'Produk sudah lumayan tapi ada inkonsistensi. Perketat quality control dan waste management.',high:'Kualitas produk sudah bagus. Fokus pada inovasi dan pengembangan menu baru.'},
+  leadership:{low:'Leadership sangat lemah — owner masih jadi satu-satunya penggerak. Develop leader internal.',mid:'Ada potensi leader tapi belum dikembangkan. Mulai coaching SPV dan delegasi bertahap.',high:'Tim leadership sudah solid. Fokus pada succession planning dan ekspansi.'},
+};
+
+function scoreColor(p){
+  if(p>=80)return{bg:'var(--green-bg)',text:'var(--green-text)',label:'Excellent',bar:'var(--green-bar)'};
+  if(p>=60)return{bg:'var(--blue-bg)',text:'var(--blue-text)',label:'Baik',bar:'var(--blue-bar)'};
+  if(p>=40)return{bg:'var(--amber-bg)',text:'var(--amber-text)',label:'Perlu Perbaikan',bar:'var(--amber-bar)'};
+  return{bg:'var(--red-bg)',text:'var(--red-text)',label:'Kritis',bar:'var(--red-bar)'};
+}
+
+function App(){
+  const [phase,setPhase]=useState('intro');
+  const [mode,setMode]=useState(null);
+  const [sec,setSec]=useState(0);
+  const [ans,setAns]=useState({});
+  const [notes,setNotes]=useState({});
+  const [info,setInfo]=useState({name:'',type:'coffee_shop',staff:'',outlets:'1'});
+  const [copied,setCopied]=useState(false);
+
+  const sections=mode==='general'?G:C;
+
+  const scores=useMemo(()=>sections.map(s=>{
+    let tot=0,mx=0;
+    s.questions.forEach(q=>{const a=ans[q.id];
+      if(mode==='general'){mx+=3;if(a==='yes')tot+=3;else if(a==='partial')tot+=1.5;}
+      else{mx+=5;if(a)tot+=parseInt(a);}
+    });
+    return{id:s.id,label:s.label,score:tot,max:mx,pct:mx>0?Math.round(tot/mx*100):0};
+  }),[ans,sections,mode]);
+
+  const overall=useMemo(()=>{
+    const t=scores.reduce((a,s)=>a+s.score,0),m=scores.reduce((a,s)=>a+s.max,0);
+    return m>0?Math.round(t/m*100):0;
+  },[scores]);
+
+  const priorities=useMemo(()=>[...scores].filter(s=>s.max>0).sort((a,b)=>a.pct-b.pct).slice(0,3),[scores]);
+
+  function reset(){setPhase('intro');setMode(null);setAns({});setNotes({});setSec(0);setInfo({name:'',type:'coffee_shop',staff:'',outlets:'1'});}
+
+  function genReport(){
+    const d=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+    const col=scoreColor(overall);
+    let r=`LAPORAN AUDIT OPERASIONAL F&B\n${'='.repeat(34)}\nNama Bisnis : ${info.name||'-'}\nTanggal     : ${d}\nAuditor     : Arief Permadi\nMode        : ${mode==='general'?'General':'Lengkap'}\n\nSKOR KESELURUHAN: ${overall}% — ${col.label.toUpperCase()}\n\nSKOR PER AREA:\n`;
+    scores.forEach(s=>{r+=`  ${s.pct>=80?'[✓]':s.pct>=60?'[~]':'[!]'} ${s.label}: ${s.pct}%\n`;});
+    r+=`\nPRIORITAS PERBAIKAN:\n`;
+    priorities.forEach((p,i)=>{const rec=REC[p.id];const band=p.pct<40?'low':p.pct<70?'mid':'high';r+=`  ${i+1}. ${p.label} (${p.pct}%)\n     → ${rec?rec[band]:'-'}\n\n`;});
+    if(sections.some(s=>notes[s.id])){r+=`CATATAN LAPANGAN:\n`;sections.forEach(s=>{if(notes[s.id])r+=`  ${s.label}: ${notes[s.id]}\n\n`;});}
+    r+=`${'='.repeat(34)}\nArief Permadi · 085714142712 · arief.kunto@gmail.com`;
+    return r;
+  }
+
+  function copyReport(){navigator.clipboard.writeText(genReport()).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);}).catch(()=>{});}
+
+  const gap=(n)=>({marginBottom:n+'px'});
+  const flex=(opts={})=>({display:'flex',...opts});
+  const s=(styles)=>styles;
+
+  if(phase==='intro') return h('div',null,
+    h('h2',{style:{fontSize:18,fontWeight:600,...gap(4)}},'Pilih Mode Audit'),
+    h('p',{style:{fontSize:14,color:'var(--text2)',...gap(20)}},'Sesuaikan dengan waktu dan kedalaman yang lo butuhkan'),
+    h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}},
+      h('button',{onClick:()=>{setMode('general');setPhase('info');},style:{textAlign:'left',padding:'1.25rem',borderRadius:'12px',border:'0.5px solid var(--border2)',background:'var(--bg)',cursor:'pointer',width:'100%'}},
+        h('div',{style:{...flex({alignItems:'center',gap:'8px'}),...gap(10)}},
+          h('div',{style:{width:30,height:30,borderRadius:'8px',background:'var(--amber-bg)',display:'flex',alignItems:'center',justifyContent:'center'}},
+            h('i',{className:'ti ti-zap',style:{fontSize:16,color:'var(--amber-text)'}})
+          ),
+          h('span',{style:{fontWeight:600,fontSize:14}},'General')
+        ),
+        h('p',{style:{fontSize:12,color:'var(--text2)',lineHeight:1.5,...gap(10)}},'20 pertanyaan Yes/No. Cocok untuk screening awal.'),
+        h('div',{style:{...flex({gap:'6px',flexWrap:'wrap'})}},
+          ['15–20 mnt','5 area'].map(t=>h('span',{key:t,className:'tag',style:{background:'var(--amber-bg)',color:'var(--amber-text)'}},t))
+        )
+      ),
+      h('button',{onClick:()=>{setMode('complete');setPhase('info');},style:{textAlign:'left',padding:'1.25rem',borderRadius:'12px',border:'2px solid var(--blue-text)',background:'var(--bg)',cursor:'pointer',width:'100%',position:'relative'}},
+        h('span',{style:{position:'absolute',top:0,right:12,fontSize:10,background:'var(--blue-bg)',color:'var(--blue-text)',padding:'2px 8px',borderRadius:'0 0 6px 6px',fontWeight:500}},'Rekomendasi'),
+        h('div',{style:{...flex({alignItems:'center',gap:'8px'}),...gap(10)}},
+          h('div',{style:{width:30,height:30,borderRadius:'8px',background:'var(--blue-bg)',display:'flex',alignItems:'center',justifyContent:'center'}},
+            h('i',{className:'ti ti-checklist',style:{fontSize:16,color:'var(--blue-text)'}})
+          ),
+          h('span',{style:{fontWeight:600,fontSize:14}},'Lengkap')
+        ),
+        h('p',{style:{fontSize:12,color:'var(--text2)',lineHeight:1.5,...gap(10)}},'50 pertanyaan skala 1–5. Untuk audit berbayar dan proposal.'),
+        h('div',{style:{...flex({gap:'6px',flexWrap:'wrap'})}},
+          ['45–60 mnt','8 area'].map(t=>h('span',{key:t,className:'tag',style:{background:'var(--blue-bg)',color:'var(--blue-text)'}},t))
+        )
+      )
+    )
+  );
+
+  if(phase==='info') return h('div',null,
+    h('button',{className:'btn',onClick:()=>setPhase('intro'),style:{...gap(20)}},h('i',{className:'ti ti-arrow-left'}),' Kembali'),
+    h('h2',{style:{fontSize:17,fontWeight:600,...gap(4)}},'Info Bisnis'),
+    h('p',{style:{fontSize:13,color:'var(--text2)',...gap(20)}},'Data ini akan masuk ke laporan audit.'),
+    h('div',{style:{display:'flex',flexDirection:'column',gap:'14px',maxWidth:'440px'}},
+      h('div',null,h('label',null,'Nama Bisnis / Outlet'),h('input',{placeholder:'Contoh: Kopi Kenangan Sudirman',value:info.name,onChange:ev=>setInfo(p=>({...p,name:ev.target.value}))})),
+      h('div',null,h('label',null,'Jenis Usaha'),
+        h('select',{value:info.type,onChange:ev=>setInfo(p=>({...p,type:ev.target.value}))},
+          h('option',{value:'coffee_shop'},'Coffee Shop'),
+          h('option',{value:'resto'},'Restoran / Warung Makan'),
+          h('option',{value:'fnb_retail'},'F&B Retail (Bakery, dll)'),
+          h('option',{value:'catering'},'Catering'),
+          h('option',{value:'cloud_kitchen'},'Cloud Kitchen'),
+          h('option',{value:'other'},'Lainnya')
+        )
+      ),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}},
+        h('div',null,h('label',null,'Jumlah Staff'),h('input',{type:'number',placeholder:'Contoh: 12',value:info.staff,onChange:ev=>setInfo(p=>({...p,staff:ev.target.value}))})),
+        h('div',null,h('label',null,'Jumlah Outlet'),
+          h('select',{value:info.outlets,onChange:ev=>setInfo(p=>({...p,outlets:ev.target.value}))},
+            h('option',{value:'1'},'1 outlet'),h('option',{value:'2-3'},'2–3 outlet'),
+            h('option',{value:'4-10'},'4–10 outlet'),h('option',{value:'10+'},'10+ outlet')
+          )
+        )
+      ),
+      h('button',{className:'btn btn-primary',onClick:()=>{setPhase('audit');setSec(0);}},
+        'Mulai Audit ',h('i',{className:'ti ti-arrow-right'})
+      )
+    )
+  );
+
+  if(phase==='audit'){
+    const section=sections[sec];
+    const isLast=sec===sections.length-1;
+    const secDone=section.questions.every(q=>ans[q.id]!==undefined);
+    const pct=Math.round((sec+1)/sections.length*100);
+
+    return h('div',null,
+      h('div',{style:{...flex({justifyContent:'space-between'}),...gap(6)}},
+        h('span',{style:{fontSize:12,color:'var(--text2)'}},'Bagian '+(sec+1)+' dari '+sections.length),
+        h('span',{style:{fontSize:12,color:'var(--text2)',fontWeight:500}},pct+'%')
+      ),
+      h('div',{className:'progress-bar'},h('div',{className:'progress-fill',style:{width:pct+'%'}})),
+
+      h('div',{style:{...flex({alignItems:'center',gap:'10px'}),...gap(20)}},
+        h('div',{style:{width:34,height:34,borderRadius:'8px',background:'var(--gold-bg)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}},
+          h('i',{className:'ti '+section.icon,style:{fontSize:17,color:'var(--gold)'}})
+        ),
+        h('div',null,
+          h('div',{style:{fontWeight:600,fontSize:15}},(sec+1)+'. '+section.label),
+          h('div',{style:{fontSize:12,color:'var(--text2)'}},section.questions.length+' pertanyaan')
+        )
+      ),
+
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'10px',...gap(16)}},
+        section.questions.map((q,idx)=>h('div',{key:q.id,className:'card',style:{borderColor:ans[q.id]!==undefined?'var(--border2)':'var(--border)'}},
+          h('p',{style:{fontSize:13.5,marginBottom:'10px',lineHeight:1.5}},
+            h('span',{style:{color:'var(--gold)',fontWeight:600,marginRight:'6px',fontSize:12}},String(idx+1).padStart(2,'0')),
+            q.text
+          ),
+          mode==='general'?
+            h('div',{style:{display:'flex',gap:'7px'}},
+              [{val:'yes',label:'Iya',type:'green'},{val:'partial',label:'Sebagian',type:'amber'},{val:'no',label:'Belum',type:'red'}].map(o=>
+                h('button',{key:o.val,onClick:()=>setAns(p=>({...p,[q.id]:o.val})),style:{
+                  flex:1,padding:'7px 4px',fontSize:12,fontWeight:500,borderRadius:'7px',cursor:'pointer',transition:'all .15s',
+                  border:`0.5px solid ${ans[q.id]===o.val?'var(--'+o.type+'-text)':'var(--border)'}`,
+                  background:ans[q.id]===o.val?'var(--'+o.type+'-bg)':'transparent',
+                  color:ans[q.id]===o.val?'var(--'+o.type+'-text)':'var(--text2)',fontFamily:'inherit'
+                }},o.label)
+              )
+            ):
+            h('div',null,
+              h('div',{style:{display:'flex',gap:'6px',marginBottom:'3px'}},
+                [1,2,3,4,5].map(v=>h('button',{key:v,onClick:()=>setAns(p=>({...p,[q.id]:String(v)})),style:{
+                  flex:1,padding:'7px 2px',fontSize:13,fontWeight:500,cursor:'pointer',
+                  borderRadius:'7px',transition:'all .15s',fontFamily:'inherit',
+                  border:`0.5px solid ${ans[q.id]===String(v)?'var(--blue-text)':'var(--border)'}`,
+                  background:ans[q.id]===String(v)?'var(--blue-bg)':'transparent',
+                  color:ans[q.id]===String(v)?'var(--blue-text)':'var(--text2)'
+                }},v))
+              ),
+              h('div',{style:{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)'}},
+                h('span',null,'Tidak ada'),h('span',null,'Sangat baik')
+              )
+            )
+        ))
+      ),
+
+      h('div',{style:{marginBottom:'1.25rem'}},
+        h('label',null,h('i',{className:'ti ti-notes',style:{marginRight:'4px'}}),'Catatan (opsional)'),
+        h('textarea',{rows:2,placeholder:'Tulis temuan atau detail yang perlu dicatat...',value:notes[section.id]||'',
+          onChange:ev=>setNotes(p=>({...p,[section.id]:ev.target.value})),style:{resize:'vertical'}})
+      ),
+
+      h('div',{style:{display:'flex',gap:'8px'}},
+        sec>0&&h('button',{className:'btn',onClick:()=>setSec(s=>s-1)},h('i',{className:'ti ti-arrow-left'}),' Sebelumnya'),
+        h('button',{className:'btn btn-primary',onClick:()=>isLast?setPhase('results'):setSec(s=>s+1),
+          disabled:!secDone,style:{flex:1,opacity:secDone?1:.4}},
+          isLast?'Lihat Hasil ':'Lanjut ',h('i',{className:'ti '+(isLast?'ti-chart-bar':'ti-arrow-right')})
+        )
+      ),
+      !secDone&&h('p',{style:{fontSize:12,color:'var(--text2)',textAlign:'center',marginTop:'8px'}},'Jawab semua pertanyaan untuk melanjutkan')
+    );
+  }
+
+  if(phase==='results'){
+    const col=scoreColor(overall);
+    const d=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+    return h('div',null,
+      h('div',{style:{textAlign:'center',padding:'1.5rem',background:'var(--bg2)',borderRadius:'12px',marginBottom:'1.75rem'}},
+        h('p',{style:{fontSize:13,color:'var(--text2)',marginBottom:'8px'}},(info.name||'Hasil Audit')+' · '+d),
+        h('div',{style:{fontSize:52,fontWeight:700,lineHeight:1,color:col.text,marginBottom:'10px'}},overall+'%'),
+        h('span',{className:'tag',style:{background:col.bg,color:col.text,fontSize:13,padding:'5px 16px'}},col.label),
+        h('p',{style:{fontSize:12,color:'var(--text3)',marginTop:'8px'}},(mode==='general'?'General':'Lengkap')+' · Auditor: Arief Permadi')
+      ),
+
+      h('h3',{style:{fontSize:14,fontWeight:600,marginBottom:'12px'}},'Skor per Area'),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'10px',marginBottom:'1.75rem'}},
+        scores.map(s=>{const c=scoreColor(s.pct);return h('div',{key:s.id},
+          h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'4px'}},
+            h('span',{style:{fontSize:13}},(s.pct>=80?'✓ ':s.pct>=40?'~ ':'! ')+s.label),
+            h('span',{style:{fontSize:13,fontWeight:600,color:c.text}},s.pct+'%')
+          ),
+          h('div',{style:{height:5,background:'var(--bg2)',borderRadius:'3px',overflow:'hidden'}},
+            h('div',{style:{height:'100%',width:s.pct+'%',background:c.bar,borderRadius:'3px'}})
+          )
+        )})
+      ),
+
+      h('h3',{style:{fontSize:14,fontWeight:600,marginBottom:'12px'}},'Prioritas Perbaikan'),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'1.75rem'}},
+        priorities.map((p,i)=>{
+          const rec=REC[p.id];const band=p.pct<40?'low':p.pct<70?'mid':'high';const c=scoreColor(p.pct);
+          return h('div',{key:p.id,style:{padding:'0.9rem 1.1rem',borderRadius:'12px',background:'var(--bg)',border:'0.5px solid var(--border)',boxShadow:'inset 4px 0 0 '+c.bar}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'5px'}},
+              h('span',{style:{fontWeight:600,fontSize:13}},(i+1)+'. '+p.label),
+              h('span',{style:{fontSize:12,color:c.text,fontWeight:600}},p.pct+'%')
+            ),
+            rec&&h('p',{style:{fontSize:12.5,color:'var(--text2)',lineHeight:1.5}},rec[band])
+          );
+        })
+      ),
+
+      sections.some(s=>notes[s.id])&&h('div',{style:{marginBottom:'1.75rem'}},
+        h('h3',{style:{fontSize:14,fontWeight:600,marginBottom:'12px'}},'Catatan Lapangan'),
+        sections.map(s=>notes[s.id]?h('div',{key:s.id,style:{padding:'0.75rem 1rem',borderRadius:'8px',background:'var(--bg2)',fontSize:13,lineHeight:1.5,marginBottom:'8px'}},
+          h('span',{style:{fontWeight:600,color:'var(--gold)'}},[s.label,': ']),notes[s.id]
+        ):null)
+      ),
+
+      h('div',{style:{display:'flex',gap:'8px'}},
+        h('button',{className:'btn',onClick:copyReport,style:{flex:1,fontWeight:500,
+          background:copied?'var(--green-bg)':'transparent',color:copied?'var(--green-text)':'var(--text)'}},
+          h('i',{className:'ti '+(copied?'ti-check':'ti-copy')}),' ',copied?'Tersalin!':'Salin Laporan'
+        ),
+        h('button',{className:'btn',onClick:reset},h('i',{className:'ti ti-refresh'}),' Audit Baru')
+      )
+    );
+  }
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

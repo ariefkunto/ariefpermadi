@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escalation Matrix Tool — Alqolam After Sales</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;--surface:#fff;--card:#fdfaf4;--border:#e8dfc8;
+  --ink:#1a1510;--muted:#7a7060;
+  --gold:#c4862a;--gold-bg:#fdf3e3;
+  --green:#2d7a3a;--green-bg:#ebf5ec;
+  --red:#b03a2e;--red-bg:#fbeee9;
+  --blue:#1a5fa8;--blue-bg:#e9f0fb;
+  --purple:#6b2fa0;--purple-bg:#f3ebfb;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--ink);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.badge{background:var(--gold);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:3px;margin-right:12px}
+.brand-title{font-size:14px;font-weight:700;color:#fff}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+.version{font-size:10px;color:rgba(255,255,255,.3);background:rgba(255,255,255,.08);padding:4px 10px;border-radius:10px}
+
+.main{display:grid;grid-template-columns:360px 1fr;gap:0;min-height:calc(100vh - 54px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px;overflow-y:auto}
+.sb-title{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.form-group{margin-bottom:20px}
+.form-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
+.form-label span{color:var(--gold)}
+.form-select,.form-textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink);outline:none;font-family:inherit;transition:border-color .2s}
+.form-select:focus,.form-textarea:focus{border-color:var(--gold)}
+.form-textarea{resize:vertical;min-height:80px}
+.chip-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.chip-sev.low{background:var(--green-bg);color:var(--green);border-color:transparent}
+.chip-sev.med{background:var(--gold-bg);color:var(--gold);border-color:transparent}
+.chip-sev.high{background:var(--red-bg);color:var(--red);border-color:transparent}
+.chip-sev.critical{background:var(--ink);color:#fff;border-color:transparent}
+.chip.selected{border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,.1)}
+
+.btn-analyze{width:100%;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-analyze:hover{background:#2d2820}
+.btn-reset{width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;cursor:pointer;margin-top:8px}
+
+/* MAIN CONTENT */
+.content{padding:28px;overflow-y:auto;background:var(--bg)}
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
+.placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:.4}
+.placeholder-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.placeholder-sub{font-size:13px;color:var(--muted);max-width:300px;line-height:1.6}
+
+/* RESULT */
+.result{display:none}
+.result-header{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.result-level{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.level-badge{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.05em}
+.result-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.result-sub{font-size:13px;color:var(--muted)}
+
+.response-time{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.rt-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.rt-val{font-size:1.5rem;font-weight:800;line-height:1;margin-bottom:4px}
+.rt-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+/* FLOW */
+.flow-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.flow-title{font-size:13px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.flow-steps{display:flex;flex-direction:column;gap:0}
+.flow-step{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.05);position:relative}
+.flow-step:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff}
+.step-body{}
+.step-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.step-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.step-time{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:4px;font-weight:600;background:var(--gold-bg);color:var(--gold)}
+
+/* CONTACTS */
+.contacts-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.contact-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
+.contact-role{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.contact-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.contact-info{font-size:11px;color:var(--muted)}
+
+/* ACTIONS */
+.actions-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px}
+.action-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.action-item{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--card);border-radius:6px;font-size:12px;line-height:1.5}
+.action-check{width:18px;height:18px;border-radius:4px;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;margin-top:1px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center">
+    <div class="badge">ALQOLAM</div>
+    <div>
+      <div class="brand-title">Escalation Matrix Tool</div>
+      <div class="brand-sub">After-Sales Service Operations · Education Technology</div>
+    </div>
+  </div>
+  <div class="version">v2.1 · Arief Permadi</div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sb-title">Parameter Keluhan</div>
+
+    <div class="form-group">
+      <label class="form-label">Kategori Produk <span>*</span></label>
+      <select class="form-select" id="prodCat">
+        <option value="">Pilih kategori produk...</option>
+        <option value="ebook">E-Book Reader</option>
+        <option value="tablet">Tablet Edukasi</option>
+        <option value="software">Software / Aplikasi</option>
+        <option value="konten">Konten Digital</option>
+        <option value="hardware">Hardware Lainnya</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tipe Keluhan <span>*</span></label>
+      <select class="form-select" id="compType">
+        <option value="">Pilih tipe keluhan...</option>
+        <option value="hardware">Kerusakan Hardware</option>
+        <option value="software">Bug / Error Software</option>
+        <option value="konten">Masalah Akses Konten</option>
+        <option value="garansi">Klaim Garansi</option>
+        <option value="pengiriman">Masalah Pengiriman</option>
+        <option value="refund">Permintaan Refund</option>
+        <option value="repeat">Keluhan Berulang (2x+)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tingkat Keparahan <span>*</span></label>
+      <div class="chip-group">
+        <div class="chip chip-sev low" onclick="selectSev('low',this)">🟢 Low</div>
+        <div class="chip chip-sev med" onclick="selectSev('med',this)">🟡 Medium</div>
+        <div class="chip chip-sev high" onclick="selectSev('high',this)">🔴 High</div>
+        <div class="chip chip-sev critical" onclick="selectSev('critical',this)">⚫ Critical</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sudah Berapa Lama</label>
+      <select class="form-select" id="duration">
+        <option value="fresh">Baru masuk (< 2 jam)</option>
+        <option value="same">Hari yang sama (2–8 jam)</option>
+        <option value="next">Hari berikutnya (> 8 jam)</option>
+        <option value="week">Lebih dari 1 minggu</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tipe Pelanggan</label>
+      <select class="form-select" id="custType">
+        <option value="regular">Regular</option>
+        <option value="premium">Premium / VIP</option>
+        <option value="institusi">Institusi / Sekolah</option>
+        <option value="reseller">Reseller</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Catatan Tambahan</label>
+      <textarea class="form-textarea" id="notes" placeholder="Deskripsi singkat situasi..."></textarea>
+    </div>
+
+    <button class="btn-analyze" onclick="analyze()">⚡ Analisis Eskalasi</button>
+    <button class="btn-reset" onclick="reset()">↺ Reset Form</button>
+  </div>
+
+  <div class="content">
+    <div class="placeholder" id="placeholder">
+      <div class="placeholder-icon">🔀</div>
+      <div class="placeholder-title">Escalation Matrix Tool</div>
+      <div class="placeholder-sub">Isi parameter keluhan di sebelah kiri untuk mendapatkan jalur eskalasi yang tepat, response time target, dan action plan terstruktur.</div>
+    </div>
+
+    <div class="result" id="result"></div>
+  </div>
+</div>
+
+<script>
+let selectedSev = '';
+function selectSev(v, el) {
+  selectedSev = v;
+  document.querySelectorAll('.chip-sev').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function analyze() {
+  const cat = document.getElementById('prodCat').value;
+  const type = document.getElementById('compType').value;
+  const dur = document.getElementById('duration').value;
+  const cust = document.getElementById('custType').value;
+  if (!cat || !type || !selectedSev) { alert('Mohon lengkapi: Kategori Produk, Tipe Keluhan, dan Tingkat Keparahan'); return; }
+
+  const levels = {
+    low: { label: 'Level 1 — CS Frontline', color: '#2d7a3a', bg: '#ebf5ec', rt1: '2 jam', rt2: '1 hari', rt3: '2 hari' },
+    med: { label: 'Level 2 — Senior CS / Team Lead', color: '#c4862a', bg: '#fdf3e3', rt1: '1 jam', rt2: '4 jam', rt3: '1 hari' },
+    high: { label: 'Level 3 — After Sales Manager', color: '#b03a2e', bg: '#fbeee9', rt1: '30 menit', rt2: '2 jam', rt3: '4 jam' },
+    critical: { label: 'Level 4 — Direktur / Management', color: '#1a1510', bg: '#f5f0e8', rt1: '15 menit', rt2: '1 jam', rt3: '2 jam' },
+  };
+  const lv = levels[selectedSev];
+
+  const steps = {
+    low: [
+      { n: '1', color: '#2d7a3a', title: 'Terima & Konfirmasi', desc: 'CS frontline menerima keluhan, konfirmasi ke pelanggan bahwa keluhan sudah diterima dan sedang ditangani', time: '< 15 menit' },
+      { n: '2', color: '#2d7a3a', title: 'Diagnosis & Troubleshooting', desc: 'Lakukan diagnosis awal menggunakan SOP troubleshooting standar. Coba solusi Level 1 terlebih dahulu', time: '< 1 jam' },
+      { n: '3', color: '#2d7a3a', title: 'Resolusi & Follow-up', desc: 'Selesaikan keluhan, kirimkan ringkasan solusi ke pelanggan, dan minta konfirmasi kepuasan', time: '< 2 jam' },
+    ],
+    med: [
+      { n: '1', color: '#c4862a', title: 'Eskalasi ke Senior CS', desc: 'CS frontline eskalasi ke Senior CS atau Team Lead dengan melampirkan kronologi dan tindakan yang sudah dilakukan', time: '< 30 menit' },
+      { n: '2', color: '#c4862a', title: 'Investigasi Mendalam', desc: 'Senior CS melakukan investigasi mendalam, cek histori pelanggan, dan konsultasikan ke divisi teknis jika diperlukan', time: '< 2 jam' },
+      { n: '3', color: '#c4862a', title: 'Penawaran Solusi', desc: 'Tawarkan solusi konkret: penggantian produk, kredit, atau perbaikan. Dapatkan persetujuan pelanggan', time: '< 4 jam' },
+      { n: '4', color: '#c4862a', title: 'Eksekusi & Dokumentasi', desc: 'Eksekusi solusi yang disepakati dan dokumentasikan sebagai case study untuk perbaikan SOP', time: '< 1 hari' },
+    ],
+    high: [
+      { n: '1', color: '#b03a2e', title: 'Notifikasi Manager Segera', desc: 'Team Lead notifikasi After Sales Manager secara langsung dengan laporan singkat situasi (5W1H)', time: '< 30 menit' },
+      { n: '2', color: '#b03a2e', title: 'War Room Assessment', desc: 'Manager memimpin assessment darurat bersama tim, tentukan impact dan risiko bisnis, tetapkan PIC', time: '< 1 jam' },
+      { n: '3', color: '#b03a2e', title: 'Direct Customer Handling', desc: 'Manager turun langsung handle pelanggan, berikan kepastian dan timeline resolusi yang jelas', time: '< 2 jam' },
+      { n: '4', color: '#b03a2e', title: 'Root Cause Analysis', desc: 'Setelah resolved, lakukan RCA dan update SOP untuk mencegah kejadian serupa', time: '< 4 jam' },
+    ],
+    critical: [
+      { n: '!', color: '#1a1510', title: 'ESKALASI DARURAT ke Manajemen', desc: 'Notify Direktur / Manajemen puncak secara langsung. Jangan tunggu — lakukan dalam 15 menit pertama', time: '< 15 menit' },
+      { n: '2', color: '#1a1510', title: 'Crisis Response Team', desc: 'Bentuk tim respons darurat lintas fungsi: After Sales + Legal + PR + Manajemen', time: '< 30 menit' },
+      { n: '3', color: '#1a1510', title: 'Executive Direct Contact', desc: 'Direktur atau manajemen senior menghubungi pelanggan langsung. Berikan komitmen penuh dan timeline konkret', time: '< 1 jam' },
+      { n: '4', color: '#1a1510', title: 'Full Resolution Plan', desc: 'Susun rencana kompensasi dan resolusi komprehensif. Pastikan tidak ada kebocoran ke media', time: '< 2 jam' },
+      { n: '5', color: '#1a1510', title: 'Post-Crisis Review', desc: 'Evaluasi menyeluruh pasca krisis, perbaiki sistem, dan pastikan tidak terulang', time: '1–3 hari' },
+    ],
+  };
+
+  document.getElementById('placeholder').style.display = 'none';
+  const r = document.getElementById('result');
+  r.style.display = 'block';
+
+  const custLabel = { regular: 'Regular', premium: '⭐ VIP / Premium', institusi: '🏫 Institusi', reseller: '🤝 Reseller' }[cust];
+
+  r.innerHTML = `
+    <div class="result-header">
+      <div class="result-level">
+        <div class="level-badge" style="background:${lv.bg};color:${lv.color}">${lv.label}</div>
+        <div class="level-badge" style="background:#f5f0e8;color:#7a7060">Pelanggan: ${custLabel}</div>
+      </div>
+      <div class="result-title">Rekomendasi Jalur Eskalasi</div>
+      <div class="result-sub">Berdasarkan: ${document.getElementById('compType').options[document.getElementById('compType').selectedIndex].text} · Severity: ${selectedSev.toUpperCase()}</div>
+      <div class="response-time">
+        <div class="rt-card"><div class="rt-val" style="color:${lv.color}">${lv.rt1}</div><div class="rt-lbl">First Response</div></div>
+        <div class="rt-card"><div class="rt-val" style="color:${lv.color}">${lv.rt2}</div><div class="rt-lbl">Target Resolved</div></div>
+        <div class="rt-card"><div class="rt-val" style="color:${lv.color}">${lv.rt3}</div><div class="rt-lbl">Max SLA</div></div>
+      </div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title">📋 Langkah Penanganan</div>
+      <div class="flow-steps">
+        ${steps[selectedSev].map(s=>`
+          <div class="flow-step">
+            <div class="step-num" style="background:${s.color}">${s.n}</div>
+            <div class="step-body">
+              <div class="step-title">${s.title}</div>
+              <div class="step-desc">${s.desc}</div>
+              <span class="step-time">⏱ Target: ${s.time}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="contacts-card">
+      <div class="flow-title">📞 PIC & Kontak Eskalasi</div>
+      <div class="contact-grid">
+        <div class="contact-item"><div class="contact-role">CS Frontline</div><div class="contact-name">Tim CS On-Duty</div><div class="contact-info">Ext. 101 · care.alqolam.com</div></div>
+        <div class="contact-item"><div class="contact-role">Team Lead</div><div class="contact-name">Supervisor After Sales</div><div class="contact-info">Ext. 201 · WhatsApp Group</div></div>
+        <div class="contact-item"><div class="contact-role">After Sales Manager</div><div class="contact-name">Arief Permadi Kuntoaji</div><div class="contact-info">+62-857-1414-2712</div></div>
+        <div class="contact-item"><div class="contact-role">Divisi Teknis</div><div class="contact-name">Tim Technical Support</div><div class="contact-info">Ext. 301 · Ticket System</div></div>
+      </div>
+    </div>
+
+    <div class="actions-card">
+      <div class="flow-title">✅ Action Checklist</div>
+      <div class="action-list">
+        <div class="action-item"><div class="action-check">1</div><div>Buka tiket di sistem CRM dan catat nomor tiket untuk tracking</div></div>
+        <div class="action-item"><div class="action-check">2</div><div>Konfirmasi penerimaan keluhan ke pelanggan dalam ${lv.rt1}</div></div>
+        <div class="action-item"><div class="action-check">3</div><div>Notify PIC yang sesuai level eskalasi di atas</div></div>
+        <div class="action-item"><div class="action-check">4</div><div>Dokumentasikan semua komunikasi di sistem tiket</div></div>
+        <div class="action-item"><div class="action-check">5</div><div>Update status tiket setiap ada perkembangan</div></div>
+        <div class="action-item"><div class="action-check">6</div><div>Setelah resolved: kirim survey CSAT ke pelanggan dalam 24 jam</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function reset() {
+  document.getElementById('prodCat').value = '';
+  document.getElementById('compType').value = '';
+  document.getElementById('duration').value = 'fresh';
+  document.getElementById('custType').value = 'regular';
+  document.getElementById('notes').value = '';
+  selectedSev = '';
+  document.querySelectorAll('.chip-sev').forEach(c => c.classList.remove('selected'));
+  document.getElementById('placeholder').style.display = 'flex';
+  document.getElementById('result').style.display = 'none';
+}
+</script>
+</body>
+</html>

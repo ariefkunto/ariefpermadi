@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLA Performance Dashboard — SELIS After-Sales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c12;
+  --surface: #0e1420;
+  --surface2: #131b28;
+  --border: rgba(0,200,255,0.12);
+  --cyan: #00c8ff;
+  --cyan2: #00e5c8;
+  --red: #ff4d6d;
+  --yellow: #ffd166;
+  --green: #06d6a0;
+  --text: #e2eaf5;
+  --muted: #5a7090;
+  --muted2: #8a9ab5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-left { display: flex; align-items: center; gap: 1rem; }
+.brand { display: flex; align-items: center; gap: 0.6rem; }
+.brand-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #080c12;
+}
+.brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
+.brand-name span { color: var(--cyan); }
+.divider-v { width: 1px; height: 20px; background: var(--border); }
+.page-title { font-size: 0.82rem; color: var(--muted2); font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 1rem; }
+.period-badge {
+  background: rgba(0,200,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.75rem;
+  color: var(--cyan);
+  font-weight: 600;
+}
+.live-dot {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; color: var(--green);
+}
+.live-dot::before {
+  content: '';
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* LAYOUT */
+.main { padding: 1.5rem 2rem; max-width: 1400px; margin: 0 auto; }
+
+/* HERO METRICS */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  position: relative; overflow: hidden;
+}
+.hero-card.featured {
+  background: linear-gradient(135deg, rgba(0,200,255,0.1) 0%, rgba(0,229,200,0.05) 100%);
+  border-color: rgba(0,200,255,0.3);
+}
+.hero-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--cyan2));
+  opacity: 0;
+}
+.hero-card.featured::before { opacity: 1; }
+.card-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.8rem; }
+.card-value { font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 0.4rem; }
+.featured .card-value { color: var(--cyan); }
+.card-sub { font-size: 0.75rem; color: var(--muted2); display: flex; align-items: center; gap: 0.4rem; }
+.badge-up { color: var(--green); font-weight: 600; }
+.badge-down { color: var(--red); font-weight: 600; }
+.target-bar { margin-top: 1rem; }
+.target-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted2); margin-bottom: 0.4rem; }
+.bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+.bar-fill.good { background: linear-gradient(90deg, var(--cyan), var(--cyan2)); }
+.bar-fill.warn { background: var(--yellow); }
+.bar-fill.bad  { background: var(--red); }
+
+/* SECTION GRID */
+.grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.3rem 1.5rem;
+}
+.card-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+.tag { font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 10px; letter-spacing: 0.05em; }
+.tag-cyan { background: rgba(0,200,255,0.12); color: var(--cyan); }
+.tag-green { background: rgba(6,214,160,0.12); color: var(--green); }
+.tag-red { background: rgba(255,77,109,0.12); color: var(--red); }
+.tag-yellow { background: rgba(255,209,102,0.12); color: var(--yellow); }
+
+/* REGION TABLE */
+.region-table { width: 100%; border-collapse: collapse; }
+.region-table th { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 0 0.7rem 0; border-bottom: 1px solid var(--border); }
+.region-table td { font-size: 0.82rem; padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); vertical-align: middle; }
+.region-table tr:last-child td { border-bottom: none; }
+.region-name { font-weight: 500; }
+.sla-pill { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 10px; font-size: 0.72rem; font-weight: 700; }
+.sla-good { background: rgba(6,214,160,0.12); color: var(--green); }
+.sla-warn { background: rgba(255,209,102,0.12); color: var(--yellow); }
+.sla-bad  { background: rgba(255,77,109,0.12); color: var(--red); }
+.mini-bar { height: 4px; border-radius: 10px; margin-top: 4px; }
+
+/* CATEGORY LIST */
+.cat-list { display: flex; flex-direction: column; gap: 0.9rem; }
+.cat-item { }
+.cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+.cat-name { font-size: 0.82rem; color: var(--text); font-weight: 500; }
+.cat-val { font-size: 0.82rem; font-weight: 700; }
+
+/* BREACH LIST */
+.breach-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.breach-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: 6px;
+  padding: 0.7rem 0.9rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.breach-id { font-size: 0.75rem; font-weight: 700; color: var(--cyan); }
+.breach-issue { font-size: 0.78rem; color: var(--text); margin-top: 0.1rem; }
+.breach-region { font-size: 0.7rem; color: var(--muted2); }
+.breach-delay { font-size: 0.78rem; font-weight: 700; color: var(--red); }
+
+/* CHART containers */
+canvas { max-width: 100%; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-name">SELIS <span>Ops</span></div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="page-title">SLA Performance Dashboard — After-Sales Regional</div>
+  </div>
+  <div class="topbar-right">
+    <div class="period-badge">Jan – Des 2023</div>
+    <div class="live-dot">Live Data</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- HERO METRICS -->
+  <div class="hero-grid">
+    <div class="hero-card featured">
+      <div class="card-label">Overall SLA Compliance</div>
+      <div class="card-value">97.2%</div>
+      <div class="card-sub"><span class="badge-up">▲ 2.1%</span> vs tahun sebelumnya</div>
+      <div class="target-bar">
+        <div class="target-label"><span>Target: 95%</span><span>Achieved: 97.2%</span></div>
+        <div class="bar-track"><div class="bar-fill good" style="width:97.2%"></div></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="card-label">Avg. Response Time</div>
+      <div class="card-value" style="color:var(--cyan2)">2.4<span style="font-size:1.2rem;color:var(--muted2)"> jam</span></div>
+      <div class="card-sub"><span class="badge-up">▲ 18%</span> lebih cepat dari target 3 jam</div>
+      <div class="target-bar">
+        <div class="target-label"><span>Target: ≤3j</span><span>Aktual: 2.4j</span></div>
+        <div class="bar-track"><div class="bar-fill good" style="width:80%"></div></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="card-label">Avg. Resolution Time</div>
+      <div class="card-value" style="color:var(--yellow)">1.8<span style="font-size:1.2rem;color:var(--muted2)"> hari</span></div>
+      <div class="card-sub"><span class="badge-up">▲ 12%</span> vs target 2 hari</div>
+      <div class="target-bar">
+        <div class="target-label"><span>Target: ≤2hr</span><span>Aktual: 1.8hr</span></div>
+        <div class="bar-track"><div class="bar-fill warn" style="width:90%"></div></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="card-label">Total Tickets Handled</div>
+      <div class="card-value" style="color:var(--green)">4,821</div>
+      <div class="card-sub"><span class="badge-up">▲ 34%</span> volume YoY</div>
+      <div class="target-bar">
+        <div class="target-label"><span>SLA Breach</span><span>134 tickets</span></div>
+        <div class="bar-track"><div class="bar-fill bad" style="width:2.8%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREND + REGION -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SLA Compliance Trend — Bulanan <span class="tag tag-cyan">2023</span></div>
+      <canvas id="slaChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">SLA per Region <span class="tag tag-green">All Regions</span></div>
+      <table class="region-table">
+        <thead><tr>
+          <th>Region</th><th>Tickets</th><th>SLA Rate</th><th>Trend</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><div class="region-name">Jabodetabek</div></td>
+            <td>1,842</td>
+            <td><span class="sla-pill sla-good">98.4%</span></td>
+            <td><div class="mini-bar" style="width:98.4%;background:var(--green);opacity:0.6"></div></td>
+          </tr>
+          <tr>
+            <td><div class="region-name">Jawa Barat</div></td>
+            <td>934</td>
+            <td><span class="sla-pill sla-good">97.1%</span></td>
+            <td><div class="mini-bar" style="width:97.1%;background:var(--green);opacity:0.6"></div></td>
+          </tr>
+          <tr>
+            <td><div class="region-name">Jawa Tengah</div></td>
+            <td>781</td>
+            <td><span class="sla-pill sla-good">96.8%</span></td>
+            <td><div class="mini-bar" style="width:96.8%;background:var(--cyan);opacity:0.6"></div></td>
+          </tr>
+          <tr>
+            <td><div class="region-name">Jawa Timur</div></td>
+            <td>692</td>
+            <td><span class="sla-pill sla-good">97.5%</span></td>
+            <td><div class="mini-bar" style="width:97.5%;background:var(--green);opacity:0.6"></div></td>
+          </tr>
+          <tr>
+            <td><div class="region-name">Sumatera</div></td>
+            <td>389</td>
+            <td><span class="sla-pill sla-warn">93.1%</span></td>
+            <td><div class="mini-bar" style="width:93.1%;background:var(--yellow);opacity:0.7"></div></td>
+          </tr>
+          <tr>
+            <td><div class="region-name">Kalimantan</div></td>
+            <td>183</td>
+            <td><span class="sla-pill sla-bad">89.6%</span></td>
+            <td><div class="mini-bar" style="width:89.6%;background:var(--red);opacity:0.7"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CATEGORY + BREACH -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SLA per Kategori Keluhan <span class="tag tag-cyan">Breakdown</span></div>
+      <div class="cat-list">
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">⚡ Masalah Baterai / Range</span><span class="cat-val" style="color:var(--green)">98.1%</span></div>
+          <div class="bar-track"><div class="bar-fill good" style="width:98.1%"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">🔌 Charging Port / Adapter</span><span class="cat-val" style="color:var(--cyan2)">97.4%</span></div>
+          <div class="bar-track"><div class="bar-fill good" style="width:97.4%"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">⚙️ Spare Part Replacement</span><span class="cat-val" style="color:var(--yellow)">94.2%</span></div>
+          <div class="bar-track"><div class="bar-fill warn" style="width:94.2%"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">📱 Software / Firmware Update</span><span class="cat-val" style="color:var(--green)">99.0%</span></div>
+          <div class="bar-track"><div class="bar-fill good" style="width:99%"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">🛠️ Kerusakan Fisik / Garansi</span><span class="cat-val" style="color:var(--red)">88.7%</span></div>
+          <div class="bar-track"><div class="bar-fill bad" style="width:88.7%"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-header"><span class="cat-name">📦 Pengiriman Unit Pengganti</span><span class="cat-val" style="color:var(--yellow)">95.3%</span></div>
+          <div class="bar-track"><div class="bar-fill warn" style="width:95.3%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">SLA Breach — Perlu Tindakan <span class="tag tag-red">134 Tickets</span></div>
+      <div class="breach-list">
+        <div class="breach-item">
+          <div><div class="breach-id">#SLS-4821</div><div class="breach-issue">Spare part motor rusak — stok kosong</div><div class="breach-region">📍 Kalimantan Timur</div></div>
+          <div class="breach-delay">+38j</div>
+        </div>
+        <div class="breach-item">
+          <div><div class="breach-id">#SLS-4790</div><div class="breach-issue">Unit pengganti belum tersedia</div><div class="breach-region">📍 Medan, Sumatera</div></div>
+          <div class="breach-delay">+24j</div>
+        </div>
+        <div class="breach-item">
+          <div><div class="breach-id">#SLS-4756</div><div class="breach-issue">Teknisi tidak tersedia hari libur</div><div class="breach-region">📍 Balikpapan</div></div>
+          <div class="breach-delay">+18j</div>
+        </div>
+        <div class="breach-item">
+          <div><div class="breach-id">#SLS-4701</div><div class="breach-issue">Garansi dispute — perlu approval pusat</div><div class="breach-region">📍 Surabaya</div></div>
+          <div class="breach-delay">+12j</div>
+        </div>
+        <div class="breach-item">
+          <div><div class="breach-id">#SLS-4688</div><div class="breach-issue">Kerusakan baterai — eskalasi vendor</div><div class="breach-region">📍 Bandung, Jabar</div></div>
+          <div class="breach-delay">+9j</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+const slaData = [93.1, 94.2, 95.0, 95.8, 96.4, 96.9, 97.2, 97.5, 97.8, 97.4, 97.6, 97.2];
+const targetData = Array(12).fill(95);
+
+const ctx = document.getElementById('slaChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'SLA Aktual (%)',
+        data: slaData,
+        borderColor: '#00c8ff',
+        backgroundColor: 'rgba(0,200,255,0.07)',
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#00c8ff',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+      {
+        label: 'Target SLA (%)',
+        data: targetData,
+        borderColor: 'rgba(255,209,102,0.5)',
+        borderWidth: 1.5,
+        borderDash: [6,4],
+        tension: 0,
+        fill: false,
+        pointRadius: 0,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#8a9ab5', font: { family: 'Space Grotesk', size: 11 }, boxWidth: 16 } },
+      tooltip: {
+        backgroundColor: '#0e1420',
+        borderColor: 'rgba(0,200,255,0.2)',
+        borderWidth: 1,
+        titleColor: '#00c8ff',
+        bodyColor: '#e2eaf5',
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#5a7090', font: { family: 'Space Grotesk', size: 11 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+      y: { min: 88, max: 100, ticks: { color: '#5a7090', font: { family: 'Space Grotesk', size: 11 }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

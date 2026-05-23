@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSAT & NPS Report — SELIS After-Sales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c12; --surface: #0e1420; --surface2: #131b28;
+  --border: rgba(0,200,255,0.12);
+  --cyan: #00c8ff; --cyan2: #00e5c8;
+  --red: #ff4d6d; --yellow: #ffd166; --green: #06d6a0;
+  --purple: #a78bfa; --orange: #fb923c;
+  --text: #e2eaf5; --muted: #5a7090; --muted2: #8a9ab5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.brand { display: flex; align-items: center; gap: 0.6rem; }
+.brand-icon { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, var(--purple), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #080c12; }
+.brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
+.brand-name span { color: var(--cyan); }
+.divider-v { width: 1px; height: 20px; background: var(--border); }
+.page-title { font-size: 0.82rem; color: var(--muted2); font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 1rem; }
+.period-badge { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25); border-radius: 20px; padding: 0.3rem 0.9rem; font-size: 0.75rem; color: var(--purple); font-weight: 600; }
+
+.main { padding: 1.5rem 2rem; max-width: 1400px; margin: 0 auto; }
+
+/* NPS HERO */
+.nps-hero { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; align-items: stretch; }
+.nps-big {
+  background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(0,200,255,0.06));
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 14px;
+  padding: 2rem 2.5rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  min-width: 180px;
+}
+.nps-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); margin-bottom: 0.5rem; }
+.nps-score { font-size: 5rem; font-weight: 700; line-height: 1; color: var(--purple); }
+.nps-desc { font-size: 0.75rem; color: var(--muted2); margin-top: 0.5rem; }
+.nps-tag { background: rgba(167,139,250,0.15); color: var(--purple); font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 10px; margin-top: 0.7rem; display: inline-block; }
+
+.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; }
+.metric-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.8rem; }
+.metric-val { font-size: 2.4rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
+.metric-sub { font-size: 0.75rem; color: var(--muted2); }
+.badge-up { color: var(--green); font-weight: 600; }
+
+/* RATING DIST */
+.rating-dist { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+.rating-row { display: flex; align-items: center; gap: 0.8rem; }
+.rating-stars { font-size: 0.75rem; width: 60px; flex-shrink: 0; }
+.rating-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+.rating-bar-fill { height: 100%; border-radius: 10px; }
+.rating-count { font-size: 0.72rem; color: var(--muted2); width: 50px; text-align: right; flex-shrink: 0; }
+
+/* CARDS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem; }
+.card-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+.tag { font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 10px; }
+.tag-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+.tag-green { background: rgba(6,214,160,0.12); color: var(--green); }
+.tag-red { background: rgba(255,77,109,0.12); color: var(--red); }
+.tag-cyan { background: rgba(0,200,255,0.12); color: var(--cyan); }
+
+/* NPS SEGMENTS */
+.nps-segments { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.seg { flex: 1; border-radius: 10px; padding: 1rem; text-align: center; }
+.seg.promoter { background: rgba(6,214,160,0.08); border: 1px solid rgba(6,214,160,0.2); }
+.seg.passive  { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.2); }
+.seg.detractor{ background: rgba(255,77,109,0.08);  border: 1px solid rgba(255,77,109,0.2); }
+.seg-pct { font-size: 1.8rem; font-weight: 700; }
+.seg.promoter .seg-pct  { color: var(--green); }
+.seg.passive  .seg-pct  { color: var(--yellow); }
+.seg.detractor .seg-pct { color: var(--red); }
+.seg-label { font-size: 0.7rem; color: var(--muted2); margin-top: 0.2rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.seg-count { font-size: 0.72rem; color: var(--muted2); margin-top: 0.3rem; }
+
+/* FEEDBACK THEMES */
+.theme-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.theme-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 0.9rem; background: var(--surface2); border-radius: 8px; }
+.theme-icon { font-size: 1.1rem; flex-shrink: 0; }
+.theme-text { flex: 1; }
+.theme-name { font-size: 0.82rem; font-weight: 500; }
+.theme-cnt  { font-size: 0.72rem; color: var(--muted2); }
+.theme-sent { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 8px; flex-shrink: 0; }
+.sent-pos { background: rgba(6,214,160,0.12); color: var(--green); }
+.sent-neg { background: rgba(255,77,109,0.12); color: var(--red); }
+.sent-neu { background: rgba(255,209,102,0.12); color: var(--yellow); }
+
+/* VERBATIM */
+.verbatim-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.verbatim-item { background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--purple); padding: 0.8rem 1rem; }
+.verbatim-text { font-size: 0.82rem; color: var(--text); line-height: 1.55; font-style: italic; }
+.verbatim-meta { margin-top: 0.4rem; font-size: 0.7rem; color: var(--muted2); display: flex; gap: 1rem; }
+.stars-display { color: var(--yellow); letter-spacing: -1px; }
+
+@media (max-width: 900px) {
+  .nps-hero { grid-template-columns: 1fr 1fr; }
+  .nps-big { min-width: unset; }
+  .grid-2, .grid-3, .nps-segments { display: block; }
+  .nps-segments { display: flex; flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="brand">
+      <div class="brand-icon">⭐</div>
+      <div class="brand-name">SELIS <span>Ops</span></div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="page-title">CSAT & NPS Report — After-Sales Customer Experience</div>
+  </div>
+  <div class="topbar-right">
+    <div class="period-badge">Full Year 2023</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- NPS HERO -->
+  <div class="nps-hero">
+    <div class="nps-big">
+      <div class="nps-label">Net Promoter Score</div>
+      <div class="nps-score">62</div>
+      <div class="nps-desc">Dari skala −100 hingga +100</div>
+      <div class="nps-tag">🏆 Excellent</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">CSAT Score</div>
+      <div class="metric-val" style="color:var(--green)">4.3<span style="font-size:1rem;color:var(--muted2)">/5.0</span></div>
+      <div class="metric-sub"><span class="badge-up">▲ 0.4</span> vs tahun sebelumnya (3.9)</div>
+      <div class="rating-dist" style="margin-top:1rem">
+        <div class="rating-row"><span class="rating-stars">⭐⭐⭐⭐⭐</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:58%;background:var(--green)"></div></div><span class="rating-count">2,796</span></div>
+        <div class="rating-row"><span class="rating-stars">⭐⭐⭐⭐</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:26%;background:var(--cyan2)"></div></div><span class="rating-count">1,254</span></div>
+        <div class="rating-row"><span class="rating-stars">⭐⭐⭐</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:9%;background:var(--yellow)"></div></div><span class="rating-count">434</span></div>
+        <div class="rating-row"><span class="rating-stars">⭐⭐</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:5%;background:var(--orange)"></div></div><span class="rating-count">241</span></div>
+        <div class="rating-row"><span class="rating-stars">⭐</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:2%;background:var(--red)"></div></div><span class="rating-count">96</span></div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">First Contact Resolution</div>
+      <div class="metric-val" style="color:var(--cyan)">78.4%</div>
+      <div class="metric-sub"><span class="badge-up">▲ 11%</span> masalah selesai di kontak pertama</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Responses</div>
+      <div class="metric-val" style="color:var(--purple)">4,821</div>
+      <div class="metric-sub">Response rate: <strong style="color:var(--text)">73.2%</strong> dari total tickets</div>
+    </div>
+  </div>
+
+  <!-- NPS SEGMENTS -->
+  <div class="nps-segments">
+    <div class="seg promoter">
+      <div class="seg-pct">68%</div>
+      <div class="seg-label">Promoters</div>
+      <div class="seg-count">3,278 responden (9–10)</div>
+    </div>
+    <div class="seg passive">
+      <div class="seg-pct">26%</div>
+      <div class="seg-label">Passives</div>
+      <div class="seg-count">1,253 responden (7–8)</div>
+    </div>
+    <div class="seg detractor">
+      <div class="seg-pct">6%</div>
+      <div class="seg-label">Detractors</div>
+      <div class="seg-count">290 responden (0–6)</div>
+    </div>
+  </div>
+
+  <!-- TREND + THEMES -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">CSAT & NPS Trend Bulanan <span class="tag tag-purple">2023</span></div>
+      <canvas id="csatChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Tema Feedback Terbanyak <span class="tag tag-cyan">4,821 Responses</span></div>
+      <div class="theme-list">
+        <div class="theme-item">
+          <div class="theme-icon">⚡</div>
+          <div class="theme-text"><div class="theme-name">Kecepatan Respons Teknisi</div><div class="theme-cnt">1,842 mentions</div></div>
+          <div class="theme-sent sent-pos">Positif</div>
+        </div>
+        <div class="theme-item">
+          <div class="theme-icon">🔧</div>
+          <div class="theme-text"><div class="theme-name">Kualitas Perbaikan / Hasil Service</div><div class="theme-cnt">1,294 mentions</div></div>
+          <div class="theme-sent sent-pos">Positif</div>
+        </div>
+        <div class="theme-item">
+          <div class="theme-icon">📞</div>
+          <div class="theme-text"><div class="theme-name">Komunikasi & Update Status</div><div class="theme-cnt">987 mentions</div></div>
+          <div class="theme-sent sent-neu">Netral</div>
+        </div>
+        <div class="theme-item">
+          <div class="theme-icon">⏰</div>
+          <div class="theme-text"><div class="theme-name">Waktu Tunggu Spare Part</div><div class="theme-cnt">634 mentions</div></div>
+          <div class="theme-sent sent-neg">Negatif</div>
+        </div>
+        <div class="theme-item">
+          <div class="theme-icon">💰</div>
+          <div class="theme-text"><div class="theme-name">Transparansi Biaya & Garansi</div><div class="theme-cnt">421 mentions</div></div>
+          <div class="theme-sent sent-neg">Negatif</div>
+        </div>
+        <div class="theme-item">
+          <div class="theme-icon">😊</div>
+          <div class="theme-text"><div class="theme-name">Keramahan & Profesionalisme Tim</div><div class="theme-cnt">389 mentions</div></div>
+          <div class="theme-sent sent-pos">Positif</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERBATIM -->
+  <div class="card">
+    <div class="card-title">Verbatim Pelanggan — Top Reviews <span class="tag tag-green">Pilihan Tim</span></div>
+    <div class="verbatim-list">
+      <div class="verbatim-item" style="border-left-color:var(--green)">
+        <div class="stars-display">★★★★★</div>
+        <div class="verbatim-text">"Teknisinya datang tepat waktu dan menjelaskan masalah dengan jelas. Motor listrik saya langsung bisa dipakai lagi dalam 2 jam. Pelayanan terbaik yang pernah saya rasakan untuk kendaraan listrik."</div>
+        <div class="verbatim-meta"><span>📍 Bekasi, Jabodetabek</span><span>Kategori: Baterai/Motor</span><span>Sep 2023</span></div>
+      </div>
+      <div class="verbatim-item" style="border-left-color:var(--green)">
+        <div class="stars-display">★★★★★</div>
+        <div class="verbatim-text">"CS-nya responsif banget, chat dibalas dalam 10 menit. Progress perbaikan selalu di-update. Senang sekali ada after-sales yang benar-benar peduli pelanggan."</div>
+        <div class="verbatim-meta"><span>📍 Bandung, Jabar</span><span>Kategori: Charging</span><span>Jul 2023</span></div>
+      </div>
+      <div class="verbatim-item" style="border-left-color:var(--yellow)">
+        <div class="stars-display">★★★☆☆</div>
+        <div class="verbatim-text">"Teknisinya bagus dan ramah, tapi spare part harus menunggu 5 hari karena stok kosong. Tolong perbaiki ketersediaan suku cadang di daerah saya."</div>
+        <div class="verbatim-meta"><span>📍 Medan, Sumatera</span><span>Kategori: Spare Part</span><span>Okt 2023</span></div>
+      </div>
+      <div class="verbatim-item" style="border-left-color:var(--red)">
+        <div class="stars-display">★★☆☆☆</div>
+        <div class="verbatim-text">"Sudah 3 kali hubungi CS tapi belum ada solusi untuk masalah garansi saya. Informasinya berbeda-beda setiap telepon. Mohon diperbaiki konsistensi informasinya."</div>
+        <div class="verbatim-meta"><span>📍 Balikpapan, Kalimantan</span><span>Kategori: Garansi</span><span>Nov 2023</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+const csatData = [3.7, 3.9, 4.0, 4.0, 4.1, 4.2, 4.3, 4.3, 4.4, 4.4, 4.3, 4.3];
+const npsData  = [44, 48, 51, 53, 56, 58, 60, 62, 65, 64, 63, 62];
+
+const ctx = document.getElementById('csatChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'CSAT Score (/5)',
+        data: csatData,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.07)',
+        borderWidth: 2.5,
+        tension: 0.4, fill: true,
+        pointBackgroundColor: '#a78bfa',
+        pointRadius: 4, pointHoverRadius: 6,
+        yAxisID: 'y'
+      },
+      {
+        label: 'NPS Score',
+        data: npsData,
+        borderColor: '#00e5c8',
+        backgroundColor: 'rgba(0,229,200,0.04)',
+        borderWidth: 2,
+        tension: 0.4, fill: false,
+        pointBackgroundColor: '#00e5c8',
+        pointRadius: 4, pointHoverRadius: 6,
+        yAxisID: 'y2'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#8a9ab5', font: { family: 'Space Grotesk', size: 11 }, boxWidth: 16 } },
+      tooltip: { backgroundColor: '#0e1420', borderColor: 'rgba(167,139,250,0.2)', borderWidth: 1, titleColor: '#a78bfa', bodyColor: '#e2eaf5' }
+    },
+    scales: {
+      x: { ticks: { color: '#5a7090', font: { family: 'Space Grotesk', size: 11 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+      y:  { position: 'left',  min: 3.0, max: 5.0, ticks: { color: '#5a7090', font: { family: 'Space Grotesk', size: 11 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+      y2: { position: 'right', min: 30, max: 80, ticks: { color: '#5a7090', font: { family: 'Space Grotesk', size: 11 } }, grid: { drawOnChartArea: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
