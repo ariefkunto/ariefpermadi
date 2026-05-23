@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Stock Level Management — Allvacon Medical</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4f8;--surface:#fff;--surface2:#f7fafc;--teal:#0a7ea4;--teal2:#0bc5a4;--teal-light:#e0f5f9;--red:#e53e3e;--red-light:#fff5f5;--yellow:#d69e2e;--yellow-light:#fffbeb;--green:#38a169;--green-light:#f0fff4;--purple:#805ad5;--purple-light:#faf5ff;--ink:#1a202c;--muted:#718096;--muted2:#a0aec0;--border:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.brand-text{font-size:.9rem;font-weight:700}.brand-text span{color:var(--purple)}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+.topbar-center{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.35rem 1rem;font-size:.8rem;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.date-badge{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)}
+.alert-pill{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;color:var(--red);background:var(--red-light);padding:.3rem .8rem;border-radius:20px;border:1px solid rgba(229,62,62,.2)}
+.main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.5rem}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.metric-card.alert{border-color:var(--red)}
+.metric-card.alert::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);border-radius:10px 0 0 10px}
+.metric-card.ok::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:10px 0 0 10px}
+.metric-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem}
+.metric-val{font-size:2rem;font-weight:700;line-height:1;margin-bottom:.3rem}
+.metric-sub{font-size:.72rem;color:var(--muted)}
+.delta-up{color:var(--green);font-weight:600}.delta-down{color:var(--red);font-weight:600}
+.metric-bar{margin-top:.8rem;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:4px}
+/* LAYOUT */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem 1.5rem;box-shadow:var(--shadow)}
+.card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.tag{font-size:.63rem;font-weight:700;padding:.2rem .6rem;border-radius:20px}
+.tag-red{background:var(--red-light);color:var(--red)}.tag-green{background:var(--green-light);color:var(--green)}.tag-teal{background:var(--teal-light);color:var(--teal)}.tag-purple{background:var(--purple-light);color:var(--purple)}.tag-yellow{background:var(--yellow-light);color:var(--yellow)}
+/* INVENTORY TABLE */
+.inv-table{width:100%;border-collapse:collapse}
+.inv-table th{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 0 .7rem 0;border-bottom:2px solid var(--border)}
+.inv-table td{font-size:.79rem;padding:.6rem 0;border-bottom:1px solid var(--bg);vertical-align:middle}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-table tr:hover td{background:var(--surface2)}
+.sku{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--purple);font-weight:600}
+.item-name{font-weight:500;font-size:.8rem}
+.item-brand{font-size:.7rem;color:var(--muted)}
+.stock-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:.5rem}
+.stock-bar{height:100%;border-radius:6px}
+.stock-num{font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600}
+.stock-ok{color:var(--green)}.stock-warn{color:var(--yellow)}.stock-crit{color:var(--red)}
+.level-badge{font-size:.68rem;font-weight:700;padding:.15rem .55rem;border-radius:20px;white-space:nowrap}
+.l-ok{background:var(--green-light);color:var(--green)}.l-low{background:var(--yellow-light);color:var(--yellow)}.l-crit{background:var(--red-light);color:var(--red)}.l-over{background:var(--purple-light);color:var(--purple)}
+/* ALERT LIST */
+.alert-list{display:flex;flex-direction:column;gap:.6rem}
+.alert-item{display:flex;align-items:flex-start;gap:.8rem;padding:.8rem 1rem;border-radius:8px;border:1px solid}
+.alert-item.crit{background:var(--red-light);border-color:rgba(229,62,62,.2)}
+.alert-item.warn{background:var(--yellow-light);border-color:rgba(214,158,46,.2)}
+.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+.alert-title{font-size:.81rem;font-weight:600}
+.alert-desc{font-size:.73rem;color:var(--muted);margin-top:.1rem}
+.alert-action{margin-left:auto;font-size:.7rem;font-weight:700;padding:.25rem .65rem;border-radius:6px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.act-crit{background:var(--red);color:#fff}.act-warn{background:var(--yellow);color:#fff}
+/* CATEGORY ACCURACY */
+.acc-grid{display:flex;flex-direction:column;gap:.9rem}
+.acc-row{display:flex;align-items:center;gap:.8rem}
+.acc-label{font-size:.8rem;width:150px;flex-shrink:0}
+.acc-bar-wrap{flex:1;height:10px;background:var(--border);border-radius:10px;overflow:hidden}
+.acc-bar{height:100%;border-radius:10px}
+.acc-val{font-size:.78rem;font-weight:700;font-family:'IBM Plex Mono',monospace;width:48px;text-align:right}
+@media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">📦</div><div><div class="brand-text">Allvacon <span>Medical</span></div><div class="brand-sub">PT. Allvamed Nuvacon Adigana</div></div></div>
+  <div class="topbar-center">Inventory Stock Level Management</div>
+  <div class="topbar-right"><div class="date-badge">Update: Hari ini 08:00</div><div class="alert-pill">⚠ 12 Item Kritis</div></div>
+</div>
+<div class="main">
+  <div class="section-header"><span class="section-title">Ringkasan Stok Gudang</span><span style="font-size:.72rem;color:var(--muted)">Total SKU: 312 item aktif</span></div>
+  <div class="metrics-grid">
+    <div class="metric-card ok"><div class="metric-label">Inventory Accuracy</div><div class="metric-val" style="color:var(--green)">97.4%</div><div class="metric-sub"><span class="delta-up">▲ 9.1%</span> pasca WMS implementasi</div><div class="metric-bar"><div class="metric-bar-fill" style="width:97.4%;background:var(--green)"></div></div></div>
+    <div class="metric-card"><div class="metric-label">Total SKU</div><div class="metric-val" style="color:var(--teal)">312</div><div class="metric-sub">Aktif: <strong>289</strong> / Discontinue: 23</div><div class="metric-bar"><div class="metric-bar-fill" style="width:92%;background:var(--teal)"></div></div></div>
+    <div class="metric-card ok"><div class="metric-label">Stock Sehat</div><div class="metric-val" style="color:var(--green)">248</div><div class="metric-sub">79.5% dari total SKU aktif</div><div class="metric-bar"><div class="metric-bar-fill" style="width:79.5%;background:var(--green)"></div></div></div>
+    <div class="metric-card"><div class="metric-label">Stok Menipis</div><div class="metric-val" style="color:var(--yellow)">41</div><div class="metric-sub">13.1% perlu reorder segera</div><div class="metric-bar"><div class="metric-bar-fill" style="width:13.1%;background:var(--yellow)"></div></div></div>
+    <div class="metric-card alert"><div class="metric-label">Stok Kritis / Habis</div><div class="metric-val" style="color:var(--red)">12</div><div class="metric-sub">3.8% — butuh tindakan hari ini</div><div class="metric-bar"><div class="metric-bar-fill" style="width:3.8%;background:var(--red)"></div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Inventory Accuracy Trend <span class="tag tag-green">Post-WMS</span></div>
+      <canvas id="accChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Akurasi per Kategori Alat <span class="tag tag-teal">Cycle Count</span></div>
+      <div class="acc-grid">
+        <div class="acc-row"><span class="acc-label">🫀 Alat Diagnostik</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:98.6%;background:var(--green)"></div></div><span class="acc-val" style="color:var(--green)">98.6%</span></div>
+        <div class="acc-row"><span class="acc-label">🏥 Alat Monitoring</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:97.9%;background:var(--green)"></div></div><span class="acc-val" style="color:var(--green)">97.9%</span></div>
+        <div class="acc-row"><span class="acc-label">💉 Alat Terapi</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:97.2%;background:var(--teal)"></div></div><span class="acc-val" style="color:var(--teal)">97.2%</span></div>
+        <div class="acc-row"><span class="acc-label">🔬 Lab & Imaging</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:96.8%;background:var(--teal)"></div></div><span class="acc-val" style="color:var(--teal)">96.8%</span></div>
+        <div class="acc-row"><span class="acc-label">🛠️ Spare Part</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:95.1%;background:var(--yellow)"></div></div><span class="acc-val" style="color:var(--yellow)">95.1%</span></div>
+        <div class="acc-row"><span class="acc-label">🧪 Reagen & Habis Pakai</span><div class="acc-bar-wrap"><div class="acc-bar" style="width:94.3%;background:var(--yellow)"></div></div><span class="acc-val" style="color:var(--yellow)">94.3%</span></div>
+      </div>
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div class="card-title" style="margin-bottom:.7rem">Distribusi Stok per Level</div>
+        <canvas id="stockPie" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+  <!-- ALERT -->
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="card-title">⚠️ Alert Stok — Perlu Tindakan Segera <span class="tag tag-red">12 Item Kritis</span></div>
+    <div class="alert-list">
+      <div class="alert-item crit"><div class="alert-icon">🔴</div><div><div class="alert-title">Probe USG Linear L12-4 — Philips</div><div class="alert-desc">SKU: MED-USG-0412 · Stok: 0 unit · 3 PO pending dari RS Premier & RSUP RSCM</div></div><button class="alert-action act-crit">Reorder Now</button></div>
+      <div class="alert-item crit"><div class="alert-icon">🔴</div><div><div class="alert-title">Sensor SpO2 Neonatal — Nellcor</div><div class="alert-desc">SKU: MED-SPO-0218 · Stok: 2 unit · Demand forecast: 18 unit/minggu</div></div><button class="alert-action act-crit">Reorder Now</button></div>
+      <div class="alert-item crit"><div class="alert-icon">🔴</div><div><div class="alert-title">Battery Pack Defibrilator — Zoll</div><div class="alert-desc">SKU: MED-DEF-0156 · Stok: 1 unit · 2 rumah sakit menunggu replacement</div></div><button class="alert-action act-crit">Reorder Now</button></div>
+      <div class="alert-item warn"><div class="alert-icon">🟡</div><div><div class="alert-title">Infusion Set 150cm — Terumo</div><div class="alert-desc">SKU: MED-INF-0834 · Stok: 48 unit · Reorder point: 100 unit · Lead time: 5 hari</div></div><button class="alert-action act-warn">Reorder Soon</button></div>
+      <div class="alert-item warn"><div class="alert-icon">🟡</div><div><div class="alert-title">ECG Electrode Disposable — 3M</div><div class="alert-desc">SKU: MED-ECG-0667 · Stok: 210 unit · Reorder point: 500 unit · High velocity item</div></div><button class="alert-action act-warn">Reorder Soon</button></div>
+    </div>
+  </div>
+  <!-- INVENTORY TABLE -->
+  <div class="card">
+    <div class="card-title">Master Stok Inventory — Top Items <span class="tag tag-purple">Real-time WMS</span></div>
+    <table class="inv-table">
+      <thead><tr><th>SKU</th><th>Nama Item</th><th>Kategori</th><th>Stok Aktual</th><th>Min. Stock</th><th>Lokasi</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sku">MED-VEN-0301</span></td><td><div class="item-name">Ventilator Neonatal SLE6000</div><div class="item-brand">SLE Ltd · UK</div></td><td>Monitoring</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:80%;background:var(--green)"></div></div><span class="stock-num stock-ok">8</span></td><td>3</td><td>Rak A-12</td><td><span class="level-badge l-ok">✓ OK</span></td></tr>
+        <tr><td><span class="sku">MED-ECG-0412</span></td><td><div class="item-name">ECG Monitor 12-Channel</div><div class="item-brand">Nihon Kohden · Japan</div></td><td>Diagnostik</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:60%;background:var(--green)"></div></div><span class="stock-num stock-ok">12</span></td><td>5</td><td>Rak B-04</td><td><span class="level-badge l-ok">✓ OK</span></td></tr>
+        <tr><td><span class="sku">MED-INF-0834</span></td><td><div class="item-name">Infusion Pump Volumetric</div><div class="item-brand">Fresenius Kabi · Germany</div></td><td>Terapi</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:35%;background:var(--yellow)"></div></div><span class="stock-num stock-warn">48</span></td><td>100</td><td>Rak C-08</td><td><span class="level-badge l-low">⚠ Low</span></td></tr>
+        <tr><td><span class="sku">MED-USG-0412</span></td><td><div class="item-name">Probe USG Linear L12-4</div><div class="item-brand">Philips · Netherlands</div></td><td>Imaging</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:2%;background:var(--red)"></div></div><span class="stock-num stock-crit">0</span></td><td>2</td><td>Rak D-02</td><td><span class="level-badge l-crit">✗ Habis</span></td></tr>
+        <tr><td><span class="sku">MED-PAT-0519</span></td><td><div class="item-name">Patient Monitor 5-Parameter</div><div class="item-brand">Mindray · China</div></td><td>Monitoring</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:90%;background:var(--green)"></div></div><span class="stock-num stock-ok">24</span></td><td>10</td><td>Rak B-11</td><td><span class="level-badge l-ok">✓ OK</span></td></tr>
+        <tr><td><span class="sku">MED-SPO-0218</span></td><td><div class="item-name">Sensor SpO2 Neonatal</div><div class="item-brand">Nellcor · USA</div></td><td>Monitoring</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:10%;background:var(--red)"></div></div><span class="stock-num stock-crit">2</span></td><td>20</td><td>Rak E-07</td><td><span class="level-badge l-crit">✗ Kritis</span></td></tr>
+        <tr><td><span class="sku">MED-DEF-0156</span></td><td><div class="item-name">Battery Defibrilator AED</div><div class="item-brand">Zoll Medical · USA</div></td><td>Terapi</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:8%;background:var(--red)"></div></div><span class="stock-num stock-crit">1</span></td><td>5</td><td>Rak F-03</td><td><span class="level-badge l-crit">✗ Kritis</span></td></tr>
+        <tr><td><span class="sku">MED-XRY-0092</span></td><td><div class="item-name">X-Ray Detector Panel — DR</div><div class="item-brand">Carestream · USA</div></td><td>Imaging</td><td><div class="stock-bar-wrap"><div class="stock-bar" style="width:100%;background:var(--purple)"></div></div><span class="stock-num" style="color:var(--purple)">18</span></td><td>3</td><td>Rak D-09</td><td><span class="level-badge l-over">↑ Overstock</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+const months=['Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des','Jan'];
+new Chart(document.getElementById('accChart').getContext('2d'),{
+  type:'line',
+  data:{labels:months,datasets:[
+    {label:'Inventory Accuracy (%)',data:[86.2,87.8,89.1,90.4,91.7,92.9,94.1,95.2,96.0,96.8,97.1,97.4],borderColor:'#38a169',backgroundColor:'rgba(56,161,105,.08)',borderWidth:2.5,tension:.4,fill:true,pointBackgroundColor:'#38a169',pointRadius:3,pointHoverRadius:5},
+    {label:'Discrepancy Rate (%)',data:[13.8,12.2,10.9,9.6,8.3,7.1,5.9,4.8,4.0,3.2,2.9,2.6],borderColor:'#e53e3e',backgroundColor:'rgba(229,62,62,.05)',borderWidth:1.5,tension:.4,fill:false,pointBackgroundColor:'#e53e3e',pointRadius:2,pointHoverRadius:4,yAxisID:'y2'}
+  ]},
+  options:{responsive:true,plugins:{legend:{labels:{color:'#718096',font:{family:'IBM Plex Sans',size:11},boxWidth:14}},tooltip:{backgroundColor:'#fff',borderColor:'#e2e8f0',borderWidth:1,titleColor:'#1a202c',bodyColor:'#718096'}},scales:{x:{ticks:{color:'#a0aec0',font:{family:'IBM Plex Sans',size:11}},grid:{color:'#f0f4f8'}},y:{min:80,max:100,ticks:{color:'#a0aec0',font:{family:'IBM Plex Sans',size:11},callback:v=>v+'%'},grid:{color:'#f0f4f8'}},y2:{position:'right',min:0,max:20,ticks:{color:'#a0aec0',font:{family:'IBM Plex Sans',size:11},callback:v=>v+'%'},grid:{drawOnChartArea:false}}}}
+});
+new Chart(document.getElementById('stockPie').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['Stok OK (248)','Menipis (41)','Kritis (12)','Overstock (11)'],datasets:[{data:[248,41,12,11],backgroundColor:['#38a169','#d69e2e','#e53e3e','#805ad5'],borderWidth:0,hoverOffset:4}]},
+  options:{responsive:true,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#718096',font:{family:'IBM Plex Sans',size:11},boxWidth:12,padding:12}}}}
+});
+</script>
+</body>
+</html>

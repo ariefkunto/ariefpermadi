@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Tracker — Allvacon Medical Unit Support</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4f8;--surface:#fff;--surface2:#f7fafc;--emerald:#047857;--emerald2:#10b981;--emerald-light:#ecfdf5;--red:#dc2626;--red-light:#fef2f2;--yellow:#b45309;--yellow-light:#fffbeb;--blue:#1d4ed8;--blue-light:#eff6ff;--gray:#6b7280;--ink:#111827;--muted:#6b7280;--muted2:#9ca3af;--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.brand-text{font-size:.9rem;font-weight:700}.brand-text span{color:var(--emerald)}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+.topbar-center{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.35rem 1rem;font-size:.8rem;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.schedule-pill{font-size:.72rem;font-weight:600;color:var(--blue);background:var(--blue-light);padding:.3rem .8rem;border-radius:20px;border:1px solid rgba(29,78,216,.15)}
+.main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.5rem}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.metric-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px}
+.m-green::after{background:var(--emerald)}.m-blue::after{background:var(--blue)}.m-yellow::after{background:var(--yellow)}.m-red::after{background:var(--red)}
+.metric-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem}
+.metric-val{font-size:2rem;font-weight:700;line-height:1;margin-bottom:.3rem}
+.metric-sub{font-size:.72rem;color:var(--muted)}
+.delta-up{color:var(--emerald);font-weight:600}.delta-down{color:var(--red);font-weight:600}
+.metric-bar{margin-top:.8rem;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem 1.5rem;box-shadow:var(--shadow)}
+.card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.tag{font-size:.63rem;font-weight:700;padding:.2rem .6rem;border-radius:20px}
+.tag-green{background:var(--emerald-light);color:var(--emerald)}.tag-blue{background:var(--blue-light);color:var(--blue)}.tag-red{background:var(--red-light);color:var(--red)}.tag-yellow{background:var(--yellow-light);color:var(--yellow)}
+/* SCHEDULE TIMELINE */
+.schedule-list{display:flex;flex-direction:column;gap:.5rem}
+.sched-item{display:flex;align-items:center;gap:.9rem;padding:.75rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:border-color .15s}
+.sched-item:hover{border-color:var(--emerald)}
+.sched-date{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);width:70px;flex-shrink:0;font-weight:600}
+.sched-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.d-today{background:var(--blue)}.d-soon{background:var(--yellow)}.d-ok{background:var(--emerald)}.d-over{background:var(--red)}
+.sched-info{flex:1}
+.sched-unit{font-size:.8rem;font-weight:600}
+.sched-loc{font-size:.71rem;color:var(--muted);margin-top:.1rem}
+.sched-type{font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:5px;white-space:nowrap}
+.t-prev{background:var(--emerald-light);color:var(--emerald)}.t-corr{background:var(--red-light);color:var(--red)}.t-calib{background:var(--blue-light);color:var(--blue)}.t-inspect{background:var(--yellow-light);color:var(--yellow)}
+.sched-tech{font-size:.7rem;color:var(--muted);white-space:nowrap}
+/* UNIT TABLE */
+.unit-table{width:100%;border-collapse:collapse}
+.unit-table th{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 0 .7rem 0;border-bottom:2px solid var(--border)}
+.unit-table td{font-size:.79rem;padding:.6rem 0;border-bottom:1px solid var(--bg);vertical-align:middle}
+.unit-table tr:last-child td{border-bottom:none}
+.unit-id{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--emerald);font-weight:600}
+.unit-name{font-weight:500;font-size:.79rem}
+.unit-brand{font-size:.7rem;color:var(--muted)}
+.health-bar-wrap{width:70px;height:6px;background:var(--border);border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:.4rem}
+.health-bar{height:100%;border-radius:6px}
+.health-pct{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600}
+.h-ok{color:var(--emerald)}.h-warn{color:var(--yellow)}.h-crit{color:var(--red)}
+.unit-badge{font-size:.67rem;font-weight:700;padding:.15rem .5rem;border-radius:20px;white-space:nowrap}
+.u-op{background:var(--emerald-light);color:var(--emerald)}.u-maint{background:var(--blue-light);color:var(--blue)}.u-down{background:var(--red-light);color:var(--red)}.u-sched{background:var(--yellow-light);color:var(--yellow)}
+@media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">🔧</div><div><div class="brand-text">Allvacon <span>Medical</span></div><div class="brand-sub">PT. Allvamed Nuvacon Adigana</div></div></div>
+  <div class="topbar-center">Maintenance Tracker — Unit Support</div>
+  <div class="topbar-right"><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)">Mei 2026</div><div class="schedule-pill">📅 18 Jadwal Bulan Ini</div></div>
+</div>
+<div class="main">
+  <div class="section-header"><span class="section-title">Status Unit & Maintenance</span><span style="font-size:.72rem;color:var(--muted)">Total Unit Terdaftar: 186</span></div>
+  <div class="metrics-grid">
+    <div class="metric-card m-green"><div class="metric-label">Unit Operational</div><div class="metric-val" style="color:var(--emerald)">164</div><div class="metric-sub">88.2% dari total unit</div><div class="metric-bar"><div class="bar-fill" style="width:88.2%;background:var(--emerald)"></div></div></div>
+    <div class="metric-card m-blue"><div class="metric-label">Dalam Maintenance</div><div class="metric-val" style="color:var(--blue)">12</div><div class="metric-sub">Preventif: 8 · Korektif: 4</div><div class="metric-bar"><div class="bar-fill" style="width:6.5%;background:var(--blue)"></div></div></div>
+    <div class="metric-card m-yellow"><div class="metric-label">Jadwal Bulan Ini</div><div class="metric-val" style="color:var(--yellow)">18</div><div class="metric-sub">Selesai: 11 · Sisa: 7</div><div class="metric-bar"><div class="bar-fill" style="width:61%;background:var(--yellow)"></div></div></div>
+    <div class="metric-card m-red"><div class="metric-label">Unit Downtime</div><div class="metric-val" style="color:var(--red)">10</div><div class="metric-sub">5.4% · Target: &lt;5%</div><div class="metric-bar"><div class="bar-fill" style="width:5.4%;background:var(--red)"></div></div></div>
+    <div class="metric-card m-green"><div class="metric-label">PM Compliance Rate</div><div class="metric-val" style="color:var(--emerald)">94.4%</div><div class="metric-sub"><span class="delta-up">▲ 12%</span> vs sebelumnya</div><div class="metric-bar"><div class="bar-fill" style="width:94.4%;background:var(--emerald)"></div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Trend Maintenance & Downtime <span class="tag tag-green">12 Bulan</span></div>
+      <canvas id="maintChart" height="210"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Jadwal Maintenance — Upcoming <span class="tag tag-blue">7 Pending</span></div>
+      <div class="schedule-list">
+        <div class="sched-item"><span class="sched-date">Hari ini</span><div class="sched-dot d-today"></div><div class="sched-info"><div class="sched-unit">Ventilator ICU — RSUP Dr. Cipto</div><div class="sched-loc">📍 Jakarta Pusat · Unit ID: ALV-VEN-041</div></div><span class="sched-type t-calib">Kalibrasi</span><span class="sched-tech">Budi T.</span></div>
+        <div class="sched-item"><span class="sched-date">Besok</span><div class="sched-dot d-today"></div><div class="sched-info"><div class="sched-unit">ECG Monitor 12CH — RS Medistra</div><div class="sched-loc">📍 Jakarta Selatan · Unit ID: ALV-ECG-128</div></div><span class="sched-type t-prev">Preventif</span><span class="sched-tech">Rian F.</span></div>
+        <div class="sched-item"><span class="sched-date">23 Mei</span><div class="sched-dot d-soon"></div><div class="sched-info"><div class="sched-unit">Patient Monitor — RS Pondok Indah</div><div class="sched-loc">📍 Jakarta Selatan · Unit ID: ALV-PAT-089</div></div><span class="sched-type t-inspect">Inspeksi</span><span class="sched-tech">Doni S.</span></div>
+        <div class="sched-item"><span class="sched-date">25 Mei</span><div class="sched-dot d-soon"></div><div class="sched-info"><div class="sched-unit">Infusion Pump — RSUD Bekasi</div><div class="sched-loc">📍 Bekasi · Unit ID: ALV-INF-212</div></div><span class="sched-type t-prev">Preventif</span><span class="sched-tech">Rian F.</span></div>
+        <div class="sched-item"><span class="sched-date">27 Mei</span><div class="sched-dot d-ok"></div><div class="sched-info"><div class="sched-unit">USG Portable — Klinik Sehat Depok</div><div class="sched-loc">📍 Depok · Unit ID: ALV-USG-067</div></div><span class="sched-type t-calib">Kalibrasi</span><span class="sched-tech">Budi T.</span></div>
+        <div class="sched-item" style="border-color:var(--red);background:var(--red-light)"><span class="sched-date" style="color:var(--red)">Overdue</span><div class="sched-dot d-over"></div><div class="sched-info"><div class="sched-unit">Defibrilator AED — Puskesmas Cilincing</div><div class="sched-loc">📍 Jakarta Utara · Unit ID: ALV-DEF-034 · +8 Hari</div></div><span class="sched-type t-corr">Korektif</span><span class="sched-tech">Doni S.</span></div>
+        <div class="sched-item" style="border-color:var(--red);background:var(--red-light)"><span class="sched-date" style="color:var(--red)">Overdue</span><div class="sched-dot d-over"></div><div class="sched-info"><div class="sched-unit">X-Ray Portable — RS Bhayangkara</div><div class="sched-loc">📍 Jakarta Timur · Unit ID: ALV-XRY-019 · +3 Hari</div></div><span class="sched-type t-calib">Kalibrasi</span><span class="sched-tech">Rian F.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Daftar Unit — Status Kesehatan <span class="tag tag-green">186 Unit Terdaftar</span></div>
+    <table class="unit-table">
+      <thead><tr><th>Unit ID</th><th>Alat Medis</th><th>Institusi</th><th>Health Score</th><th>PM Terakhir</th><th>PM Berikutnya</th><th>Teknisi</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><span class="unit-id">ALV-VEN-041</span></td><td><div class="unit-name">Ventilator ICU Mindray SV300</div><div class="unit-brand">Mindray · Instalasi 2023</div></td><td>RSUP Dr. Cipto</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:92%;background:var(--emerald)"></div></div><span class="health-pct h-ok">92%</span></td><td>Mar 2026</td><td>Jun 2026</td><td>Budi T.</td><td><span class="unit-badge u-op">✓ Operational</span></td></tr>
+        <tr><td><span class="unit-id">ALV-ECG-128</span></td><td><div class="unit-name">ECG Monitor 12-Channel</div><div class="unit-brand">Nihon Kohden · Instalasi 2022</div></td><td>RS Medistra Jakarta</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:88%;background:var(--emerald)"></div></div><span class="health-pct h-ok">88%</span></td><td>Feb 2026</td><td>Besok</td><td>Rian F.</td><td><span class="unit-badge u-sched">📅 Terjadwal</span></td></tr>
+        <tr><td><span class="unit-id">ALV-DEF-034</span></td><td><div class="unit-name">Defibrilator AED ZOLL R Series</div><div class="unit-brand">ZOLL · Instalasi 2021</div></td><td>Puskesmas Cilincing</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:61%;background:var(--yellow)"></div></div><span class="health-pct h-warn">61%</span></td><td>Nov 2025</td><td><span style="color:var(--red);font-weight:600">OVERDUE</span></td><td>Doni S.</td><td><span class="unit-badge u-down">✗ Downtime</span></td></tr>
+        <tr><td><span class="unit-id">ALV-PAT-089</span></td><td><div class="unit-name">Patient Monitor Philips IntelliVue</div><div class="unit-brand">Philips · Instalasi 2023</div></td><td>RS Pondok Indah</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:95%;background:var(--emerald)"></div></div><span class="health-pct h-ok">95%</span></td><td>Apr 2026</td><td>23 Mei</td><td>Doni S.</td><td><span class="unit-badge u-op">✓ Operational</span></td></tr>
+        <tr><td><span class="unit-id">ALV-INF-212</span></td><td><div class="unit-name">Infusion Pump Fresenius Volumat</div><div class="unit-brand">Fresenius Kabi · Instalasi 2022</div></td><td>RSUD Kota Bekasi</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:79%;background:var(--yellow)"></div></div><span class="health-pct h-warn">79%</span></td><td>Jan 2026</td><td>25 Mei</td><td>Rian F.</td><td><span class="unit-badge u-maint">🔧 Maintenance</span></td></tr>
+        <tr><td><span class="unit-id">ALV-USG-067</span></td><td><div class="unit-name">USG Portable GE Vscan Air</div><div class="unit-brand">GE Healthcare · Instalasi 2024</div></td><td>Klinik Sehat Depok</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:97%;background:var(--emerald)"></div></div><span class="health-pct h-ok">97%</span></td><td>Apr 2026</td><td>27 Mei</td><td>Budi T.</td><td><span class="unit-badge u-op">✓ Operational</span></td></tr>
+        <tr><td><span class="unit-id">ALV-XRY-019</span></td><td><div class="unit-name">X-Ray Portable Carestream DRX</div><div class="unit-brand">Carestream · Instalasi 2021</div></td><td>RS Bhayangkara Jakarta</td><td><div class="health-bar-wrap"><div class="health-bar" style="width:54%;background:var(--red)"></div></div><span class="health-pct h-crit">54%</span></td><td>Des 2025</td><td><span style="color:var(--red);font-weight:600">OVERDUE</span></td><td>Rian F.</td><td><span class="unit-badge u-down">✗ Downtime</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+const months=['Jun','Jul','Ags','Sep','Okt','Nov','Des','Jan','Feb','Mar','Apr','Mei'];
+new Chart(document.getElementById('maintChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:months,datasets:[
+    {label:'Preventif',data:[8,9,10,11,12,13,14,15,14,16,15,11],backgroundColor:'rgba(4,120,87,.7)',borderRadius:4,stack:'a'},
+    {label:'Korektif',data:[6,5,7,5,6,4,5,4,3,4,4,4],backgroundColor:'rgba(220,38,38,.7)',borderRadius:4,stack:'a'},
+    {label:'Kalibrasi',data:[3,4,3,5,4,4,3,4,5,3,4,3],backgroundColor:'rgba(29,78,216,.7)',borderRadius:4,stack:'a'}
+  ]},
+  options:{responsive:true,plugins:{legend:{labels:{color:'#718096',font:{family:'IBM Plex Sans',size:11},boxWidth:14}},tooltip:{backgroundColor:'#fff',borderColor:'#e5e7eb',borderWidth:1,titleColor:'#111827',bodyColor:'#718096'}},scales:{x:{ticks:{color:'#9ca3af',font:{family:'IBM Plex Sans',size:11}},grid:{display:false}},y:{ticks:{color:'#9ca3af',font:{family:'IBM Plex Sans',size:11}},grid:{color:'#f0f4f8'},stacked:true}}}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surgical Support Performance Monitor — Allvacon Medical</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#fff;--surface2:#f7fafc;
+  --indigo:#312e81;--indigo2:#4f46e5;--indigo-light:#eef2ff;
+  --red:#dc2626;--red-light:#fef2f2;
+  --yellow:#b45309;--yellow-light:#fefce8;
+  --green:#047857;--green-light:#ecfdf5;
+  --teal:#0d9488;--teal-light:#f0fdfa;
+  --ink:#111827;--muted:#6b7280;--muted2:#9ca3af;
+  --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));display:flex;align-items:center;justify-content:center;font-size:1rem}
+.brand-text{font-size:.9rem;font-weight:700}.brand-text span{color:var(--indigo2)}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+.topbar-center{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.35rem 1.1rem;font-size:.8rem;font-weight:600;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.score-pill{font-size:.8rem;font-weight:700;color:var(--green);background:var(--green-light);padding:.3rem .9rem;border-radius:20px;border:1px solid rgba(4,120,87,.2);font-family:'IBM Plex Mono',monospace}
+.date-badge{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)}
+
+/* MAIN */
+.main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.5rem}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.metric-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px}
+.m-indigo::after{background:var(--indigo2)}.m-green::after{background:var(--green)}.m-teal::after{background:var(--teal)}.m-yellow::after{background:var(--yellow)}.m-red::after{background:var(--red)}
+.metric-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem}
+.metric-val{font-size:2rem;font-weight:700;line-height:1;margin-bottom:.3rem}
+.metric-sub{font-size:.72rem;color:var(--muted)}
+.delta-up{color:var(--green);font-weight:600}.delta-down{color:var(--red);font-weight:600}
+.metric-bar{margin-top:.8rem;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+
+/* LAYOUT */
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem 1.5rem;box-shadow:var(--shadow)}
+.card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.tag{font-size:.63rem;font-weight:700;padding:.2rem .6rem;border-radius:20px}
+.tag-indigo{background:var(--indigo-light);color:var(--indigo)}.tag-green{background:var(--green-light);color:var(--green)}.tag-red{background:var(--red-light);color:var(--red)}.tag-teal{background:var(--teal-light);color:var(--teal)}.tag-yellow{background:var(--yellow-light);color:var(--yellow)}
+
+/* SPECIALIST CARDS */
+.specialist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.2rem}
+.spec-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);transition:border-color .15s}
+.spec-card:hover{border-color:var(--indigo2)}
+.spec-top{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+.spec-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0}
+.av-1{background:linear-gradient(135deg,#312e81,#4f46e5)}
+.av-2{background:linear-gradient(135deg,#047857,#10b981)}
+.av-3{background:linear-gradient(135deg,#0d9488,#2dd4bf)}
+.av-4{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.av-5{background:linear-gradient(135deg,#dc2626,#f87171)}
+.av-6{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.spec-name{font-size:.88rem;font-weight:700}
+.spec-role{font-size:.7rem;color:var(--muted)}
+.spec-overall{font-size:1.5rem;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.score-ok{color:var(--green)}.score-warn{color:var(--yellow)}.score-bad{color:var(--red)}
+.spec-metrics{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.8rem}
+.spec-metric{background:var(--surface2);border-radius:6px;padding:.55rem .7rem}
+.sm-label{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:.2rem}
+.sm-val{font-size:.82rem;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.sm-bar{height:3px;background:var(--border);border-radius:3px;margin-top:.3rem;overflow:hidden}
+.sm-bar-fill{height:100%;border-radius:3px}
+
+/* PUNCTUALITY TABLE */
+.punct-table{width:100%;border-collapse:collapse}
+.punct-table th{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 0 .7rem 0;border-bottom:2px solid var(--border)}
+.punct-table td{font-size:.79rem;padding:.6rem 0;border-bottom:1px solid var(--bg);vertical-align:middle}
+.punct-table tr:last-child td{border-bottom:none}
+.case-id{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--indigo2);font-weight:600}
+.case-name{font-weight:500;font-size:.79rem}
+.case-sub{font-size:.7rem;color:var(--muted)}
+.time-ok{color:var(--green);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.75rem}
+.time-warn{color:var(--yellow);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.75rem}
+.time-late{color:var(--red);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.75rem}
+.perf-badge{font-size:.67rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;white-space:nowrap}
+.p-excellent{background:var(--green-light);color:var(--green)}
+.p-good{background:var(--teal-light);color:var(--teal)}
+.p-fair{background:var(--yellow-light);color:var(--yellow)}
+.p-poor{background:var(--red-light);color:var(--red)}
+.device-tag{font-size:.7rem;background:var(--indigo-light);color:var(--indigo);border-radius:4px;padding:.1rem .5rem;font-weight:600}
+
+/* COMPETENCY RADAR */
+.comp-list{display:flex;flex-direction:column;gap:.85rem}
+.comp-row{display:flex;align-items:center;gap:.8rem}
+.comp-label{font-size:.78rem;width:180px;flex-shrink:0;font-weight:500}
+.comp-bar-wrap{flex:1;height:10px;background:var(--border);border-radius:10px;overflow:hidden}
+.comp-bar{height:100%;border-radius:10px}
+.comp-val{font-size:.78rem;font-weight:700;font-family:'IBM Plex Mono',monospace;width:42px;text-align:right}
+
+/* DOCTOR FEEDBACK */
+.feedback-list{display:flex;flex-direction:column;gap:.7rem}
+.feedback-item{background:var(--surface2);border-radius:8px;border-left:3px solid var(--indigo2);padding:.8rem 1rem}
+.feedback-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem}
+.feedback-doctor{font-size:.78rem;font-weight:700}
+.feedback-case{font-size:.7rem;color:var(--muted)}
+.feedback-text{font-size:.8rem;color:var(--ink);line-height:1.55;font-style:italic}
+.stars{color:#f59e0b;font-size:.8rem;letter-spacing:-1px}
+
+/* TREND CARDS */
+.trend-mini{display:flex;flex-direction:column;gap:.7rem}
+.trend-item{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.trend-label{font-size:.78rem;font-weight:500}
+.trend-val{font-size:.82rem;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.trend-arrow{font-size:.7rem;font-weight:700;margin-left:.3rem}
+
+@media(max-width:1000px){.specialist-grid{grid-template-columns:repeat(2,1fr)}.metrics-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">🏥</div>
+    <div><div class="brand-text">Allvacon <span>Medical</span></div><div class="brand-sub">PT. Allvamed Nuvacon Adigana</div></div>
+  </div>
+  <div class="topbar-center">Surgical Support Performance Monitor — OR Support Team</div>
+  <div class="topbar-right">
+    <div class="date-badge">Q1 2025 — Q1 2026</div>
+    <div class="score-pill">Overall 91.4%</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI -->
+  <div class="section-header"><span class="section-title">Key Performance Indicators — OR Support Team</span><span style="font-size:.72rem;color:var(--muted)">Total kasus didukung: 1,284</span></div>
+  <div class="metrics-grid">
+    <div class="metric-card m-green">
+      <div class="metric-label">On-Time Arrival Rate</div>
+      <div class="metric-val" style="color:var(--green)">94.8%</div>
+      <div class="metric-sub"><span class="delta-up">▲ 11.2%</span> vs periode sebelumnya</div>
+      <div class="metric-bar"><div class="bar-fill" style="width:94.8%;background:var(--green)"></div></div>
+    </div>
+    <div class="metric-card m-indigo">
+      <div class="metric-label">Avg. Competency Score</div>
+      <div class="metric-val" style="color:var(--indigo2)">91.4<span style="font-size:1rem;color:var(--muted)">/100</span></div>
+      <div class="metric-sub"><span class="delta-up">▲ 8.6pt</span> pasca training terstruktur</div>
+      <div class="metric-bar"><div class="bar-fill" style="width:91.4%;background:var(--indigo2)"></div></div>
+    </div>
+    <div class="metric-card m-teal">
+      <div class="metric-label">Equipment Handling Score</div>
+      <div class="metric-val" style="color:var(--teal)">93.2%</div>
+      <div class="metric-sub"><span class="delta-up">▲ 14.7%</span> zero error handling</div>
+      <div class="metric-bar"><div class="bar-fill" style="width:93.2%;background:var(--teal)"></div></div>
+    </div>
+    <div class="metric-card m-yellow">
+      <div class="metric-label">Avg. Setup Time (menit)</div>
+      <div class="metric-val" style="color:var(--yellow)">12.4<span style="font-size:1rem;color:var(--muted)">m</span></div>
+      <div class="metric-sub">Target: ≤15 mnt <span class="delta-up">✓ Tercapai</span></div>
+      <div class="metric-bar"><div class="bar-fill" style="width:83%;background:var(--yellow)"></div></div>
+    </div>
+    <div class="metric-card m-indigo">
+      <div class="metric-label">Doctor Satisfaction Score</div>
+      <div class="metric-val" style="color:var(--indigo2)">4.6<span style="font-size:1rem;color:var(--muted)">/5.0</span></div>
+      <div class="metric-sub"><span class="delta-up">▲ 0.7pt</span> dari 3.9 periode lalu</div>
+      <div class="metric-bar"><div class="bar-fill" style="width:92%;background:var(--indigo2)"></div></div>
+    </div>
+  </div>
+
+  <!-- SPECIALIST PERFORMANCE CARDS -->
+  <div class="section-header"><span class="section-title">Individual Specialist Performance</span></div>
+  <div class="specialist-grid">
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-1">BT</div>
+        <div><div class="spec-name">Budi Triawan</div><div class="spec-role">Senior Clinical Specialist — Laparoskopi & Robotik</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-ok">96.2</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--green)">98.1%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:98.1%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--green)">97.4%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:97.4%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--green)">9.2m</div><div class="sm-bar"><div class="sm-bar-fill" style="width:90%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--green)">4.9/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:98%;background:var(--green)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-2">RF</div>
+        <div><div class="spec-name">Rian Firmansyah</div><div class="spec-role">Clinical Specialist — Endoskopi & Imaging</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-ok">93.7</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--green)">95.8%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:95.8%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--green)">94.2%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:94.2%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--green)">11.4m</div><div class="sm-bar"><div class="sm-bar-fill" style="width:85%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--green)">4.7/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:94%;background:var(--green)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-3">DS</div>
+        <div><div class="spec-name">Doni Setiawan</div><div class="spec-role">Clinical Specialist — Ortopedi & Implan</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-ok">91.1</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--green)">93.4%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:93.4%;background:var(--green)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--teal)">91.8%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:91.8%;background:var(--teal)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--teal)">13.1m</div><div class="sm-bar"><div class="sm-bar-fill" style="width:79%;background:var(--teal)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--green)">4.5/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:90%;background:var(--teal)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-4">HK</div>
+        <div><div class="spec-name">Hendra Kurnia</div><div class="spec-role">Clinical Specialist — Anestesi & ICU Support</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-ok">89.3</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--teal)">91.2%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:91.2%;background:var(--teal)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--yellow)">88.6%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:88.6%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--yellow)">14.7m</div><div class="sm-bar"><div class="sm-bar-fill" style="width:70%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--teal)">4.4/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:88%;background:var(--yellow)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-5">MA</div>
+        <div><div class="spec-name">Mira Agustina</div><div class="spec-role">Clinical Specialist — Kardiovaskular</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-warn">84.7</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--yellow)">86.4%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:86.4%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--yellow)">84.1%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:84.1%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--red)">17.3m ⚠</div><div class="sm-bar"><div class="sm-bar-fill" style="width:58%;background:var(--red)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--yellow)">4.1/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:82%;background:var(--yellow)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-top">
+        <div class="spec-avatar av-6">FN</div>
+        <div><div class="spec-name">Fajar Nugraha</div><div class="spec-role">Junior Specialist — General Surgery</div></div>
+        <div style="margin-left:auto;text-align:right"><div class="spec-overall score-warn">82.1</div><div style="font-size:.65rem;color:var(--muted)">Overall Score</div></div>
+      </div>
+      <div class="spec-metrics">
+        <div class="spec-metric"><div class="sm-label">Ketepatan Hadir</div><div class="sm-val" style="color:var(--teal)">90.1%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:90.1%;background:var(--teal)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Kompetensi Alat</div><div class="sm-val" style="color:var(--yellow)">80.4%</div><div class="sm-bar"><div class="sm-bar-fill" style="width:80.4%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Setup Time</div><div class="sm-val" style="color:var(--yellow)">16.1m</div><div class="sm-bar"><div class="sm-bar-fill" style="width:62%;background:var(--yellow)"></div></div></div>
+        <div class="spec-metric"><div class="sm-label">Dr. Satisfaction</div><div class="sm-val" style="color:var(--yellow)">4.0/5</div><div class="sm-bar"><div class="sm-bar-fill" style="width:80%;background:var(--yellow)"></div></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TREND + COMPETENCY -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Trend Performa OR Support — Bulanan <span class="tag tag-indigo">12 Bulan</span></div>
+      <canvas id="trendChart" height="210"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Kompetensi per Kategori Alat <span class="tag tag-teal">Team Average</span></div>
+      <div class="comp-list">
+        <div class="comp-row"><span class="comp-label">🔬 Laparoskopi / Robotik</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:96%;background:var(--green)"></div></div><span class="comp-val" style="color:var(--green)">96.0</span></div>
+        <div class="comp-row"><span class="comp-label">📷 Endoskopi & Kamera OR</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:94%;background:var(--green)"></div></div><span class="comp-val" style="color:var(--green)">94.2</span></div>
+        <div class="comp-row"><span class="comp-label">🦴 Ortopedi & Power Tools</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:91%;background:var(--teal)"></div></div><span class="comp-val" style="color:var(--teal)">91.8</span></div>
+        <div class="comp-row"><span class="comp-label">💉 Anestesi & Ventilator OR</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:88%;background:var(--yellow)"></div></div><span class="comp-val" style="color:var(--yellow)">88.1</span></div>
+        <div class="comp-row"><span class="comp-label">❤️ Kardiovaskular & Perfusi</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:85%;background:var(--yellow)"></div></div><span class="comp-val" style="color:var(--yellow)">85.4</span></div>
+        <div class="comp-row"><span class="comp-label">🩺 General Surgery Support</span><div class="comp-bar-wrap"><div class="comp-bar" style="width:83%;background:var(--yellow)"></div></div><span class="comp-val" style="color:var(--yellow)">82.9</span></div>
+      </div>
+      <div style="margin-top:1.3rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div class="card-title" style="margin-bottom:.8rem">Highlight Performa Tim</div>
+        <div class="trend-mini">
+          <div class="trend-item"><span class="trend-label">⏰ Ketepatan tiba sebelum insisi</span><span class="trend-val" style="color:var(--green)">94.8% <span class="trend-arrow" style="color:var(--green)">▲</span></span></div>
+          <div class="trend-item"><span class="trend-label">🚫 Zero equipment malfunction rate</span><span class="trend-val" style="color:var(--green)">97.3% <span class="trend-arrow" style="color:var(--green)">▲</span></span></div>
+          <div class="trend-item"><span class="trend-label">📋 Checklist compliance pre-op</span><span class="trend-val" style="color:var(--green)">99.1% <span class="trend-arrow" style="color:var(--green)">▲</span></span></div>
+          <div class="trend-item"><span class="trend-label">⚠️ Insiden eskalasi intraop</span><span class="trend-val" style="color:var(--yellow)">3 kasus <span class="trend-arrow" style="color:var(--red)">▲</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASE LOG + DOCTOR FEEDBACK -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Log Kasus OR — Terkini <span class="tag tag-indigo">30 Hari</span></div>
+      <table class="punct-table">
+        <thead><tr><th>Case ID</th><th>Prosedur & RS</th><th>Specialist</th><th>Tiba</th><th>Setup</th><th>Rating</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="case-id">OR-1284</span></td>
+            <td><div class="case-name">Laparoskopi Kolesistektomi</div><div class="case-sub">RS Premier Bintaro · <span class="device-tag">Karl Storz</span></div></td>
+            <td>Budi T.</td>
+            <td class="time-ok">-18m</td>
+            <td class="time-ok">8.4m</td>
+            <td><span class="perf-badge p-excellent">⭐ Excellent</span></td>
+          </tr>
+          <tr>
+            <td><span class="case-id">OR-1283</span></td>
+            <td><div class="case-name">Artroskopi Lutut — ACL Repair</div><div class="case-sub">RSUP Dr. Cipto · <span class="device-tag">Synthes</span></div></td>
+            <td>Doni S.</td>
+            <td class="time-ok">-12m</td>
+            <td class="time-ok">11.2m</td>
+            <td><span class="perf-badge p-good">✓ Good</span></td>
+          </tr>
+          <tr>
+            <td><span class="case-id">OR-1282</span></td>
+            <td><div class="case-name">Endoskopi Diagnostik ERCP</div><div class="case-sub">RS Pondok Indah · <span class="device-tag">Olympus</span></div></td>
+            <td>Rian F.</td>
+            <td class="time-ok">-9m</td>
+            <td class="time-ok">10.8m</td>
+            <td><span class="perf-badge p-excellent">⭐ Excellent</span></td>
+          </tr>
+          <tr>
+            <td><span class="case-id">OR-1279</span></td>
+            <td><div class="case-name">Open Heart Surgery — CABG</div><div class="case-sub">RS Jantung Harapan Kita · <span class="device-tag">Medtronic</span></div></td>
+            <td>Mira A.</td>
+            <td class="time-warn">-3m</td>
+            <td class="time-warn">19.4m ⚠</td>
+            <td><span class="perf-badge p-fair">△ Fair</span></td>
+          </tr>
+          <tr>
+            <td><span class="case-id">OR-1276</span></td>
+            <td><div class="case-name">Robotik Prostatektomi — DaVinci</div><div class="case-sub">RS Premier Surabaya · <span class="device-tag">Intuitive</span></div></td>
+            <td>Budi T.</td>
+            <td class="time-ok">-22m</td>
+            <td class="time-ok">7.8m</td>
+            <td><span class="perf-badge p-excellent">⭐ Excellent</span></td>
+          </tr>
+          <tr>
+            <td><span class="case-id">OR-1271</span></td>
+            <td><div class="case-name">General Surgery — Appendektomi</div><div class="case-sub">RSUD Bekasi · <span class="device-tag">Ethicon</span></div></td>
+            <td>Fajar N.</td>
+            <td class="time-late">+7m ✗</td>
+            <td class="time-warn">16.8m</td>
+            <td><span class="perf-badge p-fair">△ Fair</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Feedback Dokter / Surgeon <span class="tag tag-green">Verified</span></div>
+      <div class="feedback-list">
+        <div class="feedback-item" style="border-left-color:var(--green)">
+          <div class="feedback-header">
+            <div><div class="feedback-doctor">Dr. Andika Putra, SpB-KBD</div><div class="feedback-case">Laparoskopi · RS Premier Bintaro</div></div>
+            <div class="stars">★★★★★</div>
+          </div>
+          <div class="feedback-text">"Budi sangat profesional — sudah siapkan semua instrumen sebelum kami masuk OR. Setup Karl Storz HD-nya sempurna, tidak ada delay sama sekali selama prosedur."</div>
+        </div>
+        <div class="feedback-item" style="border-left-color:var(--green)">
+          <div class="feedback-header">
+            <div><div class="feedback-doctor">Dr. Sinta Maharani, SpOT</div><div class="feedback-case">Artroskopi Lutut · RSUP Cipto</div></div>
+            <div class="stars">★★★★★</div>
+          </div>
+          <div class="feedback-text">"Doni sangat memahami sistem implan Synthes. Responsif saat intraop ada perubahan ukuran implan mendadak, tidak panik dan langsung sediakan."</div>
+        </div>
+        <div class="feedback-item" style="border-left-color:var(--teal)">
+          <div class="feedback-header">
+            <div><div class="feedback-doctor">Dr. Bram Santoso, SpJP</div><div class="feedback-case">CABG · RS Harapan Kita</div></div>
+            <div class="stars">★★★☆☆</div>
+          </div>
+          <div class="feedback-text">"Setup perfusion circuit-nya terlambat hampir 20 menit. Mohon tim kardio lebih familiar dengan prosedur pre-pump checklist sebelum kasus berikutnya."</div>
+        </div>
+        <div class="feedback-item" style="border-left-color:var(--green)">
+          <div class="feedback-header">
+            <div><div class="feedback-doctor">Dr. Reza Firmanto, SpU</div><div class="feedback-case">DaVinci Prostatektomi · RS Premier Sby</div></div>
+            <div class="stars">★★★★★</div>
+          </div>
+          <div class="feedback-text">"Budi adalah specialist terbaik yang pernah mendampingi saya untuk prosedur robotik. Penguasaan sistem DaVinci-nya di atas rata-rata. Sangat direkomendasikan."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const months=['Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des','Jan'];
+new Chart(document.getElementById('trendChart').getContext('2d'),{
+  type:'line',
+  data:{labels:months,datasets:[
+    {label:'On-Time Arrival (%)',data:[80.2,82.6,84.1,85.8,87.4,89.1,90.6,91.8,92.9,93.6,94.2,94.8],borderColor:'#047857',backgroundColor:'rgba(4,120,87,.07)',borderWidth:2.5,tension:.4,fill:true,pointBackgroundColor:'#047857',pointRadius:3,pointHoverRadius:5},
+    {label:'Competency Score',data:[79.4,81.2,83.4,85.0,86.7,87.9,89.1,90.0,90.8,91.2,91.4,91.4],borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.05)',borderWidth:2,tension:.4,fill:false,pointBackgroundColor:'#4f46e5',pointRadius:3,pointHoverRadius:5},
+    {label:'Dr. Satisfaction (/5×20)',data:[72,74,76,77.8,80,82,84,86,88,89,91,92],borderColor:'#0d9488',backgroundColor:'rgba(13,148,136,.04)',borderWidth:1.5,tension:.4,fill:false,borderDash:[4,3],pointBackgroundColor:'#0d9488',pointRadius:2,pointHoverRadius:4}
+  ]},
+  options:{responsive:true,plugins:{legend:{labels:{color:'#6b7280',font:{family:'IBM Plex Sans',size:11},boxWidth:14}},tooltip:{backgroundColor:'#fff',borderColor:'#e5e7eb',borderWidth:1,titleColor:'#111827',bodyColor:'#6b7280'}},scales:{x:{ticks:{color:'#9ca3af',font:{family:'IBM Plex Sans',size:11}},grid:{color:'#f0f4f8'}},y:{min:65,max:100,ticks:{color:'#9ca3af',font:{family:'IBM Plex Sans',size:11},callback:v=>v+'%'},grid:{color:'#f0f4f8'}}}}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Fulfillment Dashboard — Allvacon Medical</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8;--surface:#fff;--surface2:#f7fafc;
+  --teal:#0a7ea4;--teal2:#0bc5a4;--teal-light:#e0f5f9;
+  --red:#e53e3e;--red-light:#fff5f5;
+  --yellow:#d69e2e;--yellow-light:#fffbeb;
+  --green:#38a169;--green-light:#f0fff4;
+  --ink:#1a202c;--muted:#718096;--muted2:#a0aec0;
+  --border:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.brand-text{font-size:.9rem;font-weight:700;color:var(--ink)}.brand-text span{color:var(--teal)}
+.brand-sub{font-size:.72rem;color:var(--muted);margin-top:.05rem}
+.topbar-center{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.35rem 1rem;font-size:.8rem;font-weight:600;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.date-badge{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)}
+.status-pill{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;color:var(--teal);background:var(--teal-light);padding:.3rem .8rem;border-radius:20px}
+.status-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--teal2);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.5rem}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.metric-card.featured{border-color:var(--teal)}
+.metric-card.featured::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);border-radius:10px 0 0 10px}
+.metric-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem}
+.metric-val{font-size:2rem;font-weight:700;color:var(--ink);line-height:1;margin-bottom:.3rem}
+.metric-val.teal{color:var(--teal)}.metric-val.green{color:var(--green)}.metric-val.red{color:var(--red)}.metric-val.yellow{color:var(--yellow)}
+.metric-sub{font-size:.72rem;color:var(--muted)}
+.delta-up{color:var(--green);font-weight:600}.delta-down{color:var(--red);font-weight:600}
+.metric-bar{margin-top:.8rem;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:4px}
+.fill-teal{background:var(--teal)}.fill-green{background:var(--green)}.fill-yellow{background:var(--yellow)}.fill-red{background:var(--red)}
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem 1.5rem;box-shadow:var(--shadow)}
+.card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.tag{font-size:.63rem;font-weight:700;padding:.2rem .6rem;border-radius:20px}
+.tag-teal{background:var(--teal-light);color:var(--teal)}.tag-green{background:var(--green-light);color:var(--green)}
+.req-table{width:100%;border-collapse:collapse}
+.req-table th{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 0 .7rem 0;border-bottom:2px solid var(--border)}
+.req-table td{font-size:.8rem;padding:.65rem 0;border-bottom:1px solid var(--bg);color:var(--ink);vertical-align:middle}
+.req-table tr:last-child td{border-bottom:none}
+.req-id{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--teal);font-weight:600}
+.req-type{font-size:.72rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:.15rem .5rem;color:var(--muted)}
+.status-badge{font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:20px;white-space:nowrap}
+.s-completed{background:var(--green-light);color:var(--green)}.s-progress{background:var(--teal-light);color:var(--teal)}.s-pending{background:var(--yellow-light);color:var(--yellow)}.s-delayed{background:var(--red-light);color:var(--red)}
+.time-ok{color:var(--green);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.72rem}
+.time-warn{color:var(--yellow);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.72rem}
+.time-over{color:var(--red);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:.72rem}
+.zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.zone-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem}
+.zone-name{font-size:.75rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.zone-stats{display:flex;gap:.8rem;font-size:.72rem;color:var(--muted);margin-bottom:.6rem}
+.zone-bar-wrap{height:6px;background:var(--border);border-radius:6px;overflow:hidden}
+.zone-bar{height:100%;border-radius:6px}
+.cat-grid{display:flex;flex-direction:column;gap:.8rem}
+.cat-row{display:flex;align-items:center;gap:.8rem}
+.cat-label{font-size:.78rem;width:160px;flex-shrink:0}
+.cat-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:8px;overflow:hidden}
+.cat-bar{height:100%;border-radius:8px;background:var(--teal)}
+.cat-val{font-size:.75rem;font-weight:700;font-family:'IBM Plex Mono',monospace;width:42px;text-align:right}
+.cat-pct{font-size:.7rem;color:var(--muted);width:38px;text-align:right}
+@media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">🏥</div><div><div class="brand-text">Allvacon <span>Medical</span></div><div class="brand-sub">PT. Allvamed Nuvacon Adigana</div></div></div>
+  <div class="topbar-center">Request Fulfillment Dashboard</div>
+  <div class="topbar-right"><div class="date-badge">Q1 2025 — Q1 2026</div><div class="status-pill">Operational</div></div>
+</div>
+<div class="main">
+  <div class="section-header"><span class="section-title">Key Performance Indicators</span><span style="font-size:.72rem;color:var(--muted)">Last updated: 1 jam lalu</span></div>
+  <div class="metrics-grid">
+    <div class="metric-card featured"><div class="metric-label">Fulfillment Rate</div><div class="metric-val teal">94.7%</div><div class="metric-sub"><span class="delta-up">▲ 8.2%</span> vs baseline pre-implementasi</div><div class="metric-bar"><div class="metric-bar-fill fill-teal" style="width:94.7%"></div></div></div>
+    <div class="metric-card"><div class="metric-label">Total Requests</div><div class="metric-val">2,841</div><div class="metric-sub"><span class="delta-up">▲ 23%</span> volume YoY</div><div class="metric-bar"><div class="metric-bar-fill fill-teal" style="width:75%"></div></div></div>
+    <div class="metric-card"><div class="metric-label">Avg. Fulfillment Time</div><div class="metric-val green">4.2<span style="font-size:1rem;color:var(--muted)">j</span></div><div class="metric-sub"><span class="delta-up">▲ 31%</span> lebih cepat dari sebelumnya</div><div class="metric-bar"><div class="metric-bar-fill fill-green" style="width:72%"></div></div></div>
+    <div class="metric-card"><div class="metric-label">On-Time Delivery</div><div class="metric-val green">91.3%</div><div class="metric-sub">Target: 90% <span class="delta-up">✓ Tercapai</span></div><div class="metric-bar"><div class="metric-bar-fill fill-green" style="width:91.3%"></div></div></div>
+    <div class="metric-card"><div class="metric-label">Pending / Delayed</div><div class="metric-val red">152</div><div class="metric-sub"><span class="delta-down">5.3%</span> dari total requests</div><div class="metric-bar"><div class="metric-bar-fill fill-red" style="width:5.3%"></div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Trend Fulfillment Bulanan <span class="tag tag-teal">12 Bulan</span></div>
+      <canvas id="trendChart" height="210"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Performa per Zona Distribusi <span class="tag tag-green">4 Zona</span></div>
+      <div class="zone-grid">
+        <div class="zone-card"><div class="zone-name">🏙️ Jabodetabek</div><div class="zone-stats"><span>842 req</span><span>•</span><span style="color:var(--green);font-weight:600">97.1%</span></div><div class="zone-bar-wrap"><div class="zone-bar" style="width:97.1%;background:var(--green)"></div></div></div>
+        <div class="zone-card"><div class="zone-name">🌆 Jawa Barat</div><div class="zone-stats"><span>614 req</span><span>•</span><span style="color:var(--teal);font-weight:600">95.4%</span></div><div class="zone-bar-wrap"><div class="zone-bar" style="width:95.4%;background:var(--teal)"></div></div></div>
+        <div class="zone-card"><div class="zone-name">🏗️ Jawa Tengah</div><div class="zone-stats"><span>521 req</span><span>•</span><span style="color:var(--teal);font-weight:600">93.8%</span></div><div class="zone-bar-wrap"><div class="zone-bar" style="width:93.8%;background:var(--teal)"></div></div></div>
+        <div class="zone-card"><div class="zone-name">🌴 Luar Jawa</div><div class="zone-stats"><span>864 req</span><span>•</span><span style="color:var(--yellow);font-weight:600">89.2%</span></div><div class="zone-bar-wrap"><div class="zone-bar" style="width:89.2%;background:var(--yellow)"></div></div></div>
+      </div>
+      <div style="margin-top:1.2rem">
+        <div class="card-title" style="margin-bottom:.8rem">Breakdown per Kategori Alat</div>
+        <div class="cat-grid">
+          <div class="cat-row"><span class="cat-label">🫀 Alat Diagnostik</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:82%"></div></div><span class="cat-val">936</span><span class="cat-pct">32.9%</span></div>
+          <div class="cat-row"><span class="cat-label">💉 Alat Terapi</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:58%;background:var(--teal2)"></div></div><span class="cat-val">682</span><span class="cat-pct">24.0%</span></div>
+          <div class="cat-row"><span class="cat-label">🏥 Alat Monitoring</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:45%;background:var(--green)"></div></div><span class="cat-val">527</span><span class="cat-pct">18.5%</span></div>
+          <div class="cat-row"><span class="cat-label">🔬 Lab & Imaging</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:38%;background:var(--yellow)"></div></div><span class="cat-val">448</span><span class="cat-pct">15.8%</span></div>
+          <div class="cat-row"><span class="cat-label">🛠️ Spare Part</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:21%;background:var(--muted2)"></div></div><span class="cat-val">248</span><span class="cat-pct">8.7%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Log Request Terkini <span class="tag tag-teal">30 Hari Terakhir</span></div>
+    <table class="req-table">
+      <thead><tr><th>Request ID</th><th>Institusi</th><th>Jenis Alat</th><th>Kategori</th><th>Waktu Request</th><th>Fulfillment Time</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><span class="req-id">ALV-2841</span></td><td>RS Premier Bintaro</td><td>Ventilator ICU — Mindray SV300</td><td><span class="req-type">Monitoring</span></td><td>2 jam lalu</td><td class="time-ok">3.8j</td><td><span class="status-badge s-completed">Completed</span></td></tr>
+        <tr><td><span class="req-id">ALV-2840</span></td><td>Klinik Medistra Jakarta</td><td>USG Portable — GE Vscan Air</td><td><span class="req-type">Diagnostik</span></td><td>4 jam lalu</td><td class="time-ok">2.1j</td><td><span class="status-badge s-completed">Completed</span></td></tr>
+        <tr><td><span class="req-id">ALV-2839</span></td><td>RSUP Cipto Mangunkusumo</td><td>Infusion Pump — Fresenius Kabi</td><td><span class="req-type">Terapi</span></td><td>5 jam lalu</td><td class="time-ok">1.5j</td><td><span class="status-badge s-completed">Completed</span></td></tr>
+        <tr><td><span class="req-id">ALV-2838</span></td><td>RS Pondok Indah</td><td>ECG 12-Lead — Nihon Kohden</td><td><span class="req-type">Diagnostik</span></td><td>6 jam lalu</td><td class="time-warn">5.9j</td><td><span class="status-badge s-progress">In Progress</span></td></tr>
+        <tr><td><span class="req-id">ALV-2837</span></td><td>RSUD Dr. Soetomo Surabaya</td><td>Anesthesia Machine — Drager</td><td><span class="req-type">Terapi</span></td><td>8 jam lalu</td><td class="time-warn">7.2j ⚠</td><td><span class="status-badge s-pending">Pending</span></td></tr>
+        <tr><td><span class="req-id">ALV-2836</span></td><td>RS Hasan Sadikin Bandung</td><td>MRI Contrast Media — Guerbet</td><td><span class="req-type">Imaging</span></td><td>1 hari lalu</td><td class="time-over">18.4j ✗</td><td><span class="status-badge s-delayed">Delayed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+const months=['Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des','Jan'];
+new Chart(document.getElementById('trendChart').getContext('2d'),{
+  type:'line',
+  data:{labels:months,datasets:[
+    {label:'Fulfillment Rate (%)',data:[82.1,84.3,85.9,87.2,88.4,89.7,90.5,91.8,92.6,93.4,94.1,94.7],borderColor:'#0a7ea4',backgroundColor:'rgba(10,126,164,.07)',borderWidth:2.5,tension:.4,fill:true,pointBackgroundColor:'#0a7ea4',pointRadius:3,pointHoverRadius:5},
+    {label:'On-Time Delivery (%)',data:[76.2,78.5,80.1,82.0,83.6,85.2,86.8,87.9,89.1,90.0,91.0,91.3],borderColor:'#38a169',backgroundColor:'rgba(56,161,105,.05)',borderWidth:2,tension:.4,fill:false,pointBackgroundColor:'#38a169',pointRadius:3,pointHoverRadius:5}
+  ]},
+  options:{responsive:true,plugins:{legend:{labels:{color:'#718096',font:{family:'IBM Plex Sans',size:11},boxWidth:14}},tooltip:{backgroundColor:'#fff',borderColor:'#e2e8f0',borderWidth:1,titleColor:'#1a202c',bodyColor:'#718096'}},scales:{x:{ticks:{color:'#a0aec0',font:{family:'IBM Plex Sans',size:11}},grid:{color:'#f0f4f8'}},y:{min:70,max:100,ticks:{color:'#a0aec0',font:{family:'IBM Plex Sans',size:11},callback:v=>v+'%'},grid:{color:'#f0f4f8'}}}}
+});
+</script>
+</body>
+</html>
