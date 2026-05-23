@@ -1,0 +1,860 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1C1814;--cream:#FAF7F2;--surface:#FFFFFF;--border:#E8E0D4;--muted:#7A6E64;
+  --gold:#C4862A;--gold-bg:#FDF3E3;--sage:#3D6B3D;--sage-bg:#EBF3EB;
+  --rust:#B54A2A;--rust-bg:#FBEEE9;--blue:#2A6BB5;--blue-bg:#E9F0FB;
+  --purple:#6B3DAF;--purple-bg:#F0E9FB;
+  --espresso:#2D1F14;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);font-size:13px}
+.shell{display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP NAV */
+.topnav{background:var(--espresso);display:flex;align-items:center;gap:0;padding:0 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.topnav-brand{font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;padding:12px 16px 12px 0;border-right:1px solid rgba(255,255,255,0.1);margin-right:8px}
+.tab{padding:12px 14px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:rgba(255,255,255,0.75)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.phase-indicator{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pi{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px}
+
+/* CONTENT */
+.content{padding:20px;display:none}
+.content.active{display:block}
+.page-header{margin-bottom:16px}
+.page-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.ch{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.2px}
+.badge{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.cb{padding:14px}
+
+/* TIMELINE */
+.timeline-wrap{overflow-x:auto;padding-bottom:8px}
+.tl{display:flex;gap:0;min-width:900px;padding:4px 0}
+.week{flex:1;min-width:80px;border-right:1px solid var(--border);padding:0 8px 12px}
+.week:last-child{border-right:none}
+.week-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-top:4px}
+.tl-task{border-radius:4px;padding:5px 7px;margin-bottom:4px;font-size:10px;font-weight:600;line-height:1.3;cursor:default}
+.tl-task.critical{border-left:2px solid var(--rust)}
+
+/* MATRIX */
+.matrix-table{width:100%;border-collapse:collapse}
+.matrix-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.matrix-table td{padding:6px 8px;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12px;vertical-align:middle}
+.matrix-table tr:last-child td{border-bottom:none}
+input[type=range]{width:100%;accent-color:var(--gold);height:3px;cursor:pointer}
+.score-chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;min-width:32px;text-align:center}
+
+/* CALC */
+.calc-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.calc-row:last-child{border-bottom:none}
+.calc-label{font-size:12px;color:var(--muted)}
+.calc-input{border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:12px;width:130px;text-align:right;background:var(--cream);color:var(--ink)}
+.calc-result{background:var(--espresso);border-radius:6px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.cr-label{font-size:11px;color:rgba(255,255,255,0.55);font-weight:500}
+.cr-val{font-size:18px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* LEASE */
+.lease-item{padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.lease-item:last-child{border-bottom:none}
+.lease-name{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.lease-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.lease-status{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-top:3px}
+
+/* COMPLIANCE */
+.comp-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.comp-item:last-child{border-bottom:none}
+.comp-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.comp-body h5{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:1px}
+.comp-body p{font-size:11px;color:var(--muted);line-height:1.4}
+.comp-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.cmeta{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600}
+
+/* STAT CARDS */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.sv{font-size:20px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.sl{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* CHECKLIST */
+.cl-item{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);cursor:pointer}
+.cl-item:last-child{border-bottom:none}
+.cl-box{width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .1s}
+.cl-text{font-size:12px;color:var(--muted);line-height:1.5}
+.cl-text.done{text-decoration:line-through;opacity:.45}
+
+/* NEGOTIATION */
+.nego-card{border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px}
+.nego-card:last-child{margin-bottom:0}
+.nego-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.nego-term{font-size:12px;font-weight:700;color:var(--ink)}
+.nego-priority{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px}
+.nego-body{font-size:11px;color:var(--muted);line-height:1.5}
+.nego-ask{font-size:11px;font-weight:600;color:var(--sage);margin-top:4px}
+
+/* RISK METER */
+.risk-bar-wrap{margin-bottom:8px}
+.risk-name{display:flex;justify-content:space-between;margin-bottom:3px}
+.risk-name span{font-size:11px}
+.risk-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.risk-fill{height:100%;border-radius:3px;transition:width .3s}
+</style>
+
+<div class="shell">
+  <div class="topnav">
+    <div class="topnav-brand">Pre-Opening</div>
+    <div class="tab active" onclick="switchTab(0,this)">🗓 Master Timeline</div>
+    <div class="tab" onclick="switchTab(1,this)">📍 Location Scoring</div>
+    <div class="tab" onclick="switchTab(2,this)">💰 Budget Builder</div>
+    <div class="tab" onclick="switchTab(3,this)">🤝 Lease Negotiator</div>
+    <div class="tab" onclick="switchTab(4,this)">📋 Compliance Tracker</div>
+    <div class="tab" onclick="switchTab(5,this)">✅ Go/No-Go Gate</div>
+    <div class="phase-indicator">
+      <span class="pi" style="background:var(--gold-bg);color:var(--gold)">Pre-Opening OS</span>
+    </div>
+  </div>
+
+  <!-- TAB 0: MASTER TIMELINE -->
+  <div class="content active" id="tab-0">
+    <div class="page-header">
+      <div class="page-title">Master Timeline Pre-Opening — T-16 sampai T-0</div>
+      <div class="page-sub">Scroll kanan untuk melihat semua phase. Merah = critical path — jangan terlambat ini.</div>
+    </div>
+    <div class="grid4" style="margin-bottom:14px">
+      <div class="stat-card"><div class="sv" style="color:var(--blue)">~16</div><div class="sl">Minggu rata-rata pre-opening</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--rust)">4</div><div class="sl">Critical path items</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--gold)">3</div><div class="sl">Fase utama</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--sage)">T-0</div><div class="sl">Target grand opening</div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">Timeline Visual — T-16 Weeks to Launch</span><span class="badge" style="background:var(--rust-bg);color:var(--rust)">⚠ Merah = Critical Path</span></div>
+      <div class="cb">
+        <div class="timeline-wrap">
+          <div class="tl" id="timeline-grid"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--blue-bg);border-left:2px solid var(--blue)"></div><span style="font-size:10px;color:var(--muted)">Research & Strategy</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:#F3EBF8;border-left:2px solid var(--purple)"></div><span style="font-size:10px;color:var(--muted)">Legal & Compliance</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--gold-bg);border-left:2px solid var(--gold)"></div><span style="font-size:10px;color:var(--gold)">Construction</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--sage-bg);border-left:2px solid var(--sage)"></div><span style="font-size:10px;color:var(--muted)">Team & Operations</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--rust-bg);border-left:2px solid var(--rust)"></div><span style="font-size:10px;color:var(--rust)">Critical Path</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="ch"><span class="ct">Phase 1: Foundation (T-16 s/d T-10)</span><span class="badge" style="background:var(--blue-bg);color:var(--blue)">Minggu 1–6</span></div>
+        <div class="cb">
+          <div id="cl-phase1"></div>
+          <button onclick="sendPrompt('Buatkan saya detail action plan Phase 1 pre-opening F&B: market research, pemilihan lokasi, dan strategi konsep')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:7px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;width:100%">Deep dive Phase 1 ↗</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Phase 2: Build (T-10 s/d T-4)</span><span class="badge" style="background:var(--gold-bg);color:var(--gold)">Minggu 7–12</span></div>
+        <div class="cb">
+          <div id="cl-phase2"></div>
+          <button onclick="sendPrompt('Buatkan saya detail action plan Phase 2 pre-opening F&B: konstruksi, setup vendor, dan hiring team')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:7px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;width:100%">Deep dive Phase 2 ↗</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">Phase 3: Launch Prep (T-4 s/d T-0)</span><span class="badge" style="background:var(--sage-bg);color:var(--sage)">Minggu 13–16</span></div>
+      <div class="cb">
+        <div class="grid2"><div id="cl-phase3a"></div><div id="cl-phase3b"></div></div>
+        <button onclick="sendPrompt('Buatkan saya detail rundown soft opening dan grand opening untuk F&B bisnis saya, termasuk checklist D-7, D-3, D-1 dan hari H')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:7px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">Generate Soft Opening Runbook ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: LOCATION SCORING -->
+  <div class="content" id="tab-1">
+    <div class="page-header">
+      <div class="page-title">Location Scoring Matrix</div>
+      <div class="page-sub">Bandingkan hingga 3 kandidat lokasi secara objektif. Geser slider untuk beri nilai 1–10 per kriteria.</div>
+    </div>
+    <div class="grid2" style="align-items:start">
+      <div class="card">
+        <div class="ch"><span class="ct">Scoring Criteria</span><span class="badge" style="background:var(--blue-bg);color:var(--blue)">Weighted Score</span></div>
+        <div class="cb">
+          <table class="matrix-table">
+            <thead><tr><th>Kriteria</th><th>Bobot</th><th>Lokasi A</th><th>Lokasi B</th><th>Lokasi C</th></tr></thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch"><span class="ct">Skor Akhir</span><span class="badge" style="background:var(--sage-bg);color:var(--sage)">Weighted Total</span></div>
+          <div class="cb"><div id="score-result"></div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Pemenang & Analisis</span></div>
+          <div class="cb" id="winner-analysis"></div>
+        </div>
+        <button onclick="sendPrompt('Saya sudah melakukan location scoring matrix. Bantu saya analisis faktor-faktor lain apa yang perlu dicek sebelum commit ke lokasi F&B, termasuk aspek legal dan due diligence landlord')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;width:100%">Minta analisis mendalam lokasi ↗</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">Due Diligence Checklist per Lokasi</span></div>
+      <div class="cb">
+        <div class="grid3" id="dd-checklist"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: BUDGET BUILDER -->
+  <div class="content" id="tab-2">
+    <div class="page-header">
+      <div class="page-title">Pre-Opening Budget Builder</div>
+      <div class="page-sub">Kalkulasi total capex yang dibutuhkan sebelum buka pintu. Semua angka dalam juta rupiah (Jt).</div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="ch"><span class="ct">🏗 Construction & Interior</span><span class="badge" style="background:var(--gold-bg);color:var(--gold)">Capex Terbesar</span></div>
+          <div class="cb" id="budget-construction"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">🍳 Kitchen Equipment & FF&E</span></div>
+          <div class="cb" id="budget-kitchen"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">🔧 Setup & Pre-Opening Ops</span></div>
+          <div class="cb" id="budget-setup"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="position:sticky;top:8px">
+          <div class="ch"><span class="ct">📊 Budget Summary</span><span class="badge" style="background:var(--rust-bg);color:var(--rust)">Real-time</span></div>
+          <div class="cb" id="budget-summary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: LEASE NEGOTIATOR -->
+  <div class="content" id="tab-3">
+    <div class="page-header">
+      <div class="page-title">Lease Deal Analyzer & Negotiation Playbook</div>
+      <div class="page-sub">Framework negosiasi sewa yang melindungi bisnis lo dari risiko fatal.</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="ch"><span class="ct">🧮 True Occupancy Cost Calculator</span></div>
+        <div class="cb" id="lease-calc"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">📊 Occupancy Cost Health Check</span></div>
+        <div class="cb" id="lease-health"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">⚔️ Negotiation Playbook — 9 Klausul Kritis</span><span class="badge" style="background:var(--rust-bg);color:var(--rust)">Jangan skip satupun</span></div>
+      <div class="cb" id="nego-playbook"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">🚩 Red Flag Detector — Klausul Berbahaya</span></div>
+      <div class="cb" id="red-flags"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: COMPLIANCE -->
+  <div class="content" id="tab-4">
+    <div class="page-header">
+      <div class="page-title">Compliance & Licensing Tracker</div>
+      <div class="page-sub">Semua izin yang harus beres sebelum buka. Klik item untuk tandai selesai.</div>
+    </div>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div class="card">
+          <div class="ch"><span class="ct">📋 Izin Wajib Pre-Opening</span><span class="badge" style="background:var(--rust-bg);color:var(--rust)" id="izin-progress">0/0 selesai</span></div>
+          <div class="cb" id="izin-list"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch"><span class="ct">⏱ Estimasi Timeline Perizinan</span></div>
+          <div class="cb" id="license-timeline"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">💡 Tips Mempercepat Perizinan</span></div>
+          <div class="cb" id="license-tips"></div>
+        </div>
+        <button onclick="sendPrompt('Bantu saya buat checklist dokumen lengkap untuk proses NIB dan perizinan restoran/kafe di Indonesia melalui OSS RBA, serta tips mempercepat prosesnya')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;width:100%">Minta panduan OSS step-by-step ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: GO/NO-GO -->
+  <div class="content" id="tab-5">
+    <div class="page-header">
+      <div class="page-title">Go / No-Go Gate</div>
+      <div class="page-sub">Checklist keputusan akhir sebelum commit buka. Semua harus hijau sebelum groundbreaking atau TTD kontrak.</div>
+    </div>
+    <div class="grid2">
+      <div id="gng-left"></div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch"><span class="ct">🎯 Go/No-Go Verdict</span></div>
+          <div class="cb" id="gng-verdict"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">📉 Risk Exposure Summary</span></div>
+          <div class="cb" id="risk-summary"></div>
+        </div>
+        <button onclick="sendPrompt('Saya sudah menyelesaikan Go/No-Go checklist pre-opening. Bantu saya identifikasi risiko terbesar yang sering diabaikan founder F&B pertama kali dan bagaimana mitigasinya')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;width:100%">Analisis risiko bisnis gw ↗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── TIMELINE DATA ── */
+const weeks = [
+  {w:"T-16",label:"Minggu 1",tasks:[
+    {t:"Market survey & kompetitor",c:"blue"},{t:"Survei 5 kandidat lokasi",c:"blue"},{t:"Definisi konsep & target market",c:"blue"}
+  ]},
+  {w:"T-15",label:"Minggu 2",tasks:[
+    {t:"Scoring matrix 3 lokasi final",c:"blue"},{t:"Customer interview 20 orang",c:"blue"},{t:"Menu engineering draft",c:"blue"}
+  ]},
+  {w:"T-14",label:"Minggu 3",tasks:[
+    {t:"LOI ke landlord (2 lokasi)",c:"purple",crit:true},{t:"Mulai proses NIB di OSS",c:"purple",crit:true},{t:"Cari arsitek/kontraktor F&B",c:"gold"}
+  ]},
+  {w:"T-13",label:"Minggu 4",tasks:[
+    {t:"Negosiasi heads of terms",c:"purple",crit:true},{t:"Floor plan draft v1",c:"gold"},{t:"Buat business plan & RAB",c:"blue"}
+  ]},
+  {w:"T-12",label:"Minggu 5",tasks:[
+    {t:"Review lease contract (lawyer)",c:"purple"},{t:"Finalisasi floor plan & desain",c:"gold"},{t:"Daftar brand & NPWP badan",c:"purple"}
+  ]},
+  {w:"T-11",label:"Minggu 6",tasks:[
+    {t:"TTD kontrak sewa",c:"purple",crit:true},{t:"Approve RAB konstruksi",c:"gold"},{t:"Mulai proses SLF/PBG",c:"purple"}
+  ]},
+  {w:"T-10",label:"Minggu 7",tasks:[
+    {t:"Groundbreaking konstruksi",c:"gold",crit:true},{t:"Order kitchen equipment",c:"gold"},{t:"Buka rekening bisnis",c:"blue"}
+  ]},
+  {w:"T-9",label:"Minggu 8",tasks:[
+    {t:"Konstruksi berjalan",c:"gold"},{t:"Buat brand identity",c:"sage"},{t:"Draft SOP manual v1",c:"sage"}
+  ]},
+  {w:"T-8",label:"Minggu 9",tasks:[
+    {t:"Konstruksi + MEP installation",c:"gold"},{t:"Mulai hiring (chef, kasir)",c:"sage"},{t:"Finalisasi menu & food cost",c:"sage"}
+  ]},
+  {w:"T-7",label:"Minggu 10",tasks:[
+    {t:"Kitchen equipment tiba",c:"gold"},{t:"Interview staff batch 1",c:"sage"},{t:"Setup vendor bahan baku",c:"sage"}
+  ]},
+  {w:"T-6",label:"Minggu 11",tasks:[
+    {t:"Interior finishing",c:"gold"},{t:"Onboarding staff batch 1",c:"sage"},{t:"Daftar GoFood/GrabFood",c:"sage"}
+  ]},
+  {w:"T-5",label:"Minggu 12",tasks:[
+    {t:"Konstruksi selesai",c:"gold"},{t:"Install POS & test sistem",c:"sage"},{t:"Training menu & SOP",c:"sage"}
+  ]},
+  {w:"T-4",label:"Minggu 13",tasks:[
+    {t:"Trial cooking & food costing",c:"sage"},{t:"Soft opening internal (staff)",c:"rust",crit:true},{t:"Izin sanitasi & laik fungsi",c:"purple"}
+  ]},
+  {w:"T-3",label:"Minggu 14",tasks:[
+    {t:"Friends & family trial",c:"rust",crit:true},{t:"Fix semua issue operasional",c:"sage"},{t:"Go-live GoFood/Grab",c:"sage"}
+  ]},
+  {w:"T-2",label:"Minggu 15",tasks:[
+    {t:"Soft opening limited",c:"rust",crit:true},{t:"Collect & review feedback",c:"rust"},{t:"Adjust menu & pricing",c:"sage"}
+  ]},
+  {w:"T-0",label:"GRAND OPENING",tasks:[
+    {t:"🎉 Grand Opening",c:"rust",crit:true},{t:"Social media campaign live",c:"sage"},{t:"Full team deployment",c:"sage"}
+  ]}
+];
+
+const colorMap={
+  blue:{bg:"var(--blue-bg)",border:"var(--blue)"},
+  purple:{bg:"#F3EBF8",border:"var(--purple)"},
+  gold:{bg:"var(--gold-bg)",border:"var(--gold)"},
+  sage:{bg:"var(--sage-bg)",border:"var(--sage)"},
+  rust:{bg:"var(--rust-bg)",border:"var(--rust)"}
+};
+
+function buildTimeline(){
+  const tl=document.getElementById('timeline-grid');
+  tl.innerHTML=weeks.map(w=>`
+    <div class="week">
+      <div class="week-label">${w.label}<br><span style="font-size:9px;color:var(--muted)">${w.w}</span></div>
+      ${w.tasks.map(t=>{
+        const cm=colorMap[t.c]||colorMap.blue;
+        return `<div class="tl-task" style="background:${cm.bg};border-left:2px solid ${cm.border};color:${t.crit?cm.border:cm.border}">${t.t}</div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+/* ── PHASE CHECKLISTS ── */
+const phase1=[
+  "Survei & skoring minimal 5 kandidat lokasi","Customer interview 20+ responden","Analisis TAM/SAM/SOM untuk konsep","Benchmark 10 kompetitor (harga, menu, traffic)","Finalisasi konsep & nama brand","Draft menu pertama dengan food cost estimate","Buat business plan satu halaman","Cari 2–3 kontraktor F&B berpengalaman"
+];
+const phase2=[
+  "TTD kontrak sewa dengan semua klausul protektif","Proses NIB melalui OSS RBA","Groundbreaking & mulai konstruksi","Order semua kitchen equipment (lead time 4–8 minggu)","Buka rekening bisnis terpisah","Finalisasi brand identity (logo, warna, font)","Mulai hiring chef & core team","Setup 3 vendor bahan baku utama dengan uji kualitas"
+];
+const phase3a=[
+  "Install & test POS system lengkap","Trial masak semua menu dengan yield test","Onboarding & training 100% staff","Mock service: full simulation operasional"
+];
+const phase3b=[
+  "Soft opening (friends & family)","Collect feedback & perbaikan","Go-live di semua platform delivery","Grand Opening dengan activation campaign"
+];
+
+function buildChecklist(data,elId,prefix){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const stored=JSON.parse(localStorage.getItem&&localStorage.getItem(prefix)||'{}');
+  el.innerHTML=data.map((item,i)=>{
+    const done=stored[i]||false;
+    return `<div class="cl-item" onclick="toggleCL('${prefix}',${i},'${elId}')">
+      <div class="cl-box" id="clbox-${prefix}-${i}" style="${done?'background:var(--sage);border-color:var(--sage);color:#fff':''}">${done?'✓':''}</div>
+      <div class="cl-text ${done?'done':''}" id="cltext-${prefix}-${i}">${item}</div>
+    </div>`;}).join('');
+}
+
+let clState={};
+function toggleCL(prefix,i,elId){
+  if(!clState[prefix])clState[prefix]={};
+  clState[prefix][i]=!clState[prefix][i];
+  const done=clState[prefix][i];
+  const box=document.getElementById(`clbox-${prefix}-${i}`);
+  const txt=document.getElementById(`cltext-${prefix}-${i}`);
+  if(box){box.style.background=done?'var(--sage)':'';box.style.borderColor=done?'var(--sage)':'var(--border)';box.style.color=done?'#fff':'';box.innerHTML=done?'✓':'';}
+  if(txt){txt.className='cl-text '+(done?'done':'');}
+}
+
+/* ── LOCATION MATRIX ── */
+const criteria=[
+  {name:"Footfall & Visibility",weight:25},
+  {name:"Accessibility (parkir, angkutan)",weight:20},
+  {name:"Target Demographic Match",weight:15},
+  {name:"Kompetisi di Area",weight:10},
+  {name:"Kondisi Bangunan",weight:10},
+  {name:"Harga Sewa vs Potensi",weight:10},
+  {name:"Potensi Pertumbuhan Area",weight:10},
+];
+let scores={A:{},B:{},C:{}};
+criteria.forEach((c,i)=>{scores.A[i]=5;scores.B[i]=5;scores.C[i]=5;});
+
+function buildMatrix(){
+  const body=document.getElementById('matrix-body');
+  body.innerHTML=criteria.map((c,i)=>`
+    <tr>
+      <td style="font-weight:600;min-width:160px">${c.name}</td>
+      <td><span class="badge" style="background:var(--blue-bg);color:var(--blue)">${c.weight}%</span></td>
+      <td><input type="range" min="1" max="10" value="5" onchange="updateScore('A',${i},this.value)"><br><span id="sa-${i}" class="score-chip" style="background:var(--blue-bg);color:var(--blue)">5</span></td>
+      <td><input type="range" min="1" max="10" value="5" onchange="updateScore('B',${i},this.value)"><br><span id="sb-${i}" class="score-chip" style="background:#F3EBF8;color:var(--purple)">5</span></td>
+      <td><input type="range" min="1" max="10" value="5" onchange="updateScore('C',${i},this.value)"><br><span id="sc-${i}" class="score-chip" style="background:var(--gold-bg);color:var(--gold)">5</span></td>
+    </tr>`).join('');
+  calcScores();
+}
+
+function updateScore(loc,idx,val){
+  scores[loc][idx]=parseInt(val);
+  const el=document.getElementById(`s${loc.toLowerCase()}-${idx}`);
+  if(el)el.textContent=val;
+  calcScores();
+}
+
+function calcScores(){
+  const totals={A:0,B:0,C:0};
+  criteria.forEach((c,i)=>{
+    totals.A+=scores.A[i]*c.weight/10;
+    totals.B+=scores.B[i]*c.weight/10;
+    totals.C+=scores.C[i]*c.weight/10;
+  });
+  const res=document.getElementById('score-result');
+  const colors=['blue','purple','gold'];
+  const bgs=[,'var(--blue-bg)','#F3EBF8','var(--gold-bg)'];
+  const cs=['var(--blue)','var(--purple)','var(--gold)'];
+  res.innerHTML=['A','B','C'].map((l,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px;font-weight:700;color:var(--ink)">Lokasi ${l}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:120px;height:6px;background:var(--border);border-radius:3px"><div style="width:${totals[l]}%;height:100%;background:${cs[i]};border-radius:3px"></div></div>
+        <span style="font-size:14px;font-weight:700;color:${cs[i]}">${Math.round(totals[l])}</span>
+      </div>
+    </div>`).join('');
+  
+  const winner=['A','B','C'].reduce((a,b)=>totals[a]>totals[b]?a:b);
+  const wa=document.getElementById('winner-analysis');
+  wa.innerHTML=`
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Rekomendasi Lokasi</div>
+      <div style="font-size:28px;font-weight:700;color:var(--sage)">Lokasi ${winner}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Score: ${Math.round(totals[winner])}/100</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
+      ${Math.round(totals[winner])>=70?'✅ Score ≥70 — Lokasi layak untuk dilanjutkan ke due diligence mendalam':
+      Math.round(totals[winner])>=55?'⚠️ Score 55–69 — Pertimbangkan kembali, ada beberapa kelemahan signifikan':
+      '❌ Score <55 — Cari kandidat lokasi lain sebelum commit'}
+    </div>`;
+}
+
+function buildDDChecklist(){
+  const items=["Cek sertifikat kepemilikan tanah/bangunan","Verifikasi tidak ada sengketa hukum","Survei kondisi struktural bangunan","Cek kapasitas listrik (min 10KVA untuk kafe, 20KVA+ untuk resto)","Pastikan akses air PAM & saluran pembuangan","Cek histori tenant sebelumnya","Survei parkir: kapasitas & accessibility","Konfirmasi rencana tata ruang (tidak kena proyek)","Cek sinyal internet & cellular di lokasi","Wawancara pedagang/tenant sekitar"];
+  const el=document.getElementById('dd-checklist');
+  ['Lokasi A','Lokasi B','Lokasi C'].forEach((loc,ci)=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<div style="font-weight:700;font-size:12px;color:var(--ink);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${loc}</div>`+
+      items.map((item,i)=>`<div class="cl-item" onclick="toggleDDCL(${ci},${i},this)">
+        <div class="cl-box">□</div>
+        <div class="cl-text" style="font-size:11px">${item}</div>
+      </div>`).join('');
+    el.appendChild(div);
+  });
+}
+
+function toggleDDCL(ci,i,el){
+  const box=el.querySelector('.cl-box');
+  const txt=el.querySelector('.cl-text');
+  const done=box.style.background==='var(--sage)';
+  box.style.background=done?'':'var(--sage)';
+  box.style.borderColor=done?'var(--border)':'var(--sage)';
+  box.style.color=done?'':'#fff';
+  box.textContent=done?'□':'✓';
+  txt.className='cl-text '+(done?'':'done');
+  txt.style.fontSize='11px';
+}
+
+/* ── BUDGET BUILDER ── */
+const budgetItems={
+  construction:[
+    {name:"Konstruksi & renovation (per m²)",key:"constr_sqm",default:5,unit:"Jt/m²"},
+    {name:"Luas area (m²)",key:"constr_area",default:50,unit:"m²"},
+    {name:"Interior design & finishing",key:"interior",default:30,unit:"Jt"},
+    {name:"Signage & branding exterior",key:"signage",default:10,unit:"Jt"},
+    {name:"Kontijensi konstruksi (20%)",key:"_calc_contr",default:0,unit:"Jt",readonly:true},
+  ],
+  kitchen:[
+    {name:"Peralatan masak utama",key:"kitchen_main",default:50,unit:"Jt"},
+    {name:"Cold storage & refrigerator",key:"kitchen_cold",default:20,unit:"Jt"},
+    {name:"Small wares & utensils",key:"kitchen_small",default:10,unit:"Jt"},
+    {name:"Furniture & perabot (FOH)",key:"furniture",default:25,unit:"Jt"},
+    {name:"POS & tech equipment",key:"pos",default:8,unit:"Jt"},
+  ],
+  setup:[
+    {name:"Deposit sewa (3 bulan)",key:"deposit",default:45,unit:"Jt"},
+    {name:"Free rent period target",key:"freerent",default:0,unit:"Jt (nego)"},
+    {name:"Bahan baku opening stock",key:"opening_stock",default:15,unit:"Jt"},
+    {name:"Marketing & launch campaign",key:"marketing",default:10,unit:"Jt"},
+    {name:"Working capital (3 bulan)",key:"working_cap",default:30,unit:"Jt"},
+    {name:"Legal, izin & konsultan",key:"legal",default:8,unit:"Jt"},
+    {name:"Training & pre-opening ops",key:"training",default:5,unit:"Jt"},
+    {name:"Contingency buffer (10%)",key:"_calc_total",default:0,unit:"Jt",readonly:true},
+  ]
+};
+let bv={constr_sqm:5,constr_area:50,interior:30,signage:10,kitchen_main:50,kitchen_cold:20,kitchen_small:10,furniture:25,pos:8,deposit:45,freerent:0,opening_stock:15,marketing:10,working_cap:30,legal:8,training:5};
+
+function buildBudget(){
+  ['construction','kitchen','setup'].forEach(cat=>{
+    const el=document.getElementById('budget-'+cat);
+    el.innerHTML=budgetItems[cat].filter(i=>!i.key.startsWith('_')).map(item=>`
+      <div class="calc-row">
+        <span class="calc-label">${item.name}</span>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input class="calc-input" type="number" value="${item.default}" style="width:90px" onchange="updateBV('${item.key}',this.value)">
+          <span style="font-size:10px;color:var(--muted);white-space:nowrap">${item.unit}</span>
+        </div>
+      </div>`).join('');
+    if(cat==='construction'){
+      el.innerHTML+=`<div style="font-size:11px;color:var(--rust);padding:6px 0;border-top:1px solid var(--border)">+ Kontijensi 20% dihitung otomatis</div>`;
+    }
+  });
+  updateBudgetSummary();
+}
+
+function updateBV(key,val){bv[key]=parseFloat(val)||0;updateBudgetSummary();}
+
+function updateBudgetSummary(){
+  const constrBase=(bv.constr_sqm*bv.constr_area)+bv.interior+bv.signage;
+  const constrTotal=constrBase*1.2;
+  const kitchenTotal=bv.kitchen_main+bv.kitchen_cold+bv.kitchen_small+bv.furniture+bv.pos;
+  const setupBase=bv.deposit+bv.opening_stock+bv.marketing+bv.working_cap+bv.legal+bv.training;
+  const grandBase=constrTotal+kitchenTotal+setupBase;
+  const contingency=grandBase*0.1;
+  const grand=grandBase+contingency;
+  
+  const el=document.getElementById('budget-summary');
+  el.innerHTML=`
+    <div class="calc-row"><span class="calc-label">Konstruksi & Interior</span><span style="font-weight:700;color:var(--gold)">Rp ${Math.round(constrTotal).toLocaleString('id')} Jt</span></div>
+    <div class="calc-row"><span class="calc-label">Kitchen & Equipment</span><span style="font-weight:700;color:var(--gold)">Rp ${Math.round(kitchenTotal).toLocaleString('id')} Jt</span></div>
+    <div class="calc-row"><span class="calc-label">Pre-opening Setup</span><span style="font-weight:700;color:var(--gold)">Rp ${Math.round(setupBase).toLocaleString('id')} Jt</span></div>
+    <div class="calc-row"><span class="calc-label">Contingency Buffer (10%)</span><span style="font-weight:700;color:var(--rust)">Rp ${Math.round(contingency).toLocaleString('id')} Jt</span></div>
+    <div class="calc-result">
+      <div><div class="cr-label">Total Capex Dibutuhkan</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">Termasuk semua buffer</div></div>
+      <div class="cr-val">Rp ${Math.round(grand).toLocaleString('id')} Jt</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <strong>Warung/Warteg:</strong> Est. Rp 30–80 Jt<br>
+      <strong>Kafe kecil (20–40 kursi):</strong> Est. Rp 150–400 Jt<br>
+      <strong>Resto casual (50–80 kursi):</strong> Est. Rp 400–900 Jt<br>
+      <strong>Fine Dining:</strong> Est. Rp 1–3 Milyar
+    </div>
+    <button onclick="sendPrompt('Total capex pre-opening saya sekitar Rp ${Math.round(grand)} juta. Bantu saya analisis opsi funding: modal sendiri, pinjaman bank, atau cari investor, termasuk struktur yang paling menguntungkan')" style="margin-top:10px;background:var(--espresso);color:#FAF7F2;border:none;padding:8px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;width:100%">Analisis opsi funding untuk angka ini ↗</button>`;
+}
+
+/* ── LEASE NEGOTIATOR ── */
+function buildLease(){
+  const lc=document.getElementById('lease-calc');
+  lc.innerHTML=`
+    <div class="calc-row"><span class="calc-label">Base rent (Jt/bulan)</span><input class="calc-input" id="l-base" type="number" value="20" onchange="calcLease()"></div>
+    <div class="calc-row"><span class="calc-label">Service charge (Jt/bulan)</span><input class="calc-input" id="l-sc" type="number" value="3" onchange="calcLease()"></div>
+    <div class="calc-row"><span class="calc-label">Estimasi PBB & asuransi (Jt/thn)</span><input class="calc-input" id="l-pbb" type="number" value="5" onchange="calcLease()"></div>
+    <div class="calc-row"><span class="calc-label">Target revenue bulan 3 (Jt)</span><input class="calc-input" id="l-rev" type="number" value="150" onchange="calcLease()"></div>
+    <div class="calc-row"><span class="calc-label">Eskalasi sewa/tahun (%)</span><input class="calc-input" id="l-esc" type="number" value="8" onchange="calcLease()"></div>
+    <div id="lease-result"></div>`;
+  
+  const nego=document.getElementById('nego-playbook');
+  const clauses=[
+    {term:"Break Clause",priority:"WAJIB",c:"rust",ask:"Minta break clause di tahun ke-2 atau ke-3 dengan notice 3–6 bulan. Ini exit ramp jika bisnis tidak perform.",desc:"Hak untuk terminasi kontrak sebelum expired dengan notice period"},
+    {term:"Rent-Free Period",priority:"WAJIB",c:"rust",ask:"Target 2–3 bulan rent-free di awal. Justifikasi: waktu fit-out + ramp-up periode sebelum revenue stabil.",desc:"Periode sewa gratis selama setup & masa ramp-up bisnis"},
+    {term:"Fit-Out Contribution",priority:"Sangat penting",c:"gold",ask:"Minta landlord contribute 20–50% biaya fit-out untuk kontrak >3 tahun. Kurang umum tapi possible untuk lokasi premium.",desc:"Kontribusi finansial dari landlord untuk biaya renovasi"},
+    {term:"Rent Escalation Cap",priority:"WAJIB",c:"rust",ask:"Cap eskalasi di 5–8%/tahun atau dikaitkan ke CPI (inflasi resmi). Tanpa ini, sewa bisa naik tak terbatas.",desc:"Batas maksimum kenaikan sewa per tahun"},
+    {term:"Subletting & Assignment",priority:"Penting",c:"blue",ask:"Pastikan lo boleh sublease atau assign kontrak jika mau jual bisnis. Krusial untuk exit flexibility.",desc:"Hak memindahkan kontrak ke pihak lain saat bisnis dijual"},
+    {term:"Graduated Rent Structure",priority:"Sangat penting",c:"gold",ask:"Minta ramp-up rent: 50% di bulan 1–3, 75% di bulan 4–6, 100% mulai bulan 7. Reduce cash burn awal.",desc:"Sewa mulai rendah lalu meningkat seiring ramp-up bisnis"},
+    {term:"Exclusivity Clause",priority:"Situasional",c:"sage",ask:"Jika konsep lo unik (mis. specialty coffee, bubble tea), minta hak eksklusif — landlord tidak boleh sewa ke kompetitor langsung.",desc:"Proteksi dari kompetitor serupa di properti yang sama"},
+    {term:"Signage Rights",priority:"Penting",c:"blue",ask:"Pastikan hak signage fasad, directional sign, dan listing di direktori gedung. Visibility = traffic.",desc:"Hak memasang signage brand di eksterior & dalam properti"},
+    {term:"Personal Guarantee Cap",priority:"WAJIB",c:"rust",ask:"Cap personal guarantee di 6–12 bulan sewa saja. Jangan accept unlimited personal guarantee.",desc:"Batasi eksposur personal liability jika bisnis gagal"},
+  ];
+  nego.innerHTML=clauses.map(c=>`
+    <div class="nego-card">
+      <div class="nego-head">
+        <span class="nego-term">${c.term}</span>
+        <span class="nego-priority" style="background:${c.c==='rust'?'var(--rust-bg)':c.c==='gold'?'var(--gold-bg)':c.c==='sage'?'var(--sage-bg)':'var(--blue-bg)'};color:${c.c==='rust'?'var(--rust)':c.c==='gold'?'var(--gold)':c.c==='sage'?'var(--sage)':'var(--blue)'}">${c.priority}</span>
+      </div>
+      <div class="nego-body">${c.desc}</div>
+      <div class="nego-ask">→ ${c.ask}</div>
+    </div>`).join('');
+
+  const rf=document.getElementById('red-flags');
+  rf.innerHTML=`
+    ${[
+      {flag:"Sewa dihitung % revenue (turnover rent)",warn:"Jika bisnis bagus, sewa ikut naik. Cek struktur — mana yang berlaku, base rent atau % revenue, whichever higher?"},
+      {flag:"Tidak ada klausul force majeure",warn:"Jika terjadi pandemi/bencana/kebakaran, lo tetap bayar sewa penuh. Negosiasi force majeure clause."},
+      {flag:"Landlord bisa terminasi kapan saja",warn:"Lo tidak punya security of tenure. Pastikan minimal ada notice period 6 bulan dari landlord."},
+      {flag:"Personal guarantee unlimited & tanpa batas waktu",warn:"Lo bisa dikejar secara personal untuk semua kewajiban sewa meski bisnis tutup. Cap ini."},
+      {flag:"Service charge tidak di-cap atau undefined",warn:"Bisa naik tak terbatas. Minta cap service charge atau fixed amount per kontrak."},
+    ].map(r=>`<div class="calc-row"><div><div style="font-size:12px;font-weight:700;color:var(--rust)">🚩 ${r.flag}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${r.warn}</div></div></div>`).join('')}`;
+  
+  calcLease();
+}
+
+function calcLease(){
+  const base=parseFloat(document.getElementById('l-base')?.value)||20;
+  const sc=parseFloat(document.getElementById('l-sc')?.value)||3;
+  const pbb=(parseFloat(document.getElementById('l-pbb')?.value)||5)/12;
+  const rev=parseFloat(document.getElementById('l-rev')?.value)||150;
+  const esc=parseFloat(document.getElementById('l-esc')?.value)||8;
+  const totalMonthly=base+sc+pbb;
+  const ratio=(totalMonthly/rev*100);
+  const y5total=(base*12*((Math.pow(1+esc/100,5)-1)/(esc/100)))+((sc+pbb)*12*5);
+  
+  document.getElementById('lease-result').innerHTML=`
+    <div class="calc-result">
+      <div><div class="cr-label">True Occupancy/bulan</div></div>
+      <div class="cr-val">Rp ${totalMonthly.toFixed(1)} Jt</div>
+    </div>`;
+  
+  const lh=document.getElementById('lease-health');
+  const color=ratio<10?'var(--sage)':ratio<14?'var(--gold)':'var(--rust)';
+  const status=ratio<10?'✅ Sehat':ratio<14?'⚠️ Borderline':'❌ Terlalu Tinggi';
+  lh.innerHTML=`
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:36px;font-weight:700;color:${color}">${ratio.toFixed(1)}%</div>
+      <div style="font-size:13px;color:${color};font-weight:600;margin-top:2px">${status}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">dari target revenue bulan ke-3</div>
+    </div>
+    <div style="margin:8px 0">
+      <div class="risk-bar-wrap">
+        <div class="risk-name"><span>Occupancy ratio</span><span style="font-weight:700;color:${color}">${ratio.toFixed(1)}%</span></div>
+        <div class="risk-bar"><div class="risk-fill" style="width:${Math.min(ratio/20*100,100)}%;background:${color}"></div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:8px">
+      <strong>Benchmark F&B:</strong><br>
+      < 8% = Excellent deal<br>
+      8–12% = Good — pursue<br>
+      12–15% = Acceptable if high traffic<br>
+      > 15% = Danger zone<br><br>
+      <strong>5-tahun total cost:</strong> <span style="font-weight:700;color:var(--rust)">Rp ${Math.round(y5total).toLocaleString('id')} Jt</span>
+    </div>`;
+}
+
+/* ── COMPLIANCE ── */
+const izinList=[
+  {name:"NIB (Nomor Induk Berusaha)",via:"OSS RBA — oss.go.id",time:"3–7 hari",cat:"Wajib",color:"rust"},
+  {name:"Sertifikat Standar Usaha Restoran",via:"OSS RBA setelah NIB",time:"7–14 hari",cat:"Wajib",color:"rust"},
+  {name:"SLF/PBG (Sertifikat Laik Fungsi)",via:"Dinas PUPR Setempat",time:"30–90 hari",cat:"Wajib",color:"rust"},
+  {name:"Izin Gangguan / SITU",via:"Pemerintah Kota/Kab",time:"14–30 hari",cat:"Tergantung daerah",color:"gold"},
+  {name:"Izin Usaha Industri / PIRT",via:"Dinas Kesehatan (jika produksi makanan)",time:"7–21 hari",cat:"Jika berlaku",color:"blue"},
+  {name:"NPWP Badan Usaha",via:"DJP/Kantor Pajak",time:"1–3 hari",cat:"Wajib",color:"rust"},
+  {name:"PKP (Pengusaha Kena Pajak)",via:"Kantor Pajak — jika omset >4.8M/thn",time:"3–7 hari",cat:"Kondisional",color:"gold"},
+  {name:"Sertifikasi Halal",via:"BPJPH / MUI",time:"14–45 hari",cat:"Sangat direkomendasikan",color:"sage"},
+  {name:"BPJS Ketenagakerjaan",via:"bpjsketenagakerjaan.go.id",time:"1–3 hari",cat:"Wajib",color:"rust"},
+  {name:"BPJS Kesehatan (Badan)",via:"bpjs-kesehatan.go.id",time:"1–3 hari",cat:"Wajib",color:"rust"},
+];
+let izinDone=new Array(izinList.length).fill(false);
+
+function buildCompliance(){
+  const el=document.getElementById('izin-list');
+  el.innerHTML=izinList.map((item,i)=>`
+    <div class="comp-item" onclick="toggleIzin(${i})" style="cursor:pointer">
+      <div class="comp-icon" id="izin-icon-${i}" style="background:${izinDone[i]?'var(--sage-bg)':'var(--border)'};color:${izinDone[i]?'var(--sage)':'var(--muted)'}">
+        ${izinDone[i]?'✓':'○'}
+      </div>
+      <div class="comp-body">
+        <h5 id="izin-name-${i}" style="${izinDone[i]?'text-decoration:line-through;opacity:.5':''}">${item.name}</h5>
+        <p>${item.via}</p>
+        <div class="comp-meta">
+          <span class="cmeta" style="background:${item.color==='rust'?'var(--rust-bg)':item.color==='gold'?'var(--gold-bg)':item.color==='sage'?'var(--sage-bg)':'var(--blue-bg)'};color:${item.color==='rust'?'var(--rust)':item.color==='gold'?'var(--gold)':item.color==='sage'?'var(--sage)':'var(--blue)'}">${item.cat}</span>
+          <span class="cmeta" style="background:var(--cream);color:var(--muted)">⏱ ${item.time}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  updateIzinProgress();
+  
+  document.getElementById('license-timeline').innerHTML=`
+    <div class="timeline" style="margin-left:16px">
+      ${[
+        {w:"T-16 s/d T-14",items:"Mulai proses NIB di OSS, daftar NPWP badan",c:"blue"},
+        {w:"T-14 s/d T-12",items:"TTD kontrak sewa → trigger SLF/PBG application",c:"gold"},
+        {w:"T-12 s/d T-8",items:"Proses SLF (paling lama) — mulai paralel saat konstruksi",c:"rust"},
+        {w:"T-8 s/d T-6",items:"Daftar BPJS untuk semua karyawan yang di-hire",c:"sage"},
+        {w:"T-6 s/d T-4",items:"Proses sertifikasi halal jika diperlukan",c:"gold"},
+        {w:"T-4",items:"Semua izin harus beres sebelum soft opening",c:"rust"},
+      ].map(t=>`<div class="t-item" style="--c:${t.c}">
+        <div style="position:absolute;left:-20px;top:5px;width:8px;height:8px;border-radius:50%;background:${t.c==='rust'?'var(--rust)':t.c==='gold'?'var(--gold)':t.c==='blue'?'var(--blue)':'var(--sage)'};"></div>
+        <h5>${t.w}</h5><p>${t.items}</p>
+      </div>`).join('')}
+    </div>`;
+  
+  document.getElementById('license-tips').innerHTML=`
+    ${["Hire konsultan perizinan lokal — cost Rp 5–15jt tapi bisa hemat 2–4 bulan",
+       "Proses SLF/PBG paralel dengan konstruksi, bukan setelah selesai",
+       "Bangun relasi baik dengan Dinas setempat — kunjungi langsung, jangan hanya kirim dokumen",
+       "Siapkan semua dokumen dalam satu folder digital & fisik sebelum mulai proses",
+       "Cek regulasi daerah spesifik — setiap kota bisa berbeda"
+    ].map(t=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04)"><span style="color:var(--sage);flex-shrink:0">✓</span><span style="font-size:11px;color:var(--muted);line-height:1.5">${t}</span></div>`).join('')}`;
+}
+
+function toggleIzin(i){
+  izinDone[i]=!izinDone[i];
+  const done=izinDone[i];
+  const icon=document.getElementById(`izin-icon-${i}`);
+  const name=document.getElementById(`izin-name-${i}`);
+  if(icon){icon.style.background=done?'var(--sage-bg)':'var(--border)';icon.style.color=done?'var(--sage)':'var(--muted)';icon.textContent=done?'✓':'○';}
+  if(name){name.style.textDecoration=done?'line-through':'none';name.style.opacity=done?'.5':'1';}
+  updateIzinProgress();
+}
+function updateIzinProgress(){
+  const done=izinDone.filter(Boolean).length;
+  const el=document.getElementById('izin-progress');
+  if(el){el.textContent=`${done}/${izinList.length} selesai`;}
+}
+
+/* ── GO/NO-GO ── */
+const gngItems=[
+  {cat:"Market Validation",items:[
+    "Survei 50+ potential customer selesai","Competitor gap confirmed (ada peluang)","Price point validated di pasar","Konsep & positioning jelas & terdiferensiasi"],c:"blue"},
+  {cat:"Financial Readiness",items:[
+    "Total capex sudah dikalkulas & dana tersedia","Working capital 3 bulan tersedia","Break-even analysis selesai & realistis","P&L proyeksi 12 bulan sudah dibuat"],c:"gold"},
+  {cat:"Legal & Location",items:[
+    "Lokasi terpilih dengan score ≥70/100","Kontrak sewa sudah review lawyer","SLF/PBG sedang diproses","NIB sudah diterbitkan"],c:"purple"},
+  {cat:"Operations Readiness",items:[
+    "Chef/operator utama sudah recruited","Menu final dengan food cost di bawah 35%","POS system sudah dipilih & terinstall","Vendor bahan baku minimal 2 per kategori"],c:"sage"},
+];
+let gngState={};
+
+function buildGnG(){
+  const left=document.getElementById('gng-left');
+  left.innerHTML=gngItems.map((cat,ci)=>`
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch"><span class="ct">${cat.cat}</span><span id="gng-count-${ci}" class="badge" style="background:var(--blue-bg);color:var(--blue)">0/${cat.items.length}</span></div>
+      <div class="cb">
+        ${cat.items.map((item,ii)=>`
+          <div class="cl-item" onclick="toggleGnG(${ci},${ii})">
+            <div class="cl-box" id="gng-box-${ci}-${ii}">□</div>
+            <div class="cl-text" id="gng-txt-${ci}-${ii}">${item}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  updateGnGVerdict();
+}
+
+function toggleGnG(ci,ii){
+  if(!gngState[ci])gngState[ci]={};
+  gngState[ci][ii]=!gngState[ci][ii];
+  const done=gngState[ci][ii];
+  const box=document.getElementById(`gng-box-${ci}-${ii}`);
+  const txt=document.getElementById(`gng-txt-${ci}-${ii}`);
+  if(box){box.style.background=done?'var(--sage)':'';box.style.borderColor=done?'var(--sage)':'var(--border)';box.style.color=done?'#fff':'';box.textContent=done?'✓':'□';}
+  if(txt){txt.className='cl-text '+(done?'done':'');}
+  const total=gngItems[ci].items.length;
+  const doneCount=Object.values(gngState[ci]||{}).filter(Boolean).length;
+  const cnt=document.getElementById(`gng-count-${ci}`);
+  if(cnt)cnt.textContent=`${doneCount}/${total}`;
+  updateGnGVerdict();
+}
+
+function updateGnGVerdict(){
+  let total=0,done=0;
+  gngItems.forEach((cat,ci)=>{
+    total+=cat.items.length;
+    done+=Object.values(gngState[ci]||{}).filter(Boolean).length;
+  });
+  const pct=Math.round(done/total*100);
+  const verdict=document.getElementById('gng-verdict');
+  const color=pct>=90?'var(--sage)':pct>=70?'var(--gold)':'var(--rust)';
+  const status=pct>=90?'🟢 GO — Siap Launch':pct>=70?'🟡 Conditional Go — Selesaikan dulu':'🔴 NO-GO — Terlalu banyak gap';
+  verdict.innerHTML=`
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:40px;font-weight:700;color:${color}">${pct}%</div>
+      <div style="font-size:14px;font-weight:700;color:${color};margin-top:4px">${status}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${done}/${total} critical items selesai</div>
+    </div>
+    <div style="margin-top:8px">
+      <div class="risk-bar"><div class="risk-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;padding-top:8px;border-top:1px solid var(--border)">
+      ${pct>=90?'Semua indikator utama sudah terpenuhi. Lanjutkan ke soft opening.':
+       pct>=70?'Mayoritas sudah siap tapi ada gap yang harus diselesaikan dulu sebelum commit ke grand opening.':
+       'Masih banyak yang belum siap. Jangan buka sebelum gap critical terselesaikan — risiko sangat tinggi.'}
+    </div>`;
+  
+  const rs=document.getElementById('risk-summary');
+  rs.innerHTML=`
+    ${[
+      {name:"Capital risk",val:pct<70?85:pct<90?45:20,c:"var(--rust)"},
+      {name:"Operational risk",val:pct<70?75:pct<90?40:15,c:"var(--gold)"},
+      {name:"Market risk",val:35,c:"var(--blue)"},
+      {name:"Compliance risk",val:pct<80?60:25,c:"var(--purple)"},
+    ].map(r=>`<div class="risk-bar-wrap">
+      <div class="risk-name"><span style="font-size:11px">${r.name}</span><span style="font-size:11px;font-weight:700;color:${r.c}">${r.val}%</span></div>
+      <div class="risk-bar"><div class="risk-fill" style="width:${r.val}%;background:${r.c}"></div></div>
+    </div>`).join('')}`;
+}
+
+/* ── TAB SWITCH ── */
+function switchTab(idx,el){
+  document.querySelectorAll('.content').forEach((c,i)=>c.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* INIT */
+buildTimeline();
+buildChecklist(phase1,'cl-phase1','p1');
+buildChecklist(phase2,'cl-phase2','p2');
+buildChecklist(phase3a,'cl-phase3a','p3a');
+buildChecklist(phase3b,'cl-phase3b','p3b');
+buildMatrix();
+buildDDChecklist();
+buildBudget();
+buildLease();
+buildCompliance();
+buildGnG();
+</script>
