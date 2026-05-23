@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arief Permadi Kuntoaji — Operations & Logistics Leader</title>
+<title>Arief Permadi Kuntoaji — Operations & Business Growth Leader</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,492 +15,155 @@
     --text: #e8e6df;
     --muted: #8a8680;
     --border: rgba(201,168,76,0.18);
-    --accent: #2a4a7f;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
-  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
   /* NAV */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(13,15,20,0.85);
-    backdrop-filter: blur(16px);
+    background: rgba(13,15,20,0.88); backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
-    padding: 0 5vw;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
+    padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; height: 60px;
   }
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    color: var(--gold);
-    letter-spacing: 0.04em;
-  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold); letter-spacing: 0.04em; }
   .nav-links { display: flex; gap: 2rem; }
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
   .nav-links a:hover { color: var(--gold); }
 
   /* HERO */
   .hero {
-    min-height: 100vh;
-    display: flex; align-items: center;
-    padding: 80px 5vw 60px;
-    position: relative;
-    overflow: hidden;
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 80px 5vw 60px; position: relative; overflow: hidden;
   }
-
   .hero-bg {
     position: absolute; inset: 0;
     background:
       radial-gradient(ellipse 80% 60% at 70% 50%, rgba(42,74,127,0.18) 0%, transparent 65%),
       radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,168,76,0.07) 0%, transparent 60%);
   }
-
   .hero-grid-lines {
     position: absolute; inset: 0; opacity: 0.04;
-    background-image:
-      linear-gradient(var(--gold) 1px, transparent 1px),
-      linear-gradient(90deg, var(--gold) 1px, transparent 1px);
+    background-image: linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px);
     background-size: 60px 60px;
   }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
 
-  .hero-content {
-    position: relative; z-index: 1;
-    max-width: 780px;
-  }
-
-  .hero-eyebrow {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 1.5rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.2s forwards;
-  }
-
-  .hero-name {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 7vw, 5.5rem);
-    font-weight: 900;
-    line-height: 1.0;
-    margin-bottom: 0.4rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.35s forwards;
-  }
-
+  .hero-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.2s forwards; }
+  .hero-name { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.0; margin-bottom: 0.4rem; opacity: 0; animation: fadeUp 0.7s ease 0.35s forwards; }
   .hero-name span { color: var(--gold); }
+  .hero-title { font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 300; color: var(--muted); margin-bottom: 2rem; letter-spacing: 0.03em; opacity: 0; animation: fadeUp 0.7s ease 0.5s forwards; }
+  .hero-divider { width: 60px; height: 2px; background: var(--gold); margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.7s ease 0.6s forwards; }
+  .hero-summary { font-size: 1rem; line-height: 1.8; color: #b0aca4; max-width: 660px; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.7s forwards; }
 
-  .hero-title {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    font-weight: 300;
-    color: var(--muted);
-    margin-bottom: 2rem;
-    letter-spacing: 0.03em;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.5s forwards;
-  }
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.85s forwards; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold); line-height: 1; }
+  .stat-label { font-size: 0.73rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem; }
 
-  .hero-divider {
-    width: 60px; height: 2px;
-    background: var(--gold);
-    margin-bottom: 2rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.6s forwards;
-  }
+  .hero-contacts { display: flex; gap: 1.2rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.7s ease 1s forwards; }
+  .contact-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 4px; font-size: 0.82rem; font-weight: 500; text-decoration: none; letter-spacing: 0.06em; transition: all 0.2s; border: 1px solid var(--border); color: var(--text); background: var(--bg2); }
+  .contact-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .contact-btn.primary { background: var(--gold); color: #0d0f14; border-color: var(--gold); font-weight: 600; }
+  .contact-btn.primary:hover { background: var(--gold-light); color: #0d0f14; }
 
-  .hero-summary {
-    font-size: 1rem;
-    line-height: 1.75;
-    color: #b0aca4;
-    max-width: 640px;
-    margin-bottom: 2.5rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.7s forwards;
-  }
-
-  .hero-stats {
-    display: flex; gap: 2.5rem; flex-wrap: wrap;
-    margin-bottom: 2.5rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.85s forwards;
-  }
-
-  .stat { }
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 0.2rem;
-  }
-
-  .hero-contacts {
-    display: flex; gap: 1.2rem; flex-wrap: wrap;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 1s forwards;
-  }
-
-  .contact-btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.65rem 1.3rem;
-    border-radius: 4px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    text-decoration: none;
-    letter-spacing: 0.06em;
-    transition: all 0.2s;
-    border: 1px solid var(--border);
-    color: var(--text);
-    background: var(--bg2);
-  }
-  .contact-btn:hover {
-    border-color: var(--gold);
-    color: var(--gold);
-    background: rgba(201,168,76,0.06);
-  }
-  .contact-btn.primary {
-    background: var(--gold);
-    color: #0d0f14;
-    border-color: var(--gold);
-    font-weight: 600;
-  }
-  .contact-btn.primary:hover {
-    background: var(--gold-light);
-    color: #0d0f14;
-  }
-
-  /* SECTION COMMON */
-  section {
-    padding: 90px 5vw;
-  }
-
-  .section-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.8rem;
-  }
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    font-weight: 700;
-    margin-bottom: 1rem;
-    line-height: 1.15;
-  }
-  .section-divider {
-    width: 40px; height: 2px;
-    background: var(--gold);
-    margin-bottom: 3rem;
-  }
+  /* PILLARS */
+  #pillars { background: var(--bg2); padding: 90px 5vw; }
+  .pillars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+  .pillar-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 2rem 1.8rem; transition: border-color 0.2s, transform 0.2s; }
+  .pillar-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .pillar-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+  .pillar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text); }
+  .pillar-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.65; }
 
   /* COMPETENCIES */
-  #competencies { background: var(--bg2); }
-
-  .comp-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .comp-item {
-    background: var(--bg2);
-    padding: 1.4rem 1.6rem;
-    display: flex; align-items: flex-start; gap: 0.9rem;
-    transition: background 0.2s;
-  }
+  #competencies { padding: 90px 5vw; background: var(--bg); }
+  .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .comp-item { background: var(--bg); padding: 1.3rem 1.6rem; display: flex; align-items: flex-start; gap: 0.9rem; transition: background 0.2s; }
   .comp-item:hover { background: var(--bg3); }
-  .comp-icon {
-    width: 6px; height: 6px;
-    background: var(--gold);
-    border-radius: 50%;
-    margin-top: 0.55rem;
-    flex-shrink: 0;
-  }
-  .comp-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #c0bcb5;
-    font-weight: 400;
-  }
+  .comp-icon { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; margin-top: 0.55rem; flex-shrink: 0; }
+  .comp-text { font-size: 0.88rem; line-height: 1.5; color: #c0bcb5; }
 
   /* EXPERIENCE */
-  #experience { background: var(--bg); }
-
-  .timeline {
-    position: relative;
-    padding-left: 2px;
-  }
-
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 8px; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, var(--gold), transparent);
-  }
-
-  .exp-item {
-    padding-left: 2.5rem;
-    padding-bottom: 3.5rem;
-    position: relative;
-  }
+  #experience { background: var(--bg2); padding: 90px 5vw; }
+  .timeline { position: relative; padding-left: 2px; }
+  .timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--gold), transparent); }
+  .exp-item { padding-left: 2.5rem; padding-bottom: 3.5rem; position: relative; }
   .exp-item:last-child { padding-bottom: 0; }
-
-  .exp-dot {
-    position: absolute;
-    left: -5px; top: 8px;
-    width: 11px; height: 11px;
-    border-radius: 50%;
-    background: var(--gold);
-    box-shadow: 0 0 12px rgba(201,168,76,0.5);
-  }
-
-  .exp-header {
-    margin-bottom: 0.8rem;
-  }
-
-  .exp-period {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.3rem;
-  }
-
-  .exp-role {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 0.3rem;
-  }
-
-  .exp-company {
-    font-size: 0.85rem;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .exp-company span {
-    display: inline-block;
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.2);
-    color: var(--gold);
-    padding: 0.15rem 0.6rem;
-    border-radius: 3px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-left: 0.5rem;
-    vertical-align: middle;
-  }
-
-  .exp-achievements {
-    margin-top: 1rem;
-    list-style: none;
-  }
-
-  .exp-achievements li {
-    padding: 0.45rem 0;
-    padding-left: 1.2rem;
-    position: relative;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: #a8a49d;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
+  .exp-dot { position: absolute; left: -5px; top: 8px; width: 11px; height: 11px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.5); }
+  .exp-period { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+  .exp-role { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.3rem; }
+  .exp-company { font-size: 0.85rem; color: var(--muted); }
+  .exp-company span { display: inline-block; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--gold); padding: 0.15rem 0.6rem; border-radius: 3px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-left: 0.5rem; vertical-align: middle; }
+  .exp-achievements { margin-top: 1rem; list-style: none; }
+  .exp-achievements li { padding: 0.45rem 0; padding-left: 1.2rem; position: relative; font-size: 0.88rem; line-height: 1.65; color: #a8a49d; border-bottom: 1px solid rgba(255,255,255,0.04); }
   .exp-achievements li:last-child { border-bottom: none; }
+  .exp-achievements li::before { content: '→'; position: absolute; left: 0; color: var(--gold); font-size: 0.78rem; top: 0.5rem; }
+  .portfolio-placeholder { margin-top: 1.2rem; padding: 1rem 1.2rem; border: 1px dashed rgba(201,168,76,0.25); border-radius: 6px; background: rgba(201,168,76,0.03); display: flex; align-items: center; gap: 0.8rem; }
+  .pp-icon { width: 32px; height: 32px; background: rgba(201,168,76,0.1); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .pp-text { font-size: 0.78rem; color: var(--muted); font-style: italic; }
 
-  .exp-achievements li::before {
-    content: '→';
-    position: absolute; left: 0;
-    color: var(--gold);
-    font-size: 0.78rem;
-    top: 0.5rem;
-  }
+  /* EDUCATION */
+  #education { background: var(--bg); padding: 90px 5vw; }
+  .edu-cert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .edu-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.8rem; }
+  .edu-card-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+  .edu-degree { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .edu-school { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; }
+  .edu-year { font-size: 0.78rem; color: var(--gold); opacity: 0.7; }
+  .cert-list { list-style: none; }
+  .cert-list li { padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 0.15rem; }
+  .cert-list li:last-child { border-bottom: none; }
+  .cert-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+  .cert-issuer { font-size: 0.76rem; color: var(--muted); }
 
-  /* Portfolio placeholder */
-  .portfolio-placeholder {
-    margin-top: 1.2rem;
-    padding: 1rem 1.2rem;
-    border: 1px dashed rgba(201,168,76,0.25);
-    border-radius: 6px;
-    background: rgba(201,168,76,0.03);
-    display: flex; align-items: center; gap: 0.8rem;
-  }
-  .pp-icon {
-    width: 32px; height: 32px;
-    background: rgba(201,168,76,0.1);
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-  }
-  .pp-text {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-style: italic;
-  }
+  /* SECTION COMMON */
+  .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; margin-bottom: 1rem; line-height: 1.15; }
+  .section-divider { width: 40px; height: 2px; background: var(--gold); margin-bottom: 3rem; }
 
-  /* EDUCATION & CERTS */
-  #education { background: var(--bg2); }
-
-  .edu-cert-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  @media (max-width: 640px) {
-    .edu-cert-grid { grid-template-columns: 1fr; }
-  }
-
-  .edu-card {
+  /* PORTFOLIO CARDS */
+  .portfolio-section { margin-top: 1.4rem; }
+  .portfolio-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.6rem; }
+  .portfolio-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .portfolio-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.9rem; }
+  .port-card {
     background: var(--bg3);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 1.8rem;
+    padding: 1.1rem 1.2rem;
+    text-decoration: none;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
   }
-
-  .edu-card-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 1.2rem;
-  }
-
-  .edu-degree {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-  }
-
-  .edu-school {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 0.2rem;
-  }
-
-  .edu-year {
-    font-size: 0.78rem;
-    color: var(--gold);
-    opacity: 0.7;
-  }
-
-  .cert-list { list-style: none; }
-  .cert-list li {
-    padding: 0.7rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex; flex-direction: column; gap: 0.15rem;
-  }
-  .cert-list li:last-child { border-bottom: none; }
-  .cert-name {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--text);
-  }
-  .cert-issuer {
-    font-size: 0.76rem;
-    color: var(--muted);
-  }
+  .port-card:hover { border-color: var(--gold); transform: translateY(-2px); background: rgba(201,168,76,0.05); }
+  .port-card-icon { font-size: 1.3rem; }
+  .port-card-title { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .port-card-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+  .port-card-cta { font-size: 0.72rem; color: var(--gold); font-weight: 600; letter-spacing: 0.08em; margin-top: auto; padding-top: 0.4rem; display: flex; align-items: center; gap: 0.3rem; }
+  .port-card-cta::after { content: '→'; }
 
   /* FOOTER */
-  footer {
-    background: var(--bg);
-    border-top: 1px solid var(--border);
-    padding: 3rem 5vw;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  .footer-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    color: var(--gold);
-  }
-
-  .footer-tagline {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-top: 0.2rem;
-  }
-
-  .footer-contacts {
-    display: flex; gap: 1.2rem; flex-wrap: wrap;
-  }
-
-  .footer-link {
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
+  footer { background: var(--bg); border-top: 1px solid var(--border); padding: 3rem 5vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; }
+  .footer-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); }
+  .footer-tagline { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .footer-contacts { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .footer-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
   .footer-link:hover { color: var(--gold); }
 
   /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* SCROLLBAR */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 10px; }
 
   @media (max-width: 768px) {
     .nav-links { display: none; }
-    .hero-stats { gap: 1.5rem; }
+    .edu-cert-grid { grid-template-columns: 1fr; }
     footer { flex-direction: column; align-items: flex-start; }
   }
 </style>
@@ -511,7 +174,7 @@
 <nav>
   <div class="nav-logo">AP Kuntoaji</div>
   <div class="nav-links">
-    <a href="#competencies">Competencies</a>
+    <a href="#pillars">Focus Areas</a>
     <a href="#experience">Experience</a>
     <a href="#education">Education</a>
     <a href="#contact">Contact</a>
@@ -523,12 +186,12 @@
   <div class="hero-bg"></div>
   <div class="hero-grid-lines"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow">Operations &amp; Logistics Leader</div>
+    <div class="hero-eyebrow">Operations · Sales · Business Development · Customer Experience</div>
     <h1 class="hero-name">Arief Permadi<br><span>Kuntoaji</span></h1>
-    <p class="hero-title">Warehouse &amp; Supply Chain Management · Multi-Unit Operations · P&amp;L Ownership</p>
+    <p class="hero-title">Driving Revenue Growth, Operational Excellence &amp; Customer-Centric Business Transformation</p>
     <div class="hero-divider"></div>
     <p class="hero-summary">
-      Operations leader dengan pengalaman 10+ tahun mengelola operasional multi-unit di industri F&amp;B, EV retail, medical, dan consumer services. Terbukti menghadirkan penghematan biaya 15%+, kepatuhan SLA 97%, dan scaling tim dari 50 hingga 200+ karyawan di 100+ outlet.
+      Pemimpin operasional dengan 10+ tahun pengalaman mengakselerasi pertumbuhan bisnis, membangun ekosistem penjualan yang skalabel, dan menciptakan pengalaman pelanggan kelas dunia. Terbukti mengoptimalkan P&amp;L, menumbuhkan revenue, dan mengekspansi jaringan bisnis dari 0 hingga 100+ outlet di industri F&amp;B, EV, medical, dan edukasi.
     </p>
     <div class="hero-stats">
       <div class="stat">
@@ -537,15 +200,15 @@
       </div>
       <div class="stat">
         <div class="stat-num">15%+</div>
-        <div class="stat-label">Cost Reduction</div>
+        <div class="stat-label">Cost-to-Revenue Ratio</div>
       </div>
       <div class="stat">
         <div class="stat-num">97%</div>
-        <div class="stat-label">SLA Compliance</div>
+        <div class="stat-label">Customer SLA Rate</div>
       </div>
       <div class="stat">
-        <div class="stat-num">200+</div>
-        <div class="stat-label">Employees Led</div>
+        <div class="stat-num">100+</div>
+        <div class="stat-label">Outlets Scaled</div>
       </div>
     </div>
     <div class="hero-contacts" id="contact">
@@ -556,24 +219,55 @@
   </div>
 </section>
 
+<!-- FOCUS PILLARS -->
+<section id="pillars">
+  <div class="reveal">
+    <div class="section-label">What I Do Best</div>
+    <h2 class="section-title">Focus Areas</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">⚙️</div>
+      <div class="pillar-title">Operations Excellence</div>
+      <div class="pillar-desc">Merancang sistem operasional yang efisien dan skalabel — dari standardisasi proses hingga transformasi multi-unit yang mendorong pertumbuhan bisnis berkelanjutan.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">📈</div>
+      <div class="pillar-title">Sales & Revenue Growth</div>
+      <div class="pillar-desc">Mengoptimalkan performa penjualan melalui pengelolaan P&amp;L end-to-end, strategi pricing, produktivitas tim sales, dan efisiensi cost structure untuk memaksimalkan profitabilitas.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">🚀</div>
+      <div class="pillar-title">Business Development</div>
+      <div class="pillar-desc">Membangun dan mengekspansi jaringan bisnis — dari pembukaan outlet baru, pengembangan hub operasional, hingga skalasi model bisnis ke pasar yang lebih luas.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">🌟</div>
+      <div class="pillar-title">Customer Experience</div>
+      <div class="pillar-desc">Membangun sistem layanan pelanggan kelas dunia dengan SLA compliance tinggi, complaint resolution yang terstruktur, dan after-sales excellence yang memperkuat loyalitas pelanggan.</div>
+    </div>
+  </div>
+</section>
+
 <!-- COMPETENCIES -->
 <section id="competencies">
   <div class="reveal">
-    <div class="section-label">What I bring</div>
-    <h2 class="section-title">Core Competencies</h2>
+    <div class="section-label">Core Strengths</div>
+    <h2 class="section-title">Key Competencies</h2>
     <div class="section-divider"></div>
   </div>
   <div class="comp-grid reveal">
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Enterprise Operations Management &amp; P&amp;L Ownership</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Warehouse Management System (WMS) &amp; ERP Implementation</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Inventory Planning, Control &amp; Distribution</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Multi-Unit Operations Scaling (100+ outlets)</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">SLA Management &amp; After-Sales Service Excellence</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Cost Optimization &amp; Operational Efficiency</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Large-Scale Workforce Leadership (200+ employees)</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Business Transformation &amp; Process Design</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Spare Part Forecasting &amp; Logistics Management</div></div>
-    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Training, Coaching &amp; Team Development</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">End-to-End P&amp;L Ownership &amp; Profitability Management</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Multi-Unit Business Scaling &amp; Expansion (100+ Outlets)</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Sales Performance Optimization &amp; Revenue Growth</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Business Development &amp; New Market Entry</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Customer Experience Design &amp; SLA Management</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">After-Sales Service Excellence &amp; Complaint Resolution</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Operational Transformation &amp; Process Standardization</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Large-Scale Team Leadership &amp; Organizational Development</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Cost Optimization &amp; Operational Efficiency Programs</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Cross-Functional Collaboration &amp; Stakeholder Management</div></div>
   </div>
 </section>
 
@@ -589,110 +283,159 @@
     <!-- Allvacon -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2025 — 2026</div>
-        <div class="exp-role">Operation Manager</div>
-        <div class="exp-company">PT. Allvamed Nuvacon Adigana (Allvacon) <span>Medical</span></div>
-      </div>
+      <div class="exp-period">2025 — 2026</div>
+      <div class="exp-role">Operation Manager</div>
+      <div class="exp-company">PT. Allvamed Nuvacon Adigana (Allvacon) <span>Medical</span></div>
       <ul class="exp-achievements">
-        <li>Meningkatkan kecepatan fulfillment warehouse &amp; service reliability melalui implementasi SLA-driven operational controls</li>
-        <li>Memimpin implementasi WMS penuh — meningkatkan akurasi inventaris, visibilitas stok, dan produktivitas warehouse</li>
-        <li>Menginisiasi transisi ERP untuk mengintegrasikan proses warehouse, inventory, dan technical support secara real-time</li>
-        <li>Mengurangi inventory discrepancies melalui cycle counting terstruktur dan sistem monitoring berbasis sistem</li>
-        <li>Memperkuat operasional technical support dengan SLA performance tracking dan standardized escalation workflow</li>
+        <li>Memimpin transformasi operasional bisnis distribusi alat kesehatan — meningkatkan service reliability dan kecepatan respons kepada pelanggan secara signifikan</li>
+        <li>Merancang dan mengimplementasikan SLA-driven operational controls yang memastikan konsistensi layanan di seluruh touchpoint pelanggan</li>
+        <li>Menginisiasi adopsi sistem ERP untuk meningkatkan visibilitas operasional real-time dan mendukung pengambilan keputusan bisnis yang lebih cepat</li>
+        <li>Memperkuat operasional technical support dengan standardized escalation workflow, meningkatkan customer satisfaction dan kepercayaan klien</li>
       </ul>
       <div class="portfolio-placeholder">
         <div class="pp-icon">📁</div>
-        <div class="pp-text">Portfolio hasil kerja di posisi ini akan segera ditambahkan — WMS implementation report, SLA dashboard, dll.</div>
+        <div class="pp-text">Portfolio hasil kerja akan segera ditambahkan — service performance report, customer satisfaction metrics, dll.</div>
       </div>
     </div>
 
     <!-- Janji Jiwa -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2024 — 2025</div>
-        <div class="exp-role">Operation Manager</div>
-        <div class="exp-company">PT. Kurnia Boga Narayan (Janji Jiwa / Sejuta Jiwa) <span>Retail F&amp;B</span></div>
-      </div>
+      <div class="exp-period">2024 — 2025</div>
+      <div class="exp-role">Operation Manager</div>
+      <div class="exp-company">PT. Kurnia Boga Narayan (Janji Jiwa / Sejuta Jiwa) <span>Retail F&amp;B</span></div>
       <ul class="exp-achievements">
-        <li>Mengelola strategi operasional regional di 100+ outlet dan hub, menyelaraskan pertumbuhan revenue dengan efisiensi operasional</li>
-        <li>Mengelola P&amp;L end-to-end — mengoptimalkan performa sales, produktivitas labor, operasional warehouse, dan struktur biaya</li>
-        <li>Mencapai penghematan biaya operasional 15%+ melalui program efisiensi strategis dan cost governance yang lebih ketat</li>
-        <li>Memimpin ekspansi skala besar: 200+ karyawan, 1.000+ delivery partner, dan berhasil meluncurkan 7 hub operasional baru</li>
-        <li>Menjalankan transformasi operasional yang menstandardisasi proses dan meningkatkan efisiensi lintas unit bisnis</li>
+        <li>Mengelola P&amp;L end-to-end untuk jaringan 100+ outlet — mengoptimalkan performa sales, struktur biaya, dan profitabilitas secara berkelanjutan</li>
+        <li>Mengeksekusi strategi pengembangan bisnis regional yang mendorong revenue growth dan ekspansi jaringan outlet di ekosistem delivery-based retail</li>
+        <li>Berhasil meluncurkan 7 hub operasional baru dan mengekspansi tim dari 200+ karyawan serta 1.000+ delivery partner</li>
+        <li>Mencapai efisiensi biaya operasional 15%+ melalui program optimasi yang terstruktur tanpa mengorbankan kualitas layanan pelanggan</li>
+        <li>Memimpin transformasi operasional yang menstandardisasi customer journey dan meningkatkan konsistensi pengalaman pelanggan di seluruh outlet</li>
       </ul>
-      <div class="portfolio-placeholder">
-        <div class="pp-icon">📁</div>
-        <div class="pp-text">Portfolio hasil kerja di posisi ini akan segera ditambahkan — operational report, hub expansion data, P&amp;L summary, dll.</div>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://ariefkunto.github.io/ariefpermadi/fnb_preopening_command_center.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🏗️</div>
+            <div class="port-card-title">F&amp;B Pre-Opening Command Center</div>
+            <div class="port-card-desc">Dashboard terpadu untuk mengelola seluruh tahapan pre-opening outlet F&amp;B baru dari satu platform.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/Audit_Operasional_Tools.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📋</div>
+            <div class="port-card-title">Audit Operasional F&amp;B</div>
+            <div class="port-card-desc">Tools audit operasional untuk memastikan standar kualitas dan kepatuhan proses di seluruh jaringan outlet.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SOP_Framework_Complete.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📐</div>
+            <div class="port-card-title">SOP Framework &amp; Builder</div>
+            <div class="port-card-desc">Framework lengkap untuk membangun dan mendokumentasikan SOP operasional secara terstruktur dan konsisten.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+        </div>
       </div>
     </div>
 
     <!-- SELIS -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2021 — 2024</div>
-        <div class="exp-role">After Sales Manager</div>
-        <div class="exp-company">PT. Selis Retail Indonesia (SELIS) <span>EV Retail</span></div>
-      </div>
+      <div class="exp-period">2021 — 2024</div>
+      <div class="exp-role">After Sales Manager</div>
+      <div class="exp-company">PT. Selis Retail Indonesia (SELIS) <span>EV Retail</span></div>
       <ul class="exp-achievements">
-        <li>Mencapai SLA compliance 97% di seluruh operasional regional, memperkuat kepercayaan pelanggan dan kredibilitas brand</li>
-        <li>Mengelola dan mengembangkan 50+ anggota tim customer service dan teknis, meningkatkan produktivitas dan kapabilitas layanan</li>
-        <li>Mengawasi spare part warehouse termasuk inventory planning, pemantauan stok, dan distribusi ke berbagai service point</li>
-        <li>Mengelola forecasting spare part, kontrol inventaris, dan proses distribusi untuk memastikan kesiapan operasional</li>
-        <li>Mengawasi anggaran operasional after-sales dan alokasi sumber daya untuk efisiensi biaya yang berkelanjutan</li>
+        <li>Mencapai SLA compliance 97% di seluruh operasional regional — membangun kepercayaan pelanggan yang kuat dan meningkatkan retensi customer</li>
+        <li>Mengelola dan mengembangkan 50+ tim customer service dan teknisi — membangun kultur pelayanan yang berorientasi pada kepuasan pelanggan</li>
+        <li>Merancang sistem customer complaint handling yang terstruktur, mempercepat resolusi dan meningkatkan Net Promoter Score secara konsisten</li>
+        <li>Mengelola anggaran operasional after-sales dan alokasi sumber daya untuk mempertahankan profitabilitas layanan purna jual</li>
       </ul>
-      <div class="portfolio-placeholder">
-        <div class="pp-icon">📁</div>
-        <div class="pp-text">Portfolio hasil kerja akan segera ditambahkan — SLA tracking report, service ops dashboard, dll.</div>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_SLA_Dashboard.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📊</div>
+            <div class="port-card-title">SLA Performance Dashboard</div>
+            <div class="port-card-desc">Monitoring SLA compliance 97% per region, kategori keluhan, trend bulanan, dan breach tracker real-time.</div>
+            <div class="port-card-cta">Lihat Dashboard</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_CSAT_NPS_Report.html" target="_blank" class="port-card">
+            <div class="port-card-icon">⭐</div>
+            <div class="port-card-title">CSAT &amp; NPS Report</div>
+            <div class="port-card-desc">Laporan kepuasan pelanggan — NPS score 62, rating distribution, feedback themes, dan verbatim analysis.</div>
+            <div class="port-card-cta">Lihat Report</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_Service_Pipeline.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🎫</div>
+            <div class="port-card-title">Service Request Pipeline</div>
+            <div class="port-card-desc">Kanban board pengelolaan tiket after-sales — dari New hingga Closed, dengan filter prioritas dan detail ticket.</div>
+            <div class="port-card-cta">Lihat Pipeline</div>
+          </a>
+        </div>
       </div>
     </div>
 
     <!-- Alqolam -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2018 — 2021</div>
-        <div class="exp-role">After Sales Manager</div>
-        <div class="exp-company">PT. Hidayah Insan Mulia (Alqolam) <span>EdTech</span></div>
-      </div>
+      <div class="exp-period">2018 — 2021</div>
+      <div class="exp-role">After Sales Manager</div>
+      <div class="exp-company">PT. Hidayah Insan Mulia (Alqolam) <span>EdTech</span></div>
       <ul class="exp-achievements">
-        <li>Membangun standardized service workflows dan prosedur complaint-handling untuk memperkuat tata kelola nasional</li>
-        <li>Mengimplementasikan performance monitoring system yang meningkatkan produktivitas dan mengurangi response time operasional</li>
-        <li>Mengelola spare part planning, inventory control, dan distribusi di berbagai area layanan</li>
+        <li>Membangun standardized service workflows dan sistem complaint handling yang memperkuat kepuasan pelanggan secara nasional</li>
+        <li>Mengimplementasikan performance monitoring system yang meningkatkan produktivitas tim layanan dan mengurangi response time pelanggan</li>
+        <li>Memastikan ketersediaan layanan purna jual yang konsisten di berbagai wilayah untuk mendukung pengalaman pelanggan yang seamless</li>
       </ul>
-      <div class="portfolio-placeholder">
-        <div class="pp-icon">📁</div>
-        <div class="pp-text">Portfolio hasil kerja akan segera ditambahkan.</div>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://care.alqolam.com" target="_blank" class="port-card">
+            <div class="port-card-icon">🌐</div>
+            <div class="port-card-title">Alqolam Care Portal</div>
+            <div class="port-card-desc">Platform customer care nasional yang dikelola — complaint handling, service tracking, dan dukungan pelanggan.</div>
+            <div class="port-card-cta">Kunjungi Portal</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_escalation_matrix.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🔀</div>
+            <div class="port-card-title">Escalation Matrix Tool</div>
+            <div class="port-card-desc">Tool interaktif untuk menentukan jalur eskalasi, response time target, dan action checklist berdasarkan tipe &amp; severity keluhan.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_rca.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🔍</div>
+            <div class="port-card-title">Root Cause Analysis Tool</div>
+            <div class="port-card-desc">Template RCA terstruktur dengan 5-Why analysis, fishbone diagram, corrective action plan, dan sign-off resmi.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_weekly_report.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📋</div>
+            <div class="port-card-title">Weekly Report Generator</div>
+            <div class="port-card-desc">Generator laporan mingguan after-sales otomatis — input data, langsung generate report siap presentasi ke manajemen.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+        </div>
       </div>
     </div>
 
     <!-- Pedro -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2016 — 2017</div>
-        <div class="exp-role">Training &amp; Development Specialist</div>
-        <div class="exp-company">PT. Kurnia Ciptamoda Gemilang (Pedro) <span>Fashion Retail</span></div>
-      </div>
+      <div class="exp-period">2016 — 2017</div>
+      <div class="exp-role">Training &amp; Development Specialist</div>
+      <div class="exp-company">PT. Kurnia Ciptamoda Gemilang (Pedro) <span>Fashion Retail</span></div>
       <ul class="exp-achievements">
-        <li>Merancang dan mengimplementasikan program pelatihan operasional &amp; kepemimpinan untuk store teams dan supervisors</li>
-        <li>Memperkuat standar eksekusi operasional dan layanan di jaringan ritel fashion nasional</li>
+        <li>Merancang dan mengimplementasikan program pelatihan sales, layanan pelanggan, dan kepemimpinan operasional untuk store teams dan supervisors</li>
+        <li>Membangun budaya pelayanan prima yang konsisten di jaringan ritel fashion nasional</li>
       </ul>
     </div>
 
     <!-- 7-Eleven -->
     <div class="exp-item reveal">
       <div class="exp-dot"></div>
-      <div class="exp-header">
-        <div class="exp-period">2013 — 2016</div>
-        <div class="exp-role">Training &amp; Development Specialist</div>
-        <div class="exp-company">PT. Modern Putera Indonesia (7-Eleven) <span>Retail</span></div>
-      </div>
+      <div class="exp-period">2013 — 2016</div>
+      <div class="exp-role">Training &amp; Development Specialist</div>
+      <div class="exp-company">PT. Modern Putera Indonesia (7-Eleven) <span>Retail</span></div>
       <ul class="exp-achievements">
-        <li>Mengembangkan dan mengimplementasikan program pelatihan operasional untuk retail store teams secara nasional</li>
-        <li>Meningkatkan disiplin operasional, standar layanan, dan performa toko melalui program training terstruktur</li>
+        <li>Mengembangkan program pelatihan operasional dan customer service untuk retail store teams secara nasional</li>
+        <li>Meningkatkan standar pelayanan, disiplin operasional, dan performa penjualan toko melalui training terstruktur</li>
       </ul>
     </div>
 
@@ -725,8 +468,8 @@
           <div class="cert-issuer">Indonesian Board of Hypnotherapy · 2016</div>
         </li>
         <li>
-          <div class="cert-name">Certified Trainer</div>
-          <div class="cert-issuer">BNSP (Badan Nasional Sertifikasi Profesi) · 2014</div>
+          <div class="cert-name">Certified Trainer — BNSP</div>
+          <div class="cert-issuer">Badan Nasional Sertifikasi Profesi · 2014</div>
         </li>
       </ul>
     </div>
@@ -737,25 +480,19 @@
 <footer>
   <div>
     <div class="footer-name">Arief Permadi Kuntoaji</div>
-    <div class="footer-tagline">Operations &amp; Logistics Leader · Bogor (Open to relocate / hybrid)</div>
+    <div class="footer-tagline">Operations · Sales · Business Development · Customer Experience · Bogor (Open to relocate / hybrid)</div>
   </div>
   <div class="footer-contacts">
     <a href="tel:+6285714142712" class="footer-link">📞 +62-857-1414-2712</a>
     <a href="mailto:arief.kunto@gmail.com" class="footer-link">✉️ arief.kunto@gmail.com</a>
-    <a href="https://linkedin.com/in/ariefpermadi" target="_blank" class="footer-link">💼 linkedin.com/in/ariefpermadi</a>
+    <a href="https://linkedin.com/in/ariefpermadi" target="_blank" class="footer-link">💼 LinkedIn</a>
   </div>
 </footer>
 
 <script>
-  // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
-      }
-    });
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
   }, { threshold: 0.1 });
   reveals.forEach(r => observer.observe(r));
 </script>
