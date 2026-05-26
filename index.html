@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arief Permadi Kuntoaji — Operations & Business Growth Leader</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1e28;
+    --gold: #c9a84c;
+    --gold-light: #e8c96d;
+    --text: #e8e6df;
+    --muted: #8a8680;
+    --border: rgba(201,168,76,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,15,20,0.88); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold); letter-spacing: 0.04em; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 80px 5vw 60px; position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(42,74,127,0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,168,76,0.07) 0%, transparent 60%);
+  }
+  .hero-grid-lines {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+  .hero-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.2s forwards; }
+  .hero-name { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.0; margin-bottom: 0.4rem; opacity: 0; animation: fadeUp 0.7s ease 0.35s forwards; }
+  .hero-name span { color: var(--gold); }
+  .hero-title { font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 300; color: var(--muted); margin-bottom: 2rem; letter-spacing: 0.03em; opacity: 0; animation: fadeUp 0.7s ease 0.5s forwards; }
+  .hero-divider { width: 60px; height: 2px; background: var(--gold); margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.7s ease 0.6s forwards; }
+  .hero-summary { font-size: 1rem; line-height: 1.8; color: #b0aca4; max-width: 660px; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.7s forwards; }
+
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp 0.7s ease 0.85s forwards; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold); line-height: 1; }
+  .stat-label { font-size: 0.73rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem; }
+
+  .hero-contacts { display: flex; gap: 1.2rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.7s ease 1s forwards; }
+  .contact-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 4px; font-size: 0.82rem; font-weight: 500; text-decoration: none; letter-spacing: 0.06em; transition: all 0.2s; border: 1px solid var(--border); color: var(--text); background: var(--bg2); }
+  .contact-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .contact-btn.primary { background: var(--gold); color: #0d0f14; border-color: var(--gold); font-weight: 600; }
+  .contact-btn.primary:hover { background: var(--gold-light); color: #0d0f14; }
+
+  /* PILLARS */
+  #pillars { background: var(--bg2); padding: 90px 5vw; }
+  .pillars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+  .pillar-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 2rem 1.8rem; transition: border-color 0.2s, transform 0.2s; }
+  .pillar-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .pillar-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+  .pillar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text); }
+  .pillar-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.65; }
+
+  /* COMPETENCIES */
+  #competencies { padding: 90px 5vw; background: var(--bg); }
+  .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .comp-item { background: var(--bg); padding: 1.3rem 1.6rem; display: flex; align-items: flex-start; gap: 0.9rem; transition: background 0.2s; }
+  .comp-item:hover { background: var(--bg3); }
+  .comp-icon { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; margin-top: 0.55rem; flex-shrink: 0; }
+  .comp-text { font-size: 0.88rem; line-height: 1.5; color: #c0bcb5; }
+
+  /* EXPERIENCE */
+  #experience { background: var(--bg2); padding: 90px 5vw; }
+  .timeline { position: relative; padding-left: 2px; }
+  .timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--gold), transparent); }
+  .exp-item { padding-left: 2.5rem; padding-bottom: 3.5rem; position: relative; }
+  .exp-item:last-child { padding-bottom: 0; }
+  .exp-dot { position: absolute; left: -5px; top: 8px; width: 11px; height: 11px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.5); }
+  .exp-period { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+  .exp-role { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.3rem; }
+  .exp-company { font-size: 0.85rem; color: var(--muted); }
+  .exp-company span { display: inline-block; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--gold); padding: 0.15rem 0.6rem; border-radius: 3px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-left: 0.5rem; vertical-align: middle; }
+  .exp-achievements { margin-top: 1rem; list-style: none; }
+  .exp-achievements li { padding: 0.45rem 0; padding-left: 1.2rem; position: relative; font-size: 0.88rem; line-height: 1.65; color: #a8a49d; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .exp-achievements li:last-child { border-bottom: none; }
+  .exp-achievements li::before { content: '→'; position: absolute; left: 0; color: var(--gold); font-size: 0.78rem; top: 0.5rem; }
+  .portfolio-placeholder { margin-top: 1.2rem; padding: 1rem 1.2rem; border: 1px dashed rgba(201,168,76,0.25); border-radius: 6px; background: rgba(201,168,76,0.03); display: flex; align-items: center; gap: 0.8rem; }
+  .pp-icon { width: 32px; height: 32px; background: rgba(201,168,76,0.1); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .pp-text { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+
+  /* EDUCATION */
+  #education { background: var(--bg); padding: 90px 5vw; }
+  .edu-cert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .edu-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.8rem; }
+  .edu-card-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+  .edu-degree { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .edu-school { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; }
+  .edu-year { font-size: 0.78rem; color: var(--gold); opacity: 0.7; }
+  .cert-list { list-style: none; }
+  .cert-list li { padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 0.15rem; }
+  .cert-list li:last-child { border-bottom: none; }
+  .cert-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+  .cert-issuer { font-size: 0.76rem; color: var(--muted); }
+
+  /* SECTION COMMON */
+  .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; margin-bottom: 1rem; line-height: 1.15; }
+  .section-divider { width: 40px; height: 2px; background: var(--gold); margin-bottom: 3rem; }
+
+  /* PORTFOLIO CARDS */
+  .portfolio-section { margin-top: 1.4rem; }
+  .portfolio-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.6rem; }
+  .portfolio-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .portfolio-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.9rem; }
+  .port-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+    text-decoration: none;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+  }
+  .port-card:hover { border-color: var(--gold); transform: translateY(-2px); background: rgba(201,168,76,0.05); }
+  .port-card-icon { font-size: 1.3rem; }
+  .port-card-title { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .port-card-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+  .port-card-cta { font-size: 0.72rem; color: var(--gold); font-weight: 600; letter-spacing: 0.08em; margin-top: auto; padding-top: 0.4rem; display: flex; align-items: center; gap: 0.3rem; }
+  .port-card-cta::after { content: '→'; }
+
+  /* FOOTER */
+  footer { background: var(--bg); border-top: 1px solid var(--border); padding: 3rem 5vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; }
+  .footer-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); }
+  .footer-tagline { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .footer-contacts { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .footer-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-link:hover { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 10px; }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .edu-cert-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"></div>
+  <div class="nav-links">
+    <a href="#pillars">Focus Areas</a>
+    <a href="#experience">Experience</a>
+    <a href="#education">Education</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Operations · Sales · Business Development · Customer Experience</div>
+    <h1 class="hero-name">Arief Permadi<br><span>Kuntoaji</span></h1>
+    <p class="hero-title">Driving Revenue Growth, Operational Excellence &amp; Customer-Centric Business Transformation</p>
+    <div class="hero-divider"></div>
+    <p class="hero-summary">
+      Pemimpin operasional dengan 10+ tahun pengalaman membangun sistem bisnis yang skalabel, mendorong revenue growth, dan menciptakan pengalaman pelanggan kelas dunia. Terbukti mengoptimalkan P&amp;L, memimpin ekspansi dan pengelolaan jaringan 100+ outlet, serta mengeksekusi transformasi operasional lintas industri F&amp;B, EV, medical, dan edukasi.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">10+</div>
+        <div class="stat-label">Tahun Pengalaman</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">15%+</div>
+        <div class="stat-label">Cost Reduction</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">97%</div>
+        <div class="stat-label">Customer SLA Rate</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100+</div>
+        <div class="stat-label">Outlets Managed</div>
+      </div>
+    </div>
+    <div class="hero-contacts" id="contact">
+      <a href="https://wa.me/6285714142712" target="_blank" class="contact-btn primary">💬 WhatsApp</a>
+      <a href="mailto:arief.kunto@gmail.com" class="contact-btn">✉️ arief.kunto@gmail.com</a>
+      <a href="https://linkedin.com/in/ariefpermadi" target="_blank" class="contact-btn">💼 LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOCUS PILLARS -->
+<section id="pillars">
+  <div class="reveal">
+    <div class="section-label">What I Do Best</div>
+    <h2 class="section-title">Focus Areas</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">⚙️</div>
+      <div class="pillar-title">Operations Excellence</div>
+      <div class="pillar-desc">Merancang sistem operasional yang efisien dan skalabel — dari standardisasi proses hingga transformasi multi-unit yang mendorong pertumbuhan bisnis berkelanjutan.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">📈</div>
+      <div class="pillar-title">Sales & Revenue Growth</div>
+      <div class="pillar-desc">Mengoptimalkan performa penjualan melalui pengelolaan P&amp;L end-to-end, strategi pricing, produktivitas tim sales, dan efisiensi cost structure untuk memaksimalkan profitabilitas.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">🚀</div>
+      <div class="pillar-title">Business Development</div>
+      <div class="pillar-desc">Membangun dan mengekspansi jaringan bisnis — dari pembukaan outlet baru, pengembangan hub operasional, hingga skalasi model bisnis ke pasar yang lebih luas.</div>
+    </div>
+    <div class="pillar-card reveal">
+      <div class="pillar-icon">🌟</div>
+      <div class="pillar-title">Customer Experience</div>
+      <div class="pillar-desc">Membangun sistem layanan pelanggan kelas dunia dengan SLA compliance tinggi, complaint resolution yang terstruktur, dan after-sales excellence yang memperkuat loyalitas pelanggan.</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETENCIES -->
+<section id="competencies">
+  <div class="reveal">
+    <div class="section-label">Core Strengths</div>
+    <h2 class="section-title">Key Competencies</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="comp-grid reveal">
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">End-to-End P&amp;L Ownership &amp; Profitability Management</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Multi-Unit Operations Scaling &amp; Network Expansion (100+ Outlets)</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Sales Performance Optimization &amp; Revenue Growth Strategy</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">New Business Development &amp; Hub Expansion Management</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Customer Experience Design &amp; SLA Governance</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">After-Sales Operations &amp; Technical Support Management</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Operational Transformation &amp; Process Standardization</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Large-Scale Team Leadership &amp; Organizational Development</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Cost Optimization &amp; Operational Efficiency Programs</div></div>
+    <div class="comp-item"><div class="comp-icon"></div><div class="comp-text">Cross-Functional Collaboration &amp; Stakeholder Management</div></div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="reveal">
+    <div class="section-label">Career Journey</div>
+    <h2 class="section-title">Professional Experience</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="timeline">
+
+    <!-- Allvacon -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2025 — 2026</div>
+      <div class="exp-role">Operation Manager</div>
+      <div class="exp-company">PT. Allvamed Nuvacon Adigana (Allvacon) <span>Medical</span></div>
+      <ul class="exp-achievements">
+        <li>Memimpin transformasi operasional distribusi alat kesehatan — merancang SLA-driven controls yang meningkatkan kecepatan fulfillment dan konsistensi layanan di seluruh touchpoint institusi kesehatan</li>
+        <li>Menginisiasi adopsi sistem ERP untuk meningkatkan visibilitas operasional real-time dan mendukung pengambilan keputusan bisnis yang lebih cepat dan akurat</li>
+        <li>Memperkuat operasional technical support dengan standardized escalation workflow dan performance tracking, meningkatkan kepuasan serta kepercayaan klien institusi kesehatan</li>
+        <li>Mengimplementasikan sistem cycle counting dan governance kontrol yang mereduksi inventory discrepancy dan meningkatkan akurasi stok operasional</li>
+      </ul>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://ariefkunto.github.io/ariefpermadi/ALLVACON_Fulfillment_Dashboard.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📦</div>
+            <div class="port-card-title">Request Fulfillment Dashboard</div>
+            <div class="port-card-desc">Monitoring fulfillment rate 94.7%, on-time delivery, performa per zona distribusi & kategori alat medis.</div>
+            <div class="port-card-cta">Lihat Dashboard</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/ALLVACON_Inventory_Tracker.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🗃️</div>
+            <div class="port-card-title">Inventory Stock Level Management</div>
+            <div class="port-card-desc">Inventory accuracy 97.4% pasca WMS — stock level tracking, alert kritis, dan cycle count per kategori.</div>
+            <div class="port-card-cta">Lihat Tracker</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/ALLVACON_Maintenance_Tracker.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🔧</div>
+            <div class="port-card-title">Maintenance Tracker — Unit Support</div>
+            <div class="port-card-desc">Jadwal PM, health score 186 unit alat medis, overdue alert, dan PM compliance rate 94.4%.</div>
+            <div class="port-card-cta">Lihat Tracker</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/ALLVACON_Technical_SLA_Monitor.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🎯</div>
+            <div class="port-card-title">Technical Support SLA Monitor</div>
+            <div class="port-card-desc">SLA 96.8%, escalation matrix 4 level, tiket aktif prioritas tinggi, dan performa per teknisi.</div>
+            <div class="port-card-cta">Lihat Monitor</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Janji Jiwa -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2024 — 2025</div>
+      <div class="exp-role">Operation Manager</div>
+      <div class="exp-company">PT. Kurnia Boga Narayan (Janji Jiwa / Sejuta Jiwa) <span>Retail F&amp;B</span></div>
+      <ul class="exp-achievements">
+        <li>Mengelola P&amp;L end-to-end jaringan 100+ outlet — mencapai efisiensi biaya operasional 15%+ melalui optimasi struktur cost tanpa mengorbankan kualitas layanan</li>
+        <li>Mendorong revenue growth melalui strategi ekspansi bisnis regional, berhasil meluncurkan 7 hub operasional baru dengan skala tim 200+ karyawan dan 1.000+ delivery partner</li>
+        <li>Memimpin transformasi operasional yang menstandardisasi proses end-to-end dan meningkatkan konsistensi customer experience di seluruh jaringan outlet</li>
+      </ul>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://ariefkunto.github.io/ariefpermadi/fnb_preopening_command_center.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🏗️</div>
+            <div class="port-card-title">F&amp;B Pre-Opening Command Center</div>
+            <div class="port-card-desc">Dashboard terpadu untuk mengelola seluruh tahapan pre-opening outlet F&amp;B baru dari satu platform.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/Audit_Operasional_Tools.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📋</div>
+            <div class="port-card-title">Audit Operasional F&amp;B</div>
+            <div class="port-card-desc">Tools audit operasional untuk memastikan standar kualitas dan kepatuhan proses di seluruh jaringan outlet.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SOP_Framework_Complete.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📐</div>
+            <div class="port-card-title">SOP Framework &amp; Builder</div>
+            <div class="port-card-desc">Framework lengkap untuk membangun dan mendokumentasikan SOP operasional secara terstruktur dan konsisten.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SejutaJiwa_Order_Forecast.html" target="_blank" class="port-card">
+            <div class="port-card-icon">☕</div>
+            <div class="port-card-title">Daily Order System</div>
+            <div class="port-card-desc">Sistem forecast pemesanan harian berbasis data — faktor cuaca real-time, kalender, rider, dan expiry 3–4 hari.</div>
+            <div class="port-card-cta">Lihat System</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/tuku_coffeeshop_game.html" target="_blank" class="port-card">
+            <div class="port-card-icon">☕</div>
+            <div class="port-card-title">Coffee Shop Simulator</div>
+            <div class="port-card-desc">Game simulasi membangun coffee shop — pilih luas outlet, alokasi zona, equipment, barista, kitchen crew, dan service mode. Simulasikan throughput, serving time, dan bandingkan efisiensi layout antar konfigurasi.</div>
+            <div class="port-card-cta">Coba Simulator</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELIS -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2021 — 2024</div>
+      <div class="exp-role">After Sales Manager</div>
+      <div class="exp-company">PT. Selis Retail Indonesia (SELIS) <span>EV Retail</span></div>
+      <ul class="exp-achievements">
+        <li>Mencapai SLA compliance 97% di seluruh operasional regional — memperkuat kepercayaan pelanggan dan mendorong retensi customer jangka panjang</li>
+        <li>Memimpin pengembangan 50+ tim customer service dan teknisi menuju standar pelayanan berbasis data, target, dan kepuasan pelanggan terukur</li>
+        <li>Merancang sistem complaint handling terstruktur yang mempercepat resolusi dan mendorong peningkatan Net Promoter Score secara konsisten</li>
+        <li>Mengelola anggaran operasional after-sales secara efisien untuk mempertahankan profitabilitas layanan purna jual di seluruh region</li>
+      </ul>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_SLA_Dashboard.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📊</div>
+            <div class="port-card-title">SLA Performance Dashboard</div>
+            <div class="port-card-desc">Monitoring SLA compliance 97% per region, kategori keluhan, trend bulanan, dan breach tracker real-time.</div>
+            <div class="port-card-cta">Lihat Dashboard</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_CSAT_NPS_Report.html" target="_blank" class="port-card">
+            <div class="port-card-icon">⭐</div>
+            <div class="port-card-title">CSAT &amp; NPS Report</div>
+            <div class="port-card-desc">Laporan kepuasan pelanggan — NPS score 62, rating distribution, feedback themes, dan verbatim analysis.</div>
+            <div class="port-card-cta">Lihat Report</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/SELIS_Service_Pipeline.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🎫</div>
+            <div class="port-card-title">Service Request Pipeline</div>
+            <div class="port-card-desc">Kanban board pengelolaan tiket after-sales — dari New hingga Closed, dengan filter prioritas dan detail ticket.</div>
+            <div class="port-card-cta">Lihat Pipeline</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alqolam -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2018 — 2021</div>
+      <div class="exp-role">After Sales Manager</div>
+      <div class="exp-company">PT. Hidayah Insan Mulia (Alqolam) <span>EdTech</span></div>
+      <ul class="exp-achievements">
+        <li>Membangun standardized service workflows dan sistem complaint handling nasional yang mempercepat resolusi dan meningkatkan kepuasan pelanggan secara terukur</li>
+        <li>Mengimplementasikan performance monitoring system yang meningkatkan produktivitas tim layanan dan mengurangi response time operasional secara signifikan</li>
+        <li>Mengkoordinasikan ketersediaan layanan purna jual di multi-wilayah, memastikan konsistensi standar layanan dari Sabang hingga Makassar</li>
+      </ul>
+      <div class="portfolio-section">
+        <div class="portfolio-label">Portfolio</div>
+        <div class="portfolio-cards">
+          <a href="https://care.alqolam.com" target="_blank" class="port-card">
+            <div class="port-card-icon">🌐</div>
+            <div class="port-card-title">Alqolam Care Portal</div>
+            <div class="port-card-desc">Platform customer care nasional yang dikelola — complaint handling, service tracking, dan dukungan pelanggan.</div>
+            <div class="port-card-cta">Kunjungi Portal</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_escalation_matrix.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🔀</div>
+            <div class="port-card-title">Escalation Matrix Tool</div>
+            <div class="port-card-desc">Tool interaktif untuk menentukan jalur eskalasi, response time target, dan action checklist berdasarkan tipe &amp; severity keluhan.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_rca.html" target="_blank" class="port-card">
+            <div class="port-card-icon">🔍</div>
+            <div class="port-card-title">Root Cause Analysis Tool</div>
+            <div class="port-card-desc">Template RCA terstruktur dengan 5-Why analysis, fishbone diagram, corrective action plan, dan sign-off resmi.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+          <a href="https://ariefkunto.github.io/ariefpermadi/alqolam_weekly_report.html" target="_blank" class="port-card">
+            <div class="port-card-icon">📋</div>
+            <div class="port-card-title">Weekly Report Generator</div>
+            <div class="port-card-desc">Generator laporan mingguan after-sales otomatis — input data, langsung generate report siap presentasi ke manajemen.</div>
+            <div class="port-card-cta">Lihat Tool</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pedro -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2016 — 2017</div>
+      <div class="exp-role">Training &amp; Development Specialist</div>
+      <div class="exp-company">PT. Kurnia Ciptamoda Gemilang (Pedro) <span>Fashion Retail</span></div>
+      <ul class="exp-achievements">
+        <li>Merancang kurikulum pelatihan sales, service excellence, dan kepemimpinan operasional untuk store teams dan supervisors di jaringan ritel fashion nasional</li>
+        <li>Meningkatkan standar eksekusi penjualan dan konsistensi layanan pelanggan yang berdampak langsung pada performa toko</li>
+      </ul>
+    </div>
+
+    <!-- 7-Eleven -->
+    <div class="exp-item reveal">
+      <div class="exp-dot"></div>
+      <div class="exp-period">2013 — 2016</div>
+      <div class="exp-role">Training &amp; Development Specialist</div>
+      <div class="exp-company">PT. Modern Putera Indonesia (7-Eleven) <span>Retail</span></div>
+      <ul class="exp-achievements">
+        <li>Membangun dan mengimplementasikan kurikulum pelatihan operasional untuk ratusan store teams di jaringan convenience retail nasional 7-Eleven</li>
+        <li>Memperkuat disiplin operasional, kepatuhan SOP, dan performa store melalui program training terstruktur berbasis evaluasi lapangan</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- EDUCATION & CERTS -->
+<section id="education">
+  <div class="reveal">
+    <div class="section-label">Credentials</div>
+    <h2 class="section-title">Education &amp; Certifications</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="edu-cert-grid">
+    <div class="edu-card reveal">
+      <div class="edu-card-label">Education</div>
+      <div class="edu-degree">Bachelor of Science — Electrical Engineering</div>
+      <div class="edu-school">Universitas Negeri Jakarta</div>
+      <div class="edu-year">2008 — 2013</div>
+    </div>
+    <div class="edu-card reveal">
+      <div class="edu-card-label">Professional Certifications</div>
+      <ul class="cert-list">
+        <li>
+          <div class="cert-name">People Management Development Certification</div>
+          <div class="cert-issuer">The Andes &amp; Associate · 2021</div>
+        </li>
+        <li>
+          <div class="cert-name">Certified Hypnotherapist / NLP Practitioner</div>
+          <div class="cert-issuer">Indonesian Board of Hypnotherapy · 2016</div>
+        </li>
+        <li>
+          <div class="cert-name">Certified Trainer — BNSP</div>
+          <div class="cert-issuer">Badan Nasional Sertifikasi Profesi · 2014</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-name">Arief Permadi Kuntoaji</div>
+    <div class="footer-tagline">Operations · Sales · Business Development · Customer Experience · Bogor (Open to relocate / hybrid)</div>
+  </div>
+  <div class="footer-contacts">
+    <a href="https://wa.me/6285714142712" target="_blank" class="footer-link">💬 +62-857-1414-2712</a>
+    <a href="mailto:arief.kunto@gmail.com" class="footer-link">✉️ arief.kunto@gmail.com</a>
+    <a href="https://linkedin.com/in/ariefpermadi" target="_blank" class="footer-link">💼 LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
