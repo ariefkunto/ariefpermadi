@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hub Simulator — Sejuta Jiwa Opening Session</title>
+<style>
+:root{--bg:#0b0d11;--bg2:#111318;--bg3:#171a21;--bg4:#1d212a;--border:#252830;--border2:#2e3340;
+--text:#cdd0d8;--muted:#7a7f8e;--dim:#454a56;
+--blue:#2563EB;--blue2:#3B82F6;--teal:#0d9488;--amber:#d97706;--amber2:#fbbf24;
+--red:#dc2626;--green:#16a34a;--green2:#4ade80;--purple:#7c3aed;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;font-size:13px;}
+
+/* ── WIZARD ── */
+#wizard{position:fixed;inset:0;background:rgba(7,8,11,.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+#wizard.hidden{display:none;}
+.wz-card{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:680px;display:flex;flex-direction:column;max-height:calc(100vh - 40px);}
+.wz-head{padding:20px 24px 0;border-bottom:1px solid var(--border);flex-shrink:0;}
+.wz-logo{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue2);margin-bottom:10px;}
+.wz-title{font-size:19px;font-weight:700;color:#e8ecf4;margin-bottom:3px;}
+.wz-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
+.wz-steps{display:flex;}
+.wz-step{flex:1;padding:7px 0;font-size:10px;font-weight:600;text-align:center;color:var(--dim);border-bottom:2px solid var(--border);transition:all .2s;}
+.wz-step.active{color:#e8ecf4;border-color:var(--blue2);}
+.wz-step.done{color:var(--blue2);border-color:var(--blue);}
+.wz-body{padding:18px 24px;flex:1;overflow-y:auto;}
+.wz-foot{padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.step-panel{display:none;}.step-panel.active{display:block;}
+
+/* wizard form elements */
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2px;}
+.field{background:var(--bg3);border-radius:9px;padding:13px 14px;border:1px solid var(--border);}
+.field-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.field-val{font-size:24px;font-weight:700;color:#e8ecf4;line-height:1;}
+.field-sub{font-size:9px;color:var(--dim);margin-top:3px;}
+.count-row{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.cnt-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.cnt-btn:hover{background:var(--border2);color:var(--blue2);}
+.cnt-icons{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;}
+.cnt-ic{font-size:12px;opacity:.25;transition:opacity .15s;}
+.cnt-ic.on{opacity:1;}
+.radio-group{display:flex;flex-direction:column;gap:7px;}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .12s;}
+.radio-opt:hover{border-color:var(--border2);}
+.radio-opt.sel{border-color:var(--blue2);background:#0d1525;}
+.radio-opt input{accent-color:var(--blue2);margin-top:2px;flex-shrink:0;}
+.radio-opt-title{font-size:11px;font-weight:600;color:#e8ecf4;margin-bottom:2px;}
+.radio-opt-desc{font-size:10px;color:var(--muted);}
+.timing-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+.timing-row{display:grid;grid-template-columns:160px 1fr 52px;align-items:center;gap:10px;font-size:11px;}
+.timing-row input[type=range]{width:100%;accent-color:var(--blue2);}
+.timing-val{font-size:11px;font-weight:600;color:var(--blue2);text-align:right;}
+.timing-lbl{color:var(--muted);}
+.warn-box{background:#1a0d08;border:1px solid var(--amber);border-radius:7px;padding:10px 13px;font-size:11px;color:var(--amber2);line-height:1.5;margin-top:10px;}
+.info-box{background:#0a1020;border:1px solid var(--blue);border-radius:7px;padding:10px 13px;font-size:11px;color:var(--blue2);line-height:1.5;margin-top:10px;}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 18px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:#1d4ed8;}
+.btn-ghost{background:var(--bg4);color:var(--muted);border:1px solid var(--border);}.btn-ghost:hover{background:var(--border);}
+.btn-green{background:var(--green);color:#fff;}.btn-green:hover{background:#15803d;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+
+/* ── MAIN APP ── */
+#app{display:flex;height:100vh;}
+#left{width:180px;min-width:180px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+#left-top{padding:10px 11px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.hub-title{font-size:11px;font-weight:700;color:#e8ecf4;margin-bottom:2px;}
+.hub-sub{font-size:9px;color:var(--muted);}
+.loket-ctrl{padding:10px 11px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.lc-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.loket-row{display:flex;gap:5px;}
+.lk-btn{flex:1;padding:5px 4px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .12s;}
+.lk-btn:hover{background:var(--border2);}
+.lk-btn.on{background:var(--blue);border-color:var(--blue2);color:#fff;}
+#left-legend{padding:10px 11px;flex:1;overflow-y:auto;}
+.legend-title{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:4px;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.stage-list{margin-top:10px;}
+.stage-item{font-size:9px;color:var(--dim);padding:3px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.stage-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+#center{flex:1;display:flex;flex-direction:column;min-width:0;}
+#topbar{height:40px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:0 12px;flex-shrink:0;}
+.tb-title{font-size:11px;font-weight:700;color:#e8ecf4;}
+.tb-chip{font-size:8px;padding:2px 7px;border-radius:99px;font-weight:700;}
+.chip-blue{background:var(--blue);color:#fff;}
+.chip-green{background:var(--green);color:#fff;}
+.chip-amber{background:var(--amber);color:#fff;}
+.tb-hint{font-size:9px;color:var(--dim);margin-left:auto;}
+#cw{flex:1;display:flex;align-items:center;justify-content:center;background:#080a0d;overflow:hidden;padding:2px;}
+canvas{display:block;}
+#sbar{height:24px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;flex-shrink:0;}
+.sbar-txt{font-size:9px;color:var(--dim);flex:1;}
+
+#right{width:210px;min-width:210px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 9px 0;}
+.mc{background:var(--bg3);border-radius:6px;padding:8px 10px;border:1px solid var(--border);}
+.mv{font-size:17px;font-weight:700;color:#e8ecf4;line-height:1;}
+.ml{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.mc-warn{border-color:var(--amber)!important;}.mc-warn .mv{color:var(--amber2);}
+.mc-good{border-color:var(--green)!important;}.mc-good .mv{color:var(--green2);}
+.mfull{margin:4px 9px 0;}
+
+.station-sec{padding:7px 9px;border-top:1px solid var(--border);}
+.ss-title{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.st-row{margin-bottom:6px;}
+.st-head{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-bottom:2px;}
+.st-track{background:var(--bg);border-radius:99px;height:4px;overflow:hidden;}
+.st-fill{height:100%;border-radius:99px;transition:width .3s;}
+
+.rider-log{flex:1;overflow:hidden;display:flex;flex-direction:column;border-top:1px solid var(--border);}
+.rl-title{padding:5px 9px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}
+.rl-inner{flex:1;overflow-y:auto;padding:5px 7px;}
+.rider-card{background:var(--bg3);border-radius:5px;padding:5px 8px;margin-bottom:3px;font-size:10px;border-left:3px solid var(--border2);}
+.rider-card.done{border-left-color:var(--green);opacity:.6;}
+.rider-card.late{border-left-color:var(--red);}
+.rider-card.ok{border-left-color:var(--blue2);}
+.rc-name{font-weight:600;color:#e8ecf4;margin-bottom:1px;}
+.rc-status{font-size:9px;color:var(--muted);}
+
+.sim-ctrl{padding:7px 9px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+.bigbtn{width:100%;padding:8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:none;}
+.bb-go{background:var(--blue);color:#fff;}.bb-go:hover{background:#1d4ed8;}
+.bb-pause{background:var(--red);color:#fff;}.bb-pause:hover{background:#b91c1c;}
+.bsm{background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:5px;border-radius:5px;font-size:10px;cursor:pointer;}.bsm:hover{background:var(--border);}
+.spdr{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--dim);}
+.spdr input{flex:1;accent-color:var(--blue2);}
+
+/* ── REPORT OVERLAY ── */
+#report{position:fixed;inset:0;background:rgba(7,8,11,.95);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+#report.hidden{display:none;}
+.rpt-card{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:620px;max-height:88vh;overflow-y:auto;}
+.rpt-head{padding:16px 20px;border-bottom:1px solid var(--border);}
+.rpt-head h2{font-size:14px;font-weight:700;color:#e8ecf4;}
+.rpt-head p{font-size:10px;color:var(--muted);margin-top:2px;}
+.rpt-body{padding:16px 20px;}
+.rpt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.rst{background:var(--bg3);border-radius:7px;padding:10px;text-align:center;border:1px solid var(--border);}
+.rst-v{font-size:17px;font-weight:700;color:#e8ecf4;}
+.rst-l{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.rst.hl{background:#0a1020;border-color:var(--blue2);}.rst.hl .rst-v{color:var(--blue2);}
+.rst.warn{background:#150d04;border-color:var(--amber);}.rst.warn .rst-v{color:var(--amber2);}
+.rst.good{background:#071408;border-color:var(--green);}.rst.good .rst-v{color:var(--green2);}
+.rpt-section{margin-bottom:14px;}
+.rpt-stitle{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.station-breakdown{display:flex;flex-direction:column;gap:5px;}
+.sb-row{display:grid;grid-template-columns:130px 1fr 60px 60px;gap:8px;align-items:center;padding:7px 10px;background:var(--bg3);border-radius:6px;font-size:10px;border:1px solid var(--border);}
+.sb-row.bottleneck{border-color:var(--red);background:#140808;}
+.sb-row.good{border-color:var(--green);background:#060f06;}
+.sb-name{font-weight:600;color:#e8ecf4;display:flex;align-items:center;gap:5px;}
+.sb-bar-wrap{flex:1;}
+.sb-bar{height:5px;border-radius:99px;background:var(--blue2);}
+.sb-val{font-weight:600;color:#e8ecf4;text-align:right;}
+.sb-wait{font-size:9px;color:var(--muted);text-align:right;}
+.insight-card{display:flex;gap:9px;padding:9px 11px;border-radius:7px;margin-bottom:6px;font-size:11px;line-height:1.5;border:1px solid;}
+.ic-crit{background:#140808;border-color:var(--red);}
+.ic-warn{background:#150d04;border-color:var(--amber);}
+.ic-good{background:#060f06;border-color:var(--green);}
+.ic-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.ic-title{font-weight:700;color:#e8ecf4;margin-bottom:2px;}
+.ic-body{color:var(--muted);}
+.rpt-table{width:100%;border-collapse:collapse;font-size:10px;}
+.rpt-table th{text-align:left;padding:5px 7px;border-bottom:1px solid var(--border);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--bg2);z-index:1;white-space:nowrap;}
+.rpt-table td{padding:5px 7px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;vertical-align:middle;}
+.rpt-table tr.late td{color:var(--red);}
+.rpt-table tr.ok td{color:var(--green2);}
+
+/* print styles */
+@media print{#wizard,#topbar,#left,#right,#cw,#sbar{display:none!important;} #report{position:static;background:#fff;} .rpt-card{max-height:none;width:100%;box-shadow:none;border:none;} body{background:#fff;color:#111;}}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:#2a2d38;border-radius:2px;}
+
+.sl-wrap{display:flex;flex-direction:column;gap:0;}
+.sl-row{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+.sl-lbl{font-size:10px;color:var(--muted);min-width:155px;}
+.sl-val{font-size:11px;font-weight:700;color:var(--blue2);min-width:54px;text-align:right;}
+.sl-track{flex:1;position:relative;}
+.sl-track input[type=range]{width:100%;accent-color:var(--blue2);margin:0;}
+.tick-row{display:flex;justify-content:space-between;padding:0 1px;margin-top:1px;}
+.tk{display:flex;flex-direction:column;align-items:center;flex:0 0 0;}
+.tk-line{width:1px;height:4px;background:var(--border2);}
+.tk-line.mid{height:6px;background:var(--muted);width:1.5px;}
+.tk-label{font-size:7px;color:var(--dim);margin-top:1px;white-space:nowrap;}
+.tk-label.mid{color:var(--muted);font-weight:700;font-size:8px;}
+
+</style>
+</head>
+<body>
+
+<!-- ══ WIZARD ══════════════════════════════════════════════════════ -->
+<div id="wizard">
+<div class="wz-card">
+  <div class="wz-head">
+    <div class="wz-logo">🛵 Sejuta Jiwa Hub Simulator</div>
+    <div class="wz-title">Setup Opening Session</div>
+    <div class="wz-sub">Konfigurasi kapasitas hub, jumlah rider, dan parameter waktu per stasiun.</div>
+    <div class="wz-steps">
+      <div class="wz-step active" id="ws0">1. Kapasitas Hub</div>
+      <div class="wz-step" id="ws1">2. Staff & Rider</div>
+      <div class="wz-step" id="ws2">3. Timing Parameter</div>
+    </div>
+  </div>
+  <div class="wz-body">
+
+    <!-- STEP 0: HUB CAPACITY -->
+    <div id="step-0" class="step-panel active">
+      <div class="field-grid">
+        <div class="field">
+          <div class="field-label">Loket Admin Dibuka</div>
+          <div class="field-val" id="loket-num">3</div>
+          <div class="field-sub">Target max 3 mnt/rider</div>
+          <div class="count-row">
+            <button class="cnt-btn" onclick="adj('loket',-1)">−</button>
+            <div class="cnt-icons" id="loket-icons"></div>
+            <button class="cnt-btn" onclick="adj('loket',1)">+</button>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Range: 2–5 loket</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Runner Cold Room</div>
+          <div class="field-val" id="runner-num">2</div>
+          <div class="field-sub">Tim support cold room</div>
+          <div class="count-row">
+            <button class="cnt-btn" onclick="adj('runner',-1)">−</button>
+            <div class="cnt-icons" id="runner-icons"></div>
+            <button class="cnt-btn" onclick="adj('runner',1)">+</button>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Range: 1–4 runner</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Satpam Bertugas</div>
+          <div class="field-val" id="satpam-num">1</div>
+          <div class="field-sub">Handle entry + exit</div>
+          <div class="count-row">
+            <button class="cnt-btn" onclick="adj('satpam',-1)">−</button>
+            <div class="cnt-icons" id="satpam-icons"></div>
+            <button class="cnt-btn" onclick="adj('satpam',1)">+</button>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Range: 1–3 satpam</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Target Waktu / Rider</div>
+          <div class="field-val" id="target-num">10</div>
+          <div class="field-sub">menit (entry → exit)</div>
+          <div class="count-row">
+            <button class="cnt-btn" onclick="adj('target',-1)">−</button>
+            <button class="cnt-btn" onclick="adj('target',1)">+</button>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Default: 10 menit</div>
+        </div>
+      </div>
+      <div class="info-box">💡 Loket admin biasanya menjadi bottleneck utama. Dengan 3 loket dan 30 rider, estimasi avg queue di loket = 1–2 menit tambahan dari processing time 3 menit.</div>
+    </div>
+
+    <!-- STEP 1: STAFF & RIDERS -->
+    <div id="step-1" class="step-panel">
+      <div class="field-grid">
+                <div class="field" style="grid-column:1/-1;">
+          <div class="field-label">Total Rider Opening Session</div>
+          <div class="field-sub" style="margin-bottom:8px;">Rider yang akan diproses dalam satu sesi</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="number" id="riders-num" value="100" min="10" max="500" step="1"
+              style="flex:1;background:var(--bg4);border:1.5px solid var(--border2);border-radius:7px;
+                     padding:10px 12px;color:#e8ecf4;font-size:22px;font-weight:700;text-align:center;outline:none;"
+              oninput="cfg.riders=Math.max(10,Math.min(500,parseInt(this.value)||10));updateTimePreview()"
+              onfocus="this.select()">
+            <span style="font-size:11px;color:var(--muted);white-space:nowrap;">rider<br>(10–500)</span>
+          </div>
+        </div>
+      </div>
+      <!-- Time config -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div class="field">
+          <div class="field-label">⏰ Jam Mulai Hub</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <select id="start-hour" style="flex:1;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:#e8ecf4;font-size:13px;font-weight:700;" onchange="cfg.startHour=parseInt(this.value);updateTimePreview()">
+              <option value="5">05:00</option><option value="6" selected>06:00</option><option value="7">07:00</option>
+            </select>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:5px;">Jam buka hub / mulai opening</div>
+        </div>
+        <div class="field">
+          <div class="field-label">🏁 Target Selesai</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+            <select id="target-hour" style="flex:1;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--amber2);font-size:13px;font-weight:700;" onchange="cfg.targetEndHour=parseInt(this.value);updateTimePreview()">
+              <option value="8">08:00</option><option value="9">09:00</option>
+              <option value="10" selected>10:00</option><option value="11">11:00</option><option value="12">12:00</option>
+            </select>
+          </div>
+          <div style="font-size:9px;color:var(--dim);margin-top:5px;" id="time-window">Window: 4 jam untuk 100 rider</div>
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:7px;">Pola Kedatangan Rider</div>
+      <div class="radio-group">
+        <label class="radio-opt" id="arr-burst">
+          <input type="radio" name="arrival" value="burst" onchange="setCfg('arrival','burst');toggleHybridCfg()">
+          <div>
+            <div class="radio-opt-title">🌊 Burst — Semua datang di awal</div>
+            <div class="radio-opt-desc">Semua rider datang dalam 10 menit pertama. Tekanan maksimal di loket sejak jam buka.</div>
+          </div>
+        </label>
+        <label class="radio-opt sel" id="arr-hybrid">
+          <input type="radio" name="arrival" value="hybrid" checked onchange="setCfg('arrival','hybrid');toggleHybridCfg()">
+          <div>
+            <div class="radio-opt-title">🔀 Hybrid — Burst awal + sisanya bertahap</div>
+            <div class="radio-opt-desc">Realistis: 50 rider datang jam 06:00, sisanya bertahap sampai agak siang.</div>
+          </div>
+        </label>
+        <label class="radio-opt" id="arr-stagger">
+          <input type="radio" name="arrival" value="stagger" onchange="setCfg('arrival','stagger');toggleHybridCfg()">
+          <div>
+            <div class="radio-opt-title">〰 Staggered — Datang bertahap merata</div>
+            <div class="radio-opt-desc">Rider datang tersebar merata sepanjang waktu. Beban lebih ringan tapi waktu selesai lebih lama.</div>
+          </div>
+        </label>
+      </div>
+
+            <!-- Hybrid config panel -->
+      <div id="hybrid-cfg" style="margin-top:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:12px;">⚙ Konfigurasi Hybrid Arrival</div>
+
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+            <span style="font-size:9px;color:var(--muted);">Rider datang sebelum hub buka (05:00 – 06:00)</span>
+            <span id="burst-count-v" style="font-size:13px;font-weight:700;color:var(--amber2);">50 rider</span>
+          </div>
+          <input type="range" min="5" max="180" step="5" value="50" id="burst-count-sl"
+            style="width:100%;accent-color:var(--amber);"
+            oninput="cfg.burstCount=parseInt(this.value);cfg.burstWindowMin=60;document.getElementById('burst-count-v').textContent=this.value+' rider';updateTimePreview()">
+          <div style="font-size:8px;color:var(--dim);margin-top:2px;">Rider ini antri di satpam 05:00–06:00, loket baru buka jam 06:00</div>
+        </div>
+
+        <div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:8px;">
+            Sisanya (<span id="stagger-count-v">50</span> rider) datang bertahap dari jam 06:00 hingga:
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="svc-btn" id="se-180" onclick="setStaggerEnd(180)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;">08:00</button>
+            <button class="svc-btn" id="se-210" onclick="setStaggerEnd(210)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;">08:30</button>
+            <button class="svc-btn sel" id="se-240" onclick="setStaggerEnd(240)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;">09:00</button>
+            <button class="svc-btn" id="se-270" onclick="setStaggerEnd(270)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;">09:30</button>
+            <button class="svc-btn" id="se-300" onclick="setStaggerEnd(300)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;">10:00</button>
+          </div>
+          <div style="font-size:8px;color:var(--dim);margin-top:4px;">Rider stagger dijadwalkan merata mulai 06:00 sampai jam yang dipilih</div>
+        </div>
+
+        <div id="hybrid-preview" style="margin-top:10px;font-size:10px;color:var(--blue2);background:var(--bg4);border-radius:5px;padding:8px 10px;line-height:1.7;"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: TIMING -->
+    <div id="step-2" class="step-panel">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Sesuaikan durasi proses di setiap stasiun berdasarkan kondisi aktual hub kamu.</div>
+      <div class="timing-grid" id="timing-grid"></div>
+
+      <div style="margin-top:14px;">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:8px;">📐 Jarak Antar Zona & Kecepatan Jalan</div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;border:1px solid var(--border2);">
+          <!-- Zone flow visual -->
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:12px;flex-wrap:wrap;font-size:9px;color:var(--muted);">
+            <span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">🅿 Parkir</span>
+            <span>→</span><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">🛡 Satpam</span>
+            <span>→</span><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">📋 Loket</span>
+            <span>→</span><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">🛒 Cart</span>
+            <span>→</span><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">❄ Cold Room</span>
+            <span>→</span><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;">🛡 Keluar</span>
+          </div>
+          <!-- Distance sliders -->
+          <div id="dist-grid"></div>
+          <!-- Walk speed -->
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+              <span style="font-size:9px;color:var(--muted);">🚶 Kecepatan jalan rider</span>
+              <span id="walk-speed-v" style="font-size:12px;font-weight:700;color:var(--blue2);">1.2 m/s</span>
+            </div>
+            <div class="sl-track">
+              <input type="range" min="0.8" max="2.0" step="0.1" value="1.2" id="walk-speed-sl"
+                oninput="cfg.walkSpeed=parseFloat(this.value);document.getElementById('walk-speed-v').textContent=parseFloat(this.value).toFixed(1)+' m/s';
+                         document.querySelectorAll('[id^=dt-]').forEach(el=>{const k=el.id.replace('dt-','');const d=cfg.distances[k]||0;el.textContent='~'+Math.round(d/cfg.walkSpeed)+'s';});updateDistPreview()">
+              ${makeTicks([{label:'0.8'},{label:'1.0',mid:true},{label:'1.2'},{label:'1.4'},{label:'1.6'},{label:'1.8'},{label:'2.0'}])}
+            </div>
+            <div style="font-size:8px;color:var(--dim);margin-top:1px;">Normal jalan santai 1.2–1.4 m/s</div>
+          </div>
+          <div id="dist-preview" style="margin-top:8px;font-size:10px;color:var(--blue2);background:var(--bg4);border-radius:5px;padding:7px 10px;"></div>
+        </div>
+      </div>
+
+      <div class="warn-box" id="timing-warn" style="display:none;">⚠ Total estimasi minimum melebihi target <span id="target-time">10</span> menit. Pertimbangkan menambah loket atau runner.</div>
+    </div>
+
+  </div>
+  <div class="wz-foot">
+    <button class="btn btn-ghost" id="wz-back" onclick="wzBack()" style="visibility:hidden;">← Kembali</button>
+    <span id="wz-lbl" style="font-size:9px;color:var(--dim);">Step 1 dari 3</span>
+    <button class="btn btn-blue" id="wz-next" onclick="wzNext()">Lanjut →</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ REPORT ══════════════════════════════════════════════════════ -->
+<div id="report" class="hidden">
+<div class="rpt-card">
+  <div class="rpt-head">
+    <h2 id="rpt-title">Hub Opening Session Report</h2>
+    <p id="rpt-sub"></p>
+  </div>
+  <div class="rpt-body">
+    <div id="rpt-timeline"></div>
+    <div class="rpt-stat-grid" id="rpt-stats"></div>
+    <div class="rpt-section">
+      <div class="rpt-stitle">🚶 Waktu Perjalanan Antar Zona</div>
+      <div id="rpt-transit"></div>
+    </div>
+    <div class="rpt-section">
+      <div class="rpt-stitle">Breakdown Waktu per Stasiun</div>
+      <div class="station-breakdown" id="rpt-stations"></div>
+    </div>
+    <div class="rpt-section">
+      <div class="rpt-stitle">Bottleneck Analysis & Rekomendasi</div>
+      <div id="rpt-insights"></div>
+    </div>
+    <div class="rpt-section">
+      <div class="rpt-stitle">Detail Per Rider <span id="rpt-late-note" style="color:var(--red);font-size:9px;font-weight:400;"></span></div>
+      <table class="rpt-table"><thead><tr>
+        <th>#</th><th>Nama Rider</th><th>Tiba di Hub</th><th>Timer Mulai</th><th>Satpam Masuk</th><th>Antri Loket</th><th>Proses Loket</th><th>Setup Cart</th><th>Antri Cold</th><th>Ambil Produk</th><th>Satpam Keluar</th><th>Jalan Antar Zona</th><th>Total Antri</th><th>① Handling Time</th>
+      </tr></thead><tbody id="rpt-riders"></tbody></table>
+    </div>
+    <div style="font-size:9px;color:#888;margin-top:8px;line-height:1.7;padding:8px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);">
+      <b>① Handling Time</b> = satpam + proses loket + cart + ambil produk + satpam keluar + jalan &minus; waktu sebelum jam buka<br>
+      <b>② Waktu di Hub</b> = jam tiba hingga keluar · termasuk antri &amp; pre-opening<br>
+      <span style="color:#d97706;">⏳ sebelum buka</span> = rider tiba sebelum loket buka · satpam diproses tapi tidak dihitung ke handling time<br>
+      Antri: <span style="color:#9ca3af;">abu</span>=&lt;2m · <span style="color:#fbbf24;">kuning</span>=2–5m · <span style="color:#f87171;">merah</span>=&gt;5m
+    </div>
+    <div style="display:flex;gap:7px;margin-top:6px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="closeReport()">Tutup ✕</button>
+      <button class="btn btn-blue btn-sm" style="flex:1;" onclick="printReport()">🖨 Print / PDF</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MAIN APP ══════════════════════════════════════════════════ -->
+<div id="app">
+<div id="left">
+  <div id="left-top">
+    <div class="hub-title">Hub Sejuta Jiwa</div>
+    <div class="hub-sub" id="hub-cfg-sub">Loading...</div>
+  </div>
+  <div class="loket-ctrl">
+    <div class="lc-label">Loket Admin Aktif</div>
+    <div class="loket-row" id="loket-toggle"></div>
+  </div>
+  <div id="left-legend">
+    <div class="legend-title">Zone Legend</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#1e3a5f;"></div>Parkir Motor</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#1a2e1a;"></div>Pos Satpam</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#1a1a3a;"></div>Queue & Loket</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#2a1e0a;"></div>Parkir Cart</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#0a2a2a;"></div>Cold Room</div>
+    <div style="margin-top:12px;" class="legend-title">Rider Status</div>
+    <div class="stage-list" id="stage-legend"></div>
+  </div>
+</div>
+
+<div id="center">
+  <div id="topbar">
+    <span class="tb-title">Hub Opening Simulator</span>
+    <span class="tb-chip chip-blue" id="chip-riders">0 rider</span>
+    <span class="tb-chip chip-amber" id="chip-loket">0 loket</span>
+    <span class="tb-chip chip-green" id="chip-target">Target 10m</span>
+    <span class="tb-hint" id="tb-hint">Jalankan simulasi opening session</span><span style="margin-left:auto;font-size:11px;font-weight:700;font-family:monospace;color:var(--green2);background:var(--bg3);padding:3px 10px;border-radius:5px;border:1px solid var(--border2);" id="tb-clock">06:00:00</span>
+  </div>
+  <div id="cw"><canvas id="cv"></canvas></div>
+  <div id="sbar"><span class="sbar-txt" id="sbar-txt">Siap — Load preset atau mulai simulasi</span></div>
+</div>
+
+<div id="right">
+  <div class="mg">
+    <div class="mc" id="mc-done"><div class="mv" id="m-done">0</div><div class="ml">Rider selesai</div></div>
+    <div class="mc" id="mc-avg"><div class="mv" id="m-avg">—</div><div class="ml">Avg handling ① (zona)</div></div>
+  </div>
+  <div class="mg">
+    <div class="mc"><div class="mv" id="m-avg-hub">—</div><div class="ml">Avg waktu di hub ②</div></div>
+  </div>
+  <div class="mfull">
+    <div class="mc" id="mc-ontime"><div class="mv" id="m-ontime">—</div><div class="ml">On-time ① ≤ target</div></div>
+  </div>
+  <div class="mfull" style="margin-bottom:0;">
+    <div class="mc" id="mc-queue"><div class="mv" id="m-queue">0</div><div class="ml">In queue (loket)</div></div>
+  </div>
+
+  <div class="station-sec">
+    <div class="ss-title">Station Load</div>
+    <div id="station-bars"></div>
+  </div>
+
+  <div class="rider-log">
+    <div class="rl-title">
+      <span>Rider Log</span>
+      <span id="sim-prog" style="font-size:9px;color:var(--blue2);">—</span>
+    </div>
+    <div class="rl-inner" id="rider-log"></div>
+  </div>
+
+  <div class="sim-ctrl">
+    <div class="spdr">Speed
+      <input type="range" min="1" max="100" value="8" id="spd" oninput="document.getElementById('spd-v').textContent=this.value+'x'">
+      <span id="spd-v">8x</span>
+    </div>
+    <button class="bigbtn bb-go" id="sim-btn" onclick="toggleSim()">▶ Mulai Simulasi</button>
+    <div style="display:flex;gap:4px;">
+      <button class="bsm" style="flex:1;" onclick="resetSim()">↺ Reset</button>
+      <button class="bsm" style="flex:1;" onclick="showReport()">📊 Report</button>
+    </div>
+    <button class="bsm" style="width:100%;background:#0d2a1a;border-color:var(--green);color:var(--green2);font-weight:700;" onclick="instantResult()">
+      ⚡ Hasil Instan (skip animasi)
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════ */
+const cfg={
+  loket:3, runner:2, satpam:1, target:10,
+  riders:100, arrival:'hybrid',
+  // Time settings
+  preopenHour:5,        // satpam mulai jam 5
+  startHour:6, startMin:0,
+  targetEndHour:10, targetEndMin:0,
+  // Jarak antar zona (meter)
+  distances:{
+    motor_to_satpam:   15,   // Parkir motor → Pos satpam masuk
+    satpam_to_queue:   20,   // Pos satpam → Area antri loket
+    queue_to_admin:     5,   // Area antri → Meja loket (sudah di zona)
+    admin_to_cart:     25,   // Loket admin → Parkir cart
+    cart_to_cold:      20,   // Parkir cart → Cold room
+    cold_to_satpam_out:15,   // Cold room → Pos satpam keluar
+  },
+  walkSpeed: 1.2,            // Kecepatan jalan (m/s), default 1.2 m/s
+  // Hybrid arrival
+  burstCount:50,        // riders yg datang burst di awal
+  burstWindowMin:10,    // dalam berapa menit burst terjadi (default 10 menit)
+  staggerStartMin:30,   // stagger mulai berapa menit setelah opening
+  staggerEndMin:240,    // default: rider terakhir datang jam 09:00 (4 jam dari 05:00) (180=09:00)
+  timing:{
+    satpam_in:{label:'Satpam Masuk',min:60,max:90,val:70},
+    admin:{label:'Loket Admin',min:120,max:180,val:160},
+    cart:{label:'Setup Cart',min:50,max:90,val:65},
+    cold:{label:'Cold Room',min:60,max:90,val:70},
+    satpam_out:{label:'Satpam Keluar',min:20,max:45,val:30},
+  }
+};
+
+const STAGES={
+  arriving:               {label:'Menuju hub',         color:'#6b7280'},
+  queuing_satpam_in:      {label:'Antri satpam masuk', color:'#1d4ed8'},
+  processing_satpam_in:   {label:'Pos satpam masuk',   color:'#2563EB'},
+  waiting_admin_open:     {label:'Tunggu loket buka (06:00)',color:'#7f1d1d'},
+  transit_to_admin:       {label:'Jalan ke loket',           color:'#6d28d9'},
+  transit_to_cart:        {label:'Jalan ke cart',            color:'#5b21b6'},
+  transit_to_cold:        {label:'Jalan ke cold room',       color:'#0e7490'},
+  transit_to_satpam_out:  {label:'Jalan ke satpam keluar',   color:'#065f46'},
+  queuing_admin:          {label:'Antri loket',         color:'#b45309'},
+  processing_admin:       {label:'Proses loket',        color:'#f59e0b'},
+  moving_cart:            {label:'Menuju cart',         color:'#6d28d9'},
+  queuing_cart:           {label:'Menuju cart slot',    color:'#7c3aed'},
+  processing_cart:        {label:'Setup cart',          color:'#8b5cf6'},
+  queuing_cold:           {label:'Antri cold room',     color:'#0e7490'},
+  processing_cold:        {label:'Ambil produk',        color:'#0d9488'},
+  queuing_satpam_out:     {label:'Antri satpam keluar', color:'#065f46'},
+  processing_satpam_out:  {label:'Satpam keluar',       color:'#059669'},
+  departed:               {label:'Keluar hub',          color:'#374151'},
+};
+
+/* ═══════════════════════════════════════════════
+   CANVAS & GRID
+═══════════════════════════════════════════════ */
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let COLS=38,ROWS=14,CS=26;
+
+// Zone layout (computed from config)
+const ZONES={
+  park_motor: {fill:'#0d1a2e',stroke:'#1e3a5f',label:'PARKIR MOTOR',   short:'PARKIR'},
+  satpam:     {fill:'#0a1a0a',stroke:'#1a4a1a',label:'SATPAM MASUK',   short:'SATPAM'},
+  queue:      {fill:'#0d0d2a',stroke:'#1a1a4a',label:'AREA ANTRI',     short:'ANTRI'},
+  loket:      {fill:'#111130',stroke:'#2222aa',label:'LOKET ADMIN',    short:'LOKET'},
+  cart_park:  {fill:'#1a1005',stroke:'#4a2e08',label:'PARKIR CART',    short:'CART'},
+  cold_room:  {fill:'#051a1a',stroke:'#0a4a4a',label:'COLD ROOM',      short:'COLD'},
+  ice_maker:  {fill:'#051520',stroke:'#083a5a',label:'ICE + EXIT',     short:'ICE'},
+};
+
+let zoneGrid=[];
+let zoneBounds={};  // zone -> {c0,c1,r0,r1}
+
+function buildGrid(){
+  zoneGrid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  // Column layout
+  const pm=[1,6];   // park motor cols
+  const sp=[7,9];   // satpam entry
+  const qu=[10,14]; // queue area
+  const lk=[15,24]; // loket (up to 5 × 2 cols each)
+  const cp=[25,31]; // cart parking
+  const cr=[32,36]; // cold room
+  const im=[37,37]; // ice maker
+  const spOut=[37,37]; // satpam exit (shared col with exit side)
+
+  for(let r=1;r<ROWS-1;r++){
+    for(let c=pm[0];c<=pm[1];c++) setZ(r,c,'park_motor');
+    for(let c=sp[0];c<=sp[1];c++) setZ(r,c,'satpam');
+    for(let c=qu[0];c<=qu[1];c++) setZ(r,c,'queue');
+    for(let c=lk[0];c<=lk[1];c++) setZ(r,c,'loket');
+    for(let c=cp[0];c<=cp[1];c++) setZ(r,c,'cart_park');
+    for(let c=cr[0];c<=cr[1];c++) setZ(r,c,'cold_room');
+    setZ(r,im[0],'ice_maker');
+  }
+
+  // Compute bounds
+  computeBounds();
+}
+
+function setZ(r,c,z){ if(r>=0&&r<ROWS&&c>=0&&c<COLS) zoneGrid[r][c]=z; }
+
+function computeBounds(){
+  zoneBounds={};
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const z=zoneGrid[r][c]; if(!z) continue;
+    if(!zoneBounds[z]) zoneBounds[z]={c0:c,c1:c,r0:r,r1:r};
+    const b=zoneBounds[z];
+    b.c0=Math.min(b.c0,c);b.c1=Math.max(b.c1,c);
+    b.r0=Math.min(b.r0,r);b.r1=Math.max(b.r1,r);
+  }
+}
+
+function zoneCentroid(z){
+  const b=zoneBounds[z]; if(!b) return null;
+  return{c:(b.c0+b.c1)/2,r:(b.r0+b.r1)/2};
+}
+
+function resizeCanvas(){
+  const wrap=document.getElementById('cw');
+  const mw=wrap.clientWidth-4,mh=wrap.clientHeight-4;
+  CS=Math.max(14,Math.floor(Math.min(mw/COLS,mh/ROWS)));
+  cv.width=COLS*CS;cv.height=ROWS*CS;
+  cv.style.width=cv.width+'px';cv.style.height=cv.height+'px';
+  window._CS=CS;
+}
+
+/* ═══════════════════════════════════════════════
+   SIMULATION STATE
+═══════════════════════════════════════════════ */
+let riders=[];
+let arrivalTimes=[];
+let stations={};
+let sharedQueues={};  // FIFO: one line per station type   // stationId -> {busy:bool, queue:[riderIds]}
+let simRunning=false,rafId=null,lastTs=0;
+let elapsed=0,spawnTimer=0,riderId=0;
+let completedRiders=[];
+let metrics={done:0,totalTime:0,onTime:0,blocked:0,handleTotal:0};
+
+const STATION_TYPES=['satpam_in','admin','cart','cold','satpam_out'];
+const STATION_COLORS={
+  satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',satpam_out:'#059669'
+};
+
+function initStations(){
+  stations={};
+  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],satpam_out:[]};
+  // satpam_in: satpam count stations
+  for(let i=0;i<cfg.satpam;i++) stations[`satpam_in_${i}`]={type:'satpam_in',busy:false,queue:[],processed:0,totalWait:0};
+  // admin: loket count
+  for(let i=0;i<cfg.loket;i++) stations[`admin_${i}`]={type:'admin',busy:false,queue:[],processed:0,totalWait:0};
+  // cart bays: parallel (riders can setup cart simultaneously)
+  for(let i=0;i<8;i++) stations[`cart_${i}`]={type:'cart',busy:false,queue:[],processed:0,totalWait:0};
+  // cold room runners
+  for(let i=0;i<cfg.runner;i++) stations[`cold_${i}`]={type:'cold',busy:false,queue:[],processed:0,totalWait:0};
+  // satpam_out: exit check
+  for(let i=0;i<cfg.satpam;i++) stations[`satpam_out_${i}`]={type:'satpam_out',busy:false,queue:[],processed:0,totalWait:0};
+}
+
+function getFreeStation(type){
+  const keys=Object.keys(stations).filter(k=>stations[k].type===type);
+  return keys.find(k=>!stations[k].busy)||null;
+}
+
+function getShortestQueue(type){
+  const keys=Object.keys(stations).filter(k=>stations[k].type===type);
+  if(!keys.length) return null;
+  return keys.reduce((a,b)=>stations[a].queue.length<=stations[b].queue.length?a:b);
+}
+
+
+// ── Time helpers ────────────────────────────────────────────────────────
+function wallTime(sec){
+  const total=cfg.preopenHour*3600+cfg.startMin*60+Math.round(sec);
+  const h=Math.floor(total/3600)%24;
+  const m=Math.floor((total%3600)/60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function wallTimeFull(sec){
+  const total=cfg.preopenHour*3600+cfg.startMin*60+Math.round(sec);
+  const h=Math.floor(total/3600)%24;
+  const m=Math.floor((total%3600)/60);
+  const s=Math.floor(total%60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function transitDur(legKey){
+  // Returns travel time in seconds for a given leg
+  const distM = cfg.distances[legKey]||0;
+  return distM / Math.max(0.5, cfg.walkSpeed);
+}
+function totalTransitTime(){
+  return Object.values(cfg.distances).reduce((s,d)=>s+d,0)/cfg.walkSpeed;
+}
+function adminOpensSec(){
+  // Admin opens at startHour, satpam opens at preopenHour
+  return(cfg.startHour-cfg.preopenHour)*3600;
+}
+function targetEndSec(){
+  return(cfg.targetEndHour*3600+cfg.targetEndMin*60)-(cfg.preopenHour*3600+cfg.startMin*60);
+}
+function durStr(sec){
+  if(!sec||isNaN(sec)) return'—';
+  const h=Math.floor(sec/3600);
+  const m=Math.floor((sec%3600)/60);
+  const s=Math.round(sec%60);
+  return h>0?`${h}j ${m}m`:m>0?`${m}m ${s}s`:`${s}s`;
+}
+
+// ── Compute pre-scheduled arrival times (hybrid/burst/stagger) ───────────
+function computeArrivalTimes(){
+  arrivalTimes=[];
+  const total=cfg.riders;
+  if(cfg.arrival==='burst'){
+    // All arrive in first 10 minutes
+    for(let i=0;i<total;i++) arrivalTimes.push(Math.random()*600);
+  } else if(cfg.arrival==='stagger'){
+    // Spread evenly across staggerEndMin
+    const span=cfg.staggerEndMin*60;
+    for(let i=0;i<total;i++) arrivalTimes.push((i/Math.max(1,total-1))*span+(Math.random()-0.5)*30);
+  } else {
+    // Hybrid: burstCount riders in first burstWindowMin, rest staggered
+    const bc=Math.min(cfg.burstCount,total);
+    const sc=total-bc;
+    const bw=cfg.burstWindowMin*60;
+    for(let i=0;i<bc;i++) arrivalTimes.push(Math.random()*bw+(i/bc)*bw*0.3);
+    const ss=cfg.staggerStartMin*60;
+    const se=cfg.staggerEndMin*60;
+    for(let i=0;i<sc;i++){
+      const t=ss+(i/Math.max(1,sc-1))*(se-ss);
+      arrivalTimes.push(t+(Math.random()-0.5)*60);
+    }
+  }
+  arrivalTimes.sort((a,b)=>a-b);
+}
+
+/* ═══════════════════════════════════════════════
+   RIDER AGENT — clean state machine
+   States: arriving | queuing_X | processing_X | departed
+═══════════════════════════════════════════════ */
+
+function _joinNextStage(rider, next){
+  if(next==='cart'){
+    rider.state='moving_cart';
+    const cPos=stationPos('cart_0');
+    if(cPos){rider.tx=cPos.c+(rider.id%4);rider.ty=cPos.r;}
+    joinQueue(rider,'cart');
+  } else {
+    if(next==='admin'){
+      const qc=zoneCentroid('queue');
+      if(qc){rider.tx=qc.c+(rider.id%5-2)*0.8;rider.ty=qc.r+(rider.id%3-1)*0.7;}
+    } else if(next==='cold'){
+      const cc=zoneCentroid('cold_room');
+      if(cc){rider.tx=cc.c-1+(rider.id%3-1);rider.ty=cc.r;}
+    }
+    joinQueue(rider,next);
+  }
+}
+
+// FIFO joinQueue — one shared line per station type feeds all stations of that type
+function joinQueue(rider, stationType){
+  // Admin: hold until hub opens
+  if(stationType==='admin' && elapsed < adminOpensSec()){
+    rider.state = 'waiting_admin_open';
+    if(!sharedQueues.admin.includes(rider.id)) sharedQueues.admin.push(rider.id);
+    const qc = zoneCentroid('queue');
+    if(qc){ rider.tx = qc.c+(rider.id%5-2)*0.7; rider.ty = qc.r+(rider.id%3-1)*0.6; }
+    return;
+  }
+  // Add to shared FIFO queue (if not already)
+  const sq = sharedQueues[stationType];
+  if(sq && !sq.includes(rider.id)) sq.push(rider.id);
+  rider.state = 'queuing_' + stationType;
+  // Try to assign to a free station immediately
+  _tryAssignStation(rider, stationType);
+}
+
+// Assign rider to a free station of the given type (FIFO: only if first in line)
+function _tryAssignStation(rider, stationType){
+  const sq = sharedQueues[stationType];
+  if(!sq) return;
+  // Only process if this rider is first in the shared queue
+  if(sq[0] !== rider.id) return;
+  // Find a free station
+  const freeId = Object.keys(stations).find(k=>stations[k].type===stationType && !stations[k].busy);
+  if(!freeId) return;
+  // Assign
+  rider.stationId = freeId;
+  const pos = stationPos(freeId);
+  if(pos){ rider.tx = pos.c; rider.ty = pos.r; }
+  beginProcessing(rider);
+}
+
+// Begin processing at rider's current station
+function beginProcessing(rider){
+  const st = rider.stationId ? stations[rider.stationId] : null;
+  if(!st) return;
+  st.busy = true;
+  rider.state = 'processing_' + st.type;
+  rider.taskTimer = 0;
+  rider.taskDur = randTime(st.type);
+  const pos = stationPos(rider.stationId);
+  if(pos){ rider.tx = pos.c; rider.ty = pos.r; }
+}
+
+// Called when a station finishes — serve next in FIFO shared queue
+function _serveNextInQueue(stationType){
+  const sq = sharedQueues[stationType];
+  if(!sq || sq.length === 0) return;
+  const nextId = sq[0];
+  const nextR = riders.find(r => r.id === nextId);
+  if(!nextR) { sq.shift(); _serveNextInQueue(stationType); return; } // stale, skip
+  // Find a free station for this type
+  const freeId = Object.keys(stations).find(k=>stations[k].type===stationType && !stations[k].busy);
+  if(!freeId) return; // no free station, wait
+  nextR.stationId = freeId;
+  const pos = stationPos(freeId);
+  if(pos){ nextR.tx = pos.c; nextR.ty = pos.r; }
+  beginProcessing(nextR);
+}
+
+// Finish current station, advance to next in flow
+function finishStation(rider){
+  const st = rider.stationId ? stations[rider.stationId] : null;
+  if(!st) return;
+  const stType = st.type;
+
+  // Record time
+  rider.times[stType] = (rider.times[stType]||0) + rider.taskTimer;
+  st.processed++;
+  st.totalWait += (rider.waitTimes[stType]||0);
+
+  // Free station
+  st.busy = false;
+  rider.stationId = null;
+  rider.taskTimer = 0;
+
+  // Remove from shared FIFO queue and serve next
+  const sq = sharedQueues[stType];
+  if(sq){ const pos=sq.indexOf(rider.id); if(pos>=0) sq.splice(pos,1); }
+  _serveNextInQueue(stType);
+
+  // Advance rider to next stage — add transit leg between each zone
+  const LEG_MAP={
+    satpam_in:'satpam_to_queue',   // satpam → antri loket
+    admin:'admin_to_cart',          // loket → parkir cart
+    cart:'cart_to_cold',            // cart → cold room
+    cold:'cold_to_satpam_out',      // cold room → satpam keluar
+  };
+  const DEST_ZONE={
+    admin:'queue', cart:'cart_park', cold:'cold_room', satpam_out:'satpam',
+  };
+  const flow = ['satpam_in','admin','cart','cold','satpam_out'];
+  const idx = flow.indexOf(stType);
+  if(idx >= 0 && idx < flow.length - 1){
+    const next = flow[idx + 1];
+    const legKey = LEG_MAP[stType];
+    const tDur = legKey ? transitDur(legKey) : 0;
+    if(tDur > 0.3){
+      // Enter transit — rider walks to next zone
+      rider.state = 'transit_to_' + next;
+      rider.transitTimer = 0;
+      rider.transitDur = tDur;
+      rider.transitNext = next;
+      rider.transitLegKey = legKey;
+      const dz = DEST_ZONE[next]||'queue';
+      const dc = zoneCentroid(dz);
+      if(dc){ rider.tx=dc.c+(rider.id%3-1); rider.ty=dc.r+(rider.id%2-.5); }
+    } else {
+      _joinNextStage(rider, next);
+    }
+  } else if(idx === flow.length - 1){
+    // All done
+    rider.state = 'departed';
+    rider.tx = -2; rider.ty = rider.py;
+    const total = elapsed - rider.spawnTime;                    // waktu di hub (tiba→keluar)
+    const timerStart = Math.max(rider.spawnTime, adminOpensSec());
+
+    // Zone-only handling time (no antri, no pre-open) — computed at departure saat semua zone times lengkap
+    const _sIn  = rider.times.satpam_in||0;
+    const _loket= rider.times.admin||0;
+    const _cart = rider.times.cart||0;
+    const _cold = rider.times.cold||0;
+    const _sOut = rider.times.satpam_out||0;
+    const _jln  = rider.times.transit||0;
+    const _tbf  = rider.spawnTime<adminOpensSec()?Math.min(_sIn,adminOpensSec()-rider.spawnTime):0;
+    const zoneOnly = Math.max(0, _sIn+_loket+_cart+_cold+_sOut+_jln-_tbf);
+
+    completedRiders.push(Object.assign({}, rider, {
+      totalTime:  total,
+      handleTime: zoneOnly,     // zone-only, no antri, no pre-open
+      timerStart: timerStart,
+      exitElapsed: elapsed,
+      zoneOnly:   zoneOnly,
+    }));
+    metrics.done++;
+    metrics.totalTime += total;
+    metrics.handleTotal = (metrics.handleTotal||0) + zoneOnly;  // zone-only avg
+    if(zoneOnly <= cfg.target * 60) metrics.onTime++;
+    updateLog(rider, total);
+    if(metrics.done >= cfg.riders && simRunning) setTimeout(endSim, 1000);
+  }
+}
+
+function spawnRider(){
+  const id=riderId++;
+  const parkC=zoneBounds['park_motor'];
+  const px=parkC?parkC.c0+Math.random()*(parkC.c1-parkC.c0):1;
+  const py=parkC?parkC.r0+Math.random()*(parkC.r1-parkC.r0):3;
+  riders.push({
+    id,name:`Rider ${String(id+1).padStart(2,'0')}`,
+    px,py,tx:px,ty:py,
+    state:'arriving',
+    stationId:null,
+    taskTimer:0,taskDur:0,
+    stateTimer:0,stateEnterTime:0,
+    spawnTime:elapsed,
+    trail:[],
+    // Per-station times
+    times:{satpam_in:0,admin:0,cart:0,cold:0,satpam_out:0},
+    waitTimes:{satpam_in:0,admin:0,cart:0,cold:0,satpam_out:0},
+    stateEnterTime:elapsed,
+  });
+}
+
+function randTime(stKey){
+  const t=cfg.timing[stKey]||{val:60};
+  return t.val*(0.85+Math.random()*0.3);
+}
+
+function moveTo(r,sdt){
+  const dx=r.tx-r.px,dy=r.ty-r.py;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const speed=3.5*sdt;
+  if(dist>0.08){r.px+=dx/dist*Math.min(speed,dist);r.py+=dy/dist*Math.min(speed,dist);}
+  return dist<0.2;
+}
+
+function centroid(z){ return zoneCentroid(z); }
+
+function updateRider(r, sdt){
+  r.stateTimer += sdt;
+  r.trail.push({x:r.px, y:r.py});
+  if(r.trail.length > 30) r.trail.shift();
+  moveTo(r, sdt);
+
+  // Queuing states: accumulate wait time, try assignment via FIFO
+  if(r.state.startsWith('queuing_')){
+    const stType = r.state.replace('queuing_','');
+    r.waitTimes[stType] = (r.waitTimes[stType]||0) + sdt;
+    // Check if first in shared queue and a station is free
+    const sq = sharedQueues[stType];
+    if(sq && sq[0] === r.id){
+      const freeId = Object.keys(stations).find(k=>stations[k].type===stType && !stations[k].busy);
+      if(freeId){ r.stationId=freeId; beginProcessing(r); }
+    }
+    return;
+  }
+
+  // Processing states: count down task timer
+  if(r.state.startsWith('processing_')){
+    r.taskTimer += sdt;
+    if(r.taskTimer >= r.taskDur) finishStation(r);
+    return;
+  }
+
+  // Arriving: move to satpam zone, then join queue
+  if(r.state === 'arriving'){
+    const c = zoneCentroid('satpam');
+    if(c){ r.tx = c.c; r.ty = c.r; }
+    const dx = r.tx - r.px, dy = r.ty - r.py;
+    if(Math.sqrt(dx*dx+dy*dy) < 0.3 && r.stateTimer > 0.3){
+      // Walk from parking to satpam (motor_to_satpam leg)
+      const tDur=transitDur('motor_to_satpam');
+      if(tDur>0.3&&!r._arrivedOnce){
+        r._arrivedOnce=true;
+        r.state='transit_to_satpam_in';
+        r.transitTimer=0; r.transitDur=tDur;
+        r.transitNext='satpam_in'; r.transitLegKey='motor_to_satpam';
+      } else if(r._arrivedOnce||tDur<=0.3){
+        joinQueue(r, 'satpam_in');
+      } else { r._arrivedOnce=true; }
+    }
+    return;
+  }
+
+  // Transit states: rider is walking between zones
+  if(r.state.startsWith('transit_to_')){
+    r.transitTimer=(r.transitTimer||0)+sdt;
+    r.times.transit=(r.times.transit||0)+sdt;           // total transit
+    const _lk=r.transitLegKey?'leg_'+r.transitLegKey:'leg_'+r.transitNext;
+    r.times[_lk]=(r.times[_lk]||0)+sdt;                // per-leg by distance key
+    if(r.transitTimer>=r.transitDur){
+      _joinNextStage(r, r.transitNext);
+    }
+    return;
+  }
+  // moving_cart: just move, already joined queue via joinQueue
+  if(r.state === 'moving_cart') return;
+}
+
+// enterStation, startProcessing, completeStation replaced by joinQueue/beginProcessing/finishStation above
+
+function stationPos(stId){
+  const [type,...rest]=stId.split('_');
+  const idx=parseInt(rest[rest.length-1])||0;
+  if(stId.startsWith('satpam_in')){
+    const b=zoneBounds['satpam'];
+    return b?{c:b.c0+(b.c1-b.c0)*0.4,r:b.r0+1+idx*2}:null;
+  }
+  if(stId.startsWith('admin')){
+    const b=zoneBounds['loket'];
+    if(!b) return null;
+    const loketW=(b.c1-b.c0+1)/cfg.loket;
+    return{c:b.c0+loketW*(idx+0.5),r:(b.r0+b.r1)/2};
+  }
+  if(stId.startsWith('cart')){
+    const b=zoneBounds['cart_park'];
+    if(!b) return null;
+    const col=idx%4, row=Math.floor(idx/4);
+    return{c:b.c0+1+col*1.5,r:b.r0+1+row*3};
+  }
+  if(stId.startsWith('cold')){
+    const b=zoneBounds['cold_room'];
+    return b?{c:b.c0+1+idx*1.5,r:(b.r0+b.r1)/2}:null;
+  }
+  if(stId.startsWith('satpam_out')){
+    const b=zoneBounds['ice_maker'];
+    return b?{c:b.c0,r:b.r0+1+idx*2}:null;
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════
+   SIM LOOP
+═══════════════════════════════════════════════ */
+function simStep(dt){
+  const spd=parseInt(document.getElementById('spd').value)||6;
+  const sdt=dt*spd;
+  elapsed+=sdt;
+
+  // Spawn riders based on pre-computed arrival schedule
+  while(riderId<arrivalTimes.length && elapsed>=arrivalTimes[riderId]){
+    spawnRider();
+  }
+  // Release riders waiting for admin to open (in FIFO order by their queue position)
+  if(elapsed >= adminOpensSec()){
+    const waiting=riders.filter(r=>r.state==='waiting_admin_open');
+    for(const r of waiting){
+      r.state='queuing_admin';
+    }
+    // Ensure shared queue has them in order and try to serve
+    _serveNextInQueue('admin');
+    _serveNextInQueue('admin'); // try again for multiple free lokets
+    _serveNextInQueue('admin');
+    _serveNextInQueue('admin');
+    _serveNextInQueue('admin');
+  }
+  // Update clock display
+  document.getElementById('tb-clock').textContent=wallTimeFull(elapsed);
+  // Check if past target time
+  const tEnd=targetEndSec();
+  if(elapsed>tEnd&&simRunning&&document.getElementById('tb-clock').style.color!=='#f87171'){
+    document.getElementById('tb-clock').style.color='#f87171';
+    document.getElementById('tb-clock').title='Melebihi target!';
+  }
+
+  // Update
+  for(const r of riders) if(r.state!=='departed') updateRider(r,sdt);
+  riders=riders.filter(r=>!(r.state==='departed'&&r.px<-0.5));
+
+  updateUI();
+}
+
+function loop(ts){
+  if(!simRunning) return;
+  const dt=Math.min(0.08,(ts-lastTs)/1000);
+  lastTs=ts;
+  simStep(dt);
+  render();
+  rafId=requestAnimationFrame(loop);
+}
+
+function toggleSim(){
+  simRunning=!simRunning;
+  const btn=document.getElementById('sim-btn');
+  if(simRunning){
+    if(riderId===0) initStations();
+    lastTs=performance.now();
+    rafId=requestAnimationFrame(loop);
+    btn.textContent='⏸ Pause';btn.className='bigbtn bb-pause';
+  } else {
+    cancelAnimationFrame(rafId);
+    btn.textContent='▶ Lanjutkan';btn.className='bigbtn bb-go';
+    render();
+  }
+}
+
+function endSim(){
+  simRunning=false;
+  cancelAnimationFrame(rafId);
+  document.getElementById('sim-btn').textContent='▶ Mulai Simulasi';
+  document.getElementById('sim-btn').className='bigbtn bb-go';
+  setTimeout(showReport,600);
+}
+
+
+// ── INSTANT RESULT — fast sim without rendering ─────────────────────────
+function instantResult(){
+  // Full reset
+  simRunning=false; cancelAnimationFrame(rafId);
+  riders=[]; completedRiders=[]; riderId=0; spawnTimer=0; elapsed=0;
+  metrics={done:0,totalTime:0,onTime:0,blocked:0,handleTotal:0};
+  initStations();          // resets stations + sharedQueues
+  computeArrivalTimes();
+
+  const dt=0.25;           // 0.25s steps
+  const maxSteps=(12*3600)/dt;
+  let steps=0;
+  let adminReleased=false;
+
+  while(completedRiders.length<cfg.riders && steps<maxSteps){
+    steps++;
+    elapsed+=dt;
+
+    // Spawn riders per arrival schedule
+    while(riderId<arrivalTimes.length && elapsed>=arrivalTimes[riderId]) spawnRider();
+
+    // Release admin-waiting riders when hub opens (FIFO)
+    if(!adminReleased && elapsed>=adminOpensSec()){
+      adminReleased=true;
+      riders.filter(r=>r.state==='waiting_admin_open').forEach(r=>{
+        r.state='queuing_admin';
+      });
+      // Try to fill all free lokets from shared queue
+      for(let i=0;i<cfg.loket;i++) _serveNextInQueue('admin');
+    }
+
+    // Update each rider (no animation — teleport, run state machine)
+    for(const r of [...riders]){
+      if(r.state==='departed') continue;
+      r.px=r.tx; r.py=r.ty;  // instant position
+
+      if(r.state==='arriving'){
+        r.stateTimer+=dt;
+        if(r.stateTimer>0.1) joinQueue(r,'satpam_in');
+        continue;
+      }
+
+      if(r.state==='waiting_admin_open'){
+        r.waitTimes.admin=(r.waitTimes.admin||0)+dt;
+        continue;
+      }
+
+      if(r.state.startsWith('queuing_')){
+        const stType=r.state.replace('queuing_','');
+        r.waitTimes[stType]=(r.waitTimes[stType]||0)+dt;
+        // FIFO: try to get assigned if first in shared queue
+        const sq=sharedQueues[stType];
+        if(sq && sq[0]===r.id){
+          const freeId=Object.keys(stations).find(k=>stations[k].type===stType&&!stations[k].busy);
+          if(freeId){ r.stationId=freeId; beginProcessing(r); }
+        }
+        continue;
+      }
+
+      if(r.state.startsWith('transit_to_')){
+        r.transitTimer=(r.transitTimer||0)+dt;
+        r.times.transit=(r.times.transit||0)+dt;
+        const lk=r.transitLegKey?'leg_'+r.transitLegKey:'leg_'+r.transitNext;
+        r.times[lk]=(r.times[lk]||0)+dt;
+        if(r.transitTimer>=r.transitDur) _joinNextStage(r,r.transitNext);
+        continue;
+      }
+
+      if(r.state==='moving_cart'){
+        r.stateTimer+=dt;
+        if(r.stateTimer>0.1) joinQueue(r,'cart');
+        continue;
+      }
+
+      if(r.state.startsWith('processing_')){
+        r.taskTimer+=dt;
+        if(r.taskTimer>=r.taskDur) finishStation(r);
+        continue;
+      }
+    }
+
+    // Remove departed riders
+    riders=riders.filter(r=>r.state!=='departed');
+  }
+
+  // Done — update UI and show report
+  document.getElementById('chip-riders').textContent=cfg.riders+' rider';
+  document.getElementById('chip-loket').textContent=cfg.loket+' loket';
+  document.getElementById('sim-btn').textContent='▶ Mulai Simulasi';
+  document.getElementById('sim-btn').className='bigbtn bb-go';
+  render();
+  showReport();
+}
+
+
+function resetSim(){
+  simRunning=false;cancelAnimationFrame(rafId);
+  riders=[];completedRiders=[];riderId=0;spawnTimer=0;elapsed=0;
+  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],satpam_out:[]};
+  computeArrivalTimes();
+  metrics={done:0,totalTime:0,onTime:0,blocked:0,handleTotal:0};
+  initStations();
+  document.getElementById('sim-btn').textContent='▶ Mulai Simulasi';
+  document.getElementById('sim-btn').className='bigbtn bb-go';
+  document.getElementById('rider-log').innerHTML='';
+  document.getElementById('sim-prog').textContent='—';
+  updateUI();render();
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════ */
+function render(){
+  const C=window._CS||CS;
+  if(!cv.width) return;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#080a0d';ctx.fillRect(0,0,cv.width,cv.height);
+
+  // Zones
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const z=zoneGrid[r][c]; if(!z) continue;
+    const zc=ZONES[z];
+    ctx.fillStyle=zc.fill;ctx.fillRect(c*C,r*C,C,C);
+    ctx.strokeStyle=zc.stroke;ctx.lineWidth=0.5;
+    // Only draw relevant borders
+    if(c===COLS-1||zoneGrid[r][c+1]!==z){ctx.beginPath();ctx.moveTo((c+1)*C,r*C);ctx.lineTo((c+1)*C,(r+1)*C);ctx.stroke();}
+    if(r===ROWS-1||!zoneGrid[r+1]||zoneGrid[r+1][c]!==z){ctx.beginPath();ctx.moveTo(c*C,(r+1)*C);ctx.lineTo((c+1)*C,(r+1)*C);ctx.stroke();}
+  }
+
+  // Zone labels — clipped to zone, sized to fit, no overlap
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(const[z,b]of Object.entries(zoneBounds)){
+    const zw=(b.c1-b.c0+1)*C;   // zone pixel width
+    const zh=(b.r1-b.r0+1)*C;   // zone pixel height
+    if(zw<C*1.5||zh<C*1.5) continue;  // skip tiny zones
+    const cx=(b.c0+b.c1+1)/2*C;
+    const cy=(b.r0+b.r1+1)/2*C;
+
+    // Pick label that fits: try full label, then short label
+    const maxLblW=zw-8;
+    let fs=Math.max(9,Math.min(13,C*0.46));
+    ctx.font=`800 ${fs}px -apple-system,sans-serif`;
+    let lbl=ZONES[z].label||z;
+    if(ctx.measureText(lbl).width>maxLblW){
+      lbl=ZONES[z].short||lbl.split(' ')[0];
+      fs=Math.max(8,Math.min(12,C*0.42));
+      ctx.font=`800 ${fs}px -apple-system,sans-serif`;
+    }
+    // If still too wide, skip
+    if(ctx.measureText(lbl).width>maxLblW) continue;
+
+    // Clip to zone bounds so label never bleeds out
+    ctx.save();
+    ctx.rect(b.c0*C+1, b.r0*C+1, zw-2, zh-2);
+    ctx.clip();
+
+    // Dark pill background
+    const tw=Math.min(ctx.measureText(lbl).width+12, maxLblW);
+    const th=fs+8;
+    ctx.fillStyle='rgba(0,0,0,0.65)';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(cx-tw/2, cy-th/2, tw, th, 4);
+    else ctx.rect(cx-tw/2, cy-th/2, tw, th);
+    ctx.fill();
+
+    // White label
+    ctx.fillStyle='#ffffff';
+    ctx.globalAlpha=0.95;
+    ctx.fillText(lbl, cx, cy+1);
+    ctx.globalAlpha=1;
+    ctx.restore();
+  }
+
+  // Active loket indicators
+  for(let i=0;i<5;i++){
+    const stId=`admin_${i}`;
+    const b=zoneBounds['loket'];
+    if(!b) continue;
+    const loketW=(b.c1-b.c0+1)/cfg.loket;
+    const cx=(b.c0+loketW*(i+0.5))*C;
+    const cy=(b.r0+0.7)*C;
+    if(i<cfg.loket){
+      const st=stations[stId];
+      ctx.fillStyle=st?.busy?'#f59e0b':'#22c55e';
+      ctx.beginPath();ctx.arc(cx,cy,C*0.25,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.025)';ctx.lineWidth=0.3;
+  for(let c=0;c<=COLS;c++){ctx.beginPath();ctx.moveTo(c*C,0);ctx.lineTo(c*C,cv.height);ctx.stroke();}
+  for(let r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*C);ctx.lineTo(cv.width,r*C);ctx.stroke();}
+
+  // Riders
+  for(const r of riders){
+    // Trail
+    if(r.trail.length>1){
+      ctx.save();
+      for(let i=1;i<r.trail.length;i++){
+        const t=r.trail[i],p=r.trail[i-1];
+        const col=STAGES[r.state]?.color||'#666';
+        ctx.strokeStyle=col;ctx.lineWidth=0.8;
+        ctx.globalAlpha=(i/r.trail.length)*0.2;
+        ctx.beginPath();ctx.moveTo(p.x*C+C/2,p.y*C+C/2);ctx.lineTo(t.x*C+C/2,t.y*C+C/2);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    // Dot
+    const cx=r.px*C+C/2,cy=r.py*C+C/2;
+    const rad=C*0.3;
+    const stageKey=Object.keys(STAGES).find(k=>r.state===k||r.state.startsWith(k))||r.state;
+    const col=(STAGES[stageKey]||{color:'#6b7280'}).color;
+    ctx.fillStyle=col;
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.25)';
+    ctx.beginPath();ctx.arc(cx-rad*0.2,cy-rad*0.2,rad*0.28,0,Math.PI*2);ctx.fill();
+    // ID badge for small grids
+    if(C>=22){
+      ctx.fillStyle='#fff';ctx.font=`700 ${Math.max(5,C*0.2)}px -apple-system,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(String(r.id+1).padStart(2,'0'),cx,cy+1);
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   UI UPDATES
+═══════════════════════════════════════════════ */
+function fmt(s){
+  if(!s||isNaN(s)) return'—';
+  const m=Math.floor(s/60),sc=Math.round(s%60);
+  return m>0?`${m}m${sc}s`:`${sc}s`;
+}
+
+function updateUI(){
+  const avg=metrics.done>0?(metrics.handleTotal||metrics.totalTime)/metrics.done:0;
+  const pct=metrics.done>0?Math.round(metrics.onTime/metrics.done*100):null;
+
+  document.getElementById('m-done').textContent=metrics.done;
+  document.getElementById('m-avg').textContent=fmt(avg);
+  const avgHub=metrics.done>0?metrics.totalTime/metrics.done:0;
+  const mHub=document.getElementById('m-avg-hub');
+  if(mHub) mHub.textContent=fmt(avgHub);
+  document.getElementById('m-ontime').textContent=pct!==null?pct+'%':'—';
+
+  const avgEl=document.getElementById('mc-avg');
+  avgEl.className='mc'+(avg>cfg.target*60?' mc-warn':avg>0&&avg<=cfg.target*60?' mc-good':'');
+
+  const queueLen=riders.filter(r=>r.state==='queue_admin').length;
+  document.getElementById('m-queue').textContent=queueLen;
+
+  document.getElementById('sim-prog').textContent=`${metrics.done}/${cfg.riders}`;
+
+  // Station bars
+  const stationGroups=['satpam_in','admin','cart','cold','satpam_out'];
+  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Cold Room',satpam_out:'Satpam Keluar'};
+  let barsHTML='';
+  for(const type of stationGroups){
+    const keys=Object.keys(stations).filter(k=>stations[k].type===type);
+    const busyCount=keys.filter(k=>stations[k]&&stations[k].busy).length;
+    const total=keys.length;
+    const pct2=total?Math.round(busyCount/total*100):0;
+    const col=STATION_COLORS[type]||'#6b7280';
+    barsHTML+=`<div class="st-row">
+      <div class="st-head"><span>${stLabels[type]}</span><span>${busyCount}/${total} aktif</span></div>
+      <div class="st-track"><div class="st-fill" style="width:${pct2}%;background:${col};"></div></div>
+    </div>`;
+  }
+  document.getElementById('station-bars').innerHTML=barsHTML;
+}
+
+function updateLog(r,total){
+  const log=document.getElementById('rider-log');
+  const late=total>cfg.target*60;
+  const card=document.createElement('div');
+  card.className=`rider-card done ${late?'late':'ok'}`;
+  card.innerHTML=`<div class="rc-name">${r.name}</div>
+    <div class="rc-status">${fmt(total)} ${late?'⚠ TERLAMBAT':'✓ On-time'}</div>`;
+  log.insertBefore(card,log.firstChild);
+  if(log.children.length>40) log.removeChild(log.lastChild);
+}
+
+/* ═══════════════════════════════════════════════
+   REPORT
+═══════════════════════════════════════════════ */
+function showReport(){
+  if(!completedRiders.length){alert('Jalankan simulasi sampai selesai dulu.');return;}
+
+  const done=completedRiders;
+  const times=done.map(r=>r.totalTime);
+  // Avg handling = zone processing only (no antri, no pre-open)
+  const computeHandleOf=(r)=>{
+    const sIn=r.times.satpam_in||0;
+    const loket=r.times.admin||0;
+    const cart=r.times.cart||0;
+    const cold=r.times.cold||0;
+    const sOut=r.times.satpam_out||0;
+    const jalan=r.times.transit||0;
+    const tbf=r.spawnTime<adminOpensSec()?Math.min(sIn,adminOpensSec()-r.spawnTime):0;
+    return Math.max(0,sIn+loket+cart+cold+sOut+jalan-tbf);
+  };
+  const hTimes=done.map(r=>computeHandleOf(r));
+  const avg=hTimes.reduce((a,b)=>a+b,0)/hTimes.length;
+  const avgInHub=times.reduce((a,b)=>a+b,0)/times.length;
+  const mn=Math.min(...hTimes),mx=Math.max(...hTimes);
+  const p95=[...hTimes].sort((a,b)=>a-b)[Math.floor(hTimes.length*.95)]||mx;
+  const ontime=done.filter(r=>computeHandleOf(r)<=cfg.target*60).length;
+  const pct=Math.round(ontime/done.length*100);
+
+  // Time analysis
+  const simStartWall=String(cfg.startHour).padStart(2,'0')+':'+String(cfg.startMin).padStart(2,'0');
+  const lastDone=completedRiders.length?Math.max(...completedRiders.map(r=>r.spawnTime+(r.totalTime||0))):0;
+  const finishWall=wallTime(lastDone);
+  const tEnd=targetEndSec();
+  const overUnder=lastDone-tEnd;
+  const timeStatus=overUnder<=0?
+    `✅ Selesai ${finishWall} — ${durStr(Math.abs(overUnder))} LEBIH AWAL dari target`:
+    `⚠️ Selesai ${finishWall} — MELEBIHI target ${durStr(overUnder)}`;
+
+  document.getElementById('rpt-title').textContent='Hub Opening Report — '+simStartWall+' → '+finishWall;
+  document.getElementById('rpt-sub').textContent=
+    `${cfg.riders} rider · ${cfg.loket} loket · ${cfg.runner} runner · ${cfg.satpam} satpam · Target selesai: ${String(cfg.targetEndHour).padStart(2,'0')}:00`;
+
+  // Stats
+  const burstRiders=completedRiders.filter(r=>r.spawnTime<cfg.burstWindowMin*60);
+  const staggerRiders=completedRiders.filter(r=>r.spawnTime>=cfg.staggerStartMin*60);
+  const burstAvg=burstRiders.length?burstRiders.reduce((s,r)=>s+r.totalTime,0)/burstRiders.length:0;
+  const staggerAvg=staggerRiders.length?staggerRiders.reduce((s,r)=>s+r.totalTime,0)/staggerRiders.length:0;
+  const lastBurst=burstRiders.length?Math.max(...burstRiders.map(r=>r.spawnTime+r.totalTime)):0;
+  const lastStagger=staggerRiders.length?Math.max(...staggerRiders.map(r=>r.spawnTime+r.totalTime)):0;
+
+  const openWall=String(cfg.startHour).padStart(2,'0')+':00';
+  document.getElementById('rpt-stats').innerHTML=`
+    <div class="rst hl"><div class="rst-v">${finishWall}</div>
+      <div class="rst-l">Rider terakhir keluar hub</div></div>
+    <div class="rst ${overUnder<=0?'good':'warn'}">
+      <div class="rst-v">${overUnder<=0?'✅ On Time':'⚠ Terlambat'}</div>
+      <div class="rst-l">${overUnder<=0?'-'+durStr(Math.abs(overUnder))+' dari target':'+'+durStr(overUnder)+' dari target'}</div></div>
+    <div class="rst warn">
+      <div class="rst-v">${fmt(avg)}</div>
+      <div class="rst-l">① Avg Handling Time<br><span style="font-size:8px;font-weight:400;">zona processing saja · tanpa antri · tanpa pre-open</span></div></div>
+    <div class="rst"><div class="rst-v">${fmt(avgInHub)}</div>
+      <div class="rst-l">② Avg Waktu di Hub<br><span style="font-size:8px;font-weight:400;">tiba → keluar · termasuk antri &amp; pre-open</span></div></div>
+    <div class="rst ${avg>cfg.target*60?'warn':'good'}"><div class="rst-v">${pct}%</div>
+      <div class="rst-l">On-time ≤${cfg.target}m</div></div>
+    <div class="rst"><div class="rst-v">${fmt(p95)}</div><div class="rst-l">P95 handling time</div></div>`;
+
+  // Add time breakdown section
+  const timeSectionHTML=`
+    <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border2);">
+      <div style="font-size:11px;font-weight:700;color:#e8ecf4;margin-bottom:10px;">⏰ Timeline Simulasi</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px;">
+        <div><span style="color:var(--muted);">Hub buka:</span> <b style="color:var(--blue2);">${simStartWall}</b></div>
+        <div><span style="color:var(--muted);">Target selesai:</span> <b style="color:var(--amber2);">${String(cfg.targetEndHour).padStart(2,'0')}:00</b></div>
+        ${cfg.arrival==='hybrid'?
+          `<div><span style="color:var(--muted);">Burst (${burstRiders.length} rider):</span> <b>${simStartWall} → ${wallTime(lastBurst)}</b></div>
+          <div><span style="color:var(--muted);">Stagger (${staggerRiders.length} rider):</span> <b>${wallTime(cfg.staggerStartMin*60)} → ${wallTime(lastStagger)}</b></div>` 
+          :''}
+        <div><span style="color:var(--muted);">Rider terakhir selesai:</span> <b style="color:${overUnder<=0?'#4ade80':'#f87171'};">${finishWall}</b></div>
+        <div><span style="color:var(--muted);">Total durasi hub:</span> <b>${durStr(lastDone)}</b></div>
+      </div>
+      <div style="margin-top:10px;padding:8px 10px;border-radius:6px;font-size:11px;font-weight:600;
+        background:${overUnder<=0?'#061408':'#140808'};border:1px solid ${overUnder<=0?'var(--green)':'var(--red)'};">
+        ${timeStatus}
+      </div>
+    </div>`;
+
+
+  // Insert time section before station breakdown
+  document.getElementById('rpt-timeline').innerHTML=timeSectionHTML;
+
+  // Station breakdown
+  const stTypes=['satpam_in','admin','cart','cold','satpam_out'];
+  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Cold Room',satpam_out:'Satpam Keluar'};
+  const stColors={satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',satpam_out:'#059669'};
+
+  // Per-station averages from completed riders
+  const stAvgProcess={},stAvgWait={};
+  for(const type of stTypes){
+    const pTimes=done.map(r=>r.times[type]||0).filter(t=>t>0);
+    const wTimes=done.map(r=>r.waitTimes[type]||0);
+    stAvgProcess[type]=pTimes.length?pTimes.reduce((a,b)=>a+b,0)/pTimes.length:0;
+    stAvgWait[type]=wTimes.reduce((a,b)=>a+b,0)/done.length;
+  }
+
+  const maxAvg=Math.max(...stTypes.map(t=>stAvgProcess[t]+stAvgWait[t]));
+  const bottleneckType=stTypes.reduce((a,b)=>(stAvgWait[a]+stAvgProcess[a])>(stAvgWait[b]+stAvgProcess[b])?a:b);
+
+  let stHTML='';
+  for(const type of stTypes){
+    const total2=stAvgProcess[type]+stAvgWait[type];
+    const pct2=maxAvg>0?Math.round(total2/maxAvg*100):0;
+    const isBottle=type===bottleneckType;
+    const isGood=stAvgWait[type]<10;
+    stHTML+=`<div class="sb-row ${isBottle?'bottleneck':isGood?'good':''}">
+      <div class="sb-name"><span style="width:8px;height:8px;border-radius:50%;background:${stColors[type]};flex-shrink:0;display:inline-block;"></span>${stLabels[type]}${isBottle?' 🔴':''}</div>
+      <div class="sb-bar-wrap"><div class="sb-bar" style="width:${pct2}%;background:${stColors[type]};"></div></div>
+      <div class="sb-val">${fmt(stAvgProcess[type])}</div>
+      <div class="sb-wait">+${fmt(stAvgWait[type])} antri</div>
+    </div>`;
+  }
+  document.getElementById('rpt-stations').innerHTML=stHTML;
+
+  // Insights
+  const insights=[];
+  if(avg>cfg.target*60){
+    insights.push({type:'crit',icon:'⚠',title:`Avg time ${fmt(avg)} melebihi target ${cfg.target} menit`,
+      body:`${pct}% rider selesai tepat waktu. Perlu optimasi untuk memenuhi target operasional.`});
+  } else {
+    insights.push({type:'good',icon:'✓',title:`Rata-rata ${fmt(avg)} — dalam target ${cfg.target} menit`,
+      body:`${pct}% rider selesai on-time. Setup ini memenuhi target operasional.`});
+  }
+
+  // Bottleneck
+  const bottleWait=stAvgWait[bottleneckType];
+  const bottleTotal=stAvgProcess[bottleneckType]+bottleWait;
+  if(bottleWait>30){
+    const rec=bottleneckType==='admin'?
+      `Tambah loket admin dari ${cfg.loket} ke ${cfg.loket+1} — estimasi kurangi avg antri ~${fmt(bottleWait*cfg.loket/(cfg.loket+1))}`:
+      bottleneckType==='cold'?
+      `Tambah runner cold room dari ${cfg.runner} ke ${cfg.runner+1} — estimasi kurangi antri cold room ~${fmt(bottleWait*0.4)}`:
+      `Tambah satpam untuk percepat proses di ${stLabels[bottleneckType]}`;
+    insights.push({type:'crit',icon:'🔴',title:`Bottleneck: ${stLabels[bottleneckType]} — avg antri ${fmt(bottleWait)}`,body:rec});
+  }
+
+  // Admin loket analysis — realistic capacity check
+  const adminWait=stAvgWait['admin'];
+  const adminProcess=stAvgProcess['admin']||160;
+  const maxQueueWait=600; // target max 10 mnt antri sebelum loket
+  const burstN=cfg.arrival==='hybrid'?Math.min(cfg.burstCount,cfg.riders):
+                cfg.arrival==='burst'?cfg.riders:
+                Math.ceil(cfg.riders/4); // stagger: peak ~25% di awal
+  const serveableIn10min=Math.floor(cfg.loket*maxQueueWait/adminProcess);
+
+  if(adminWait>maxQueueWait){
+    // Queue exceeds 10 min target
+    const loketFor10min=Math.ceil(burstN*adminProcess/maxQueueWait);
+    const altBurst=Math.floor(cfg.loket*maxQueueWait/adminProcess);
+    insights.push({type:'crit',icon:'📋',
+      title:`Antri loket ${fmt(adminWait)} — melebihi target 10 menit`,
+      body:`Dengan ${cfg.loket} loket (${Math.round(adminProcess)}s/rider), hanya bisa layani `+
+        `<b>${serveableIn10min} rider</b> dalam 10 menit. Burst ${burstN} rider berarti sisa `+
+        `${Math.max(0,burstN-serveableIn10min)} rider menunggu lebih dari 10 menit. `+
+        `<br><b>Opsi 1:</b> Tambah loket ke <b>${loketFor10min}</b> untuk handle burst ${burstN} rider dalam 10 menit. `+
+        `<br><b>Opsi 2:</b> Kurangi burst count ke <b>${altBurst} rider</b> (sisanya staggered), loket cukup ${cfg.loket}.`});
+  } else if(adminWait>300){
+    // Between 5-10 min - warn
+    const addLoket=cfg.loket+1;
+    const newCapacity=Math.floor(addLoket*maxQueueWait/adminProcess);
+    insights.push({type:'warn',icon:'📋',
+      title:`Antri loket ${fmt(adminWait)} — mendekati batas 10 menit`,
+      body:`Masih dalam toleransi, tapi padat. Dengan <b>+1 loket (jadi ${addLoket})</b>, `+
+        `bisa layani ${newCapacity} rider dalam 10 menit (naik dari ${serveableIn10min}).`});
+  } else {
+    insights.push({type:'good',icon:'✅',
+      title:`Loket admin efisien — avg antri ${fmt(adminWait)}`,
+      body:`${cfg.loket} loket cukup untuk handle pola kedatangan ini. `+
+        `Kapasitas 10 menit: ${serveableIn10min} rider. `+
+        `${serveableIn10min>=burstN?'Aman untuk burst '+burstN+' rider.':'Perhatikan jika burst meningkat.'}`});
+  }
+
+  // Cold room
+  if(stAvgWait['cold']>45){
+    insights.push({type:'warn',icon:'❄',title:`Cold room waiting time tinggi (avg ${fmt(stAvgWait['cold'])})`,
+      body:`${cfg.runner} runner untuk ${cfg.riders} rider menyebabkan antrian. Tambah 1 runner atau siapkan produk lebih awal (pre-staging) untuk mengurangi waktu ambil.`});
+  }
+
+  // Performance improvement recommendation
+  const adminProc=stAvgProcess['admin']||160;
+  const coldProc=stAvgProcess['cold']||70;
+  const cartProc=stAvgProcess['cart']||65;
+  const perfImpact=(adminProc*0.2+coldProc*0.15+cartProc*0.1).toFixed(0);
+  const newAdminProc=Math.round(adminProc*0.8);
+  const newCapacity=Math.floor(cfg.loket*600/newAdminProc);
+  const currentCapacity=Math.floor(cfg.loket*600/adminProc);
+  insights.push({type:'warn',icon:'⚡',
+    title:'Rekomendasi: Tingkatkan kecepatan handling tim',
+    body:`Selain menambah loket/manpower, pertimbangkan meningkatkan <b>kecepatan proses per rider</b>:<br>`+
+      `• <b>Loket admin</b>: avg ${fmt(adminProc)}/rider → target ${fmt(newAdminProc)}/rider (−20%) → kapasitas naik dari ${currentCapacity} ke ${newCapacity} rider/10mnt<br>`+
+      `• <b>Cold room</b>: pre-staging produk sebelum jam buka (rak sudah siap per nama rider) → kurangi waktu ambil dari avg ${fmt(coldProc)} ke ~${fmt(coldProc*0.6)}<br>`+
+      `• <b>Loket</b>: sistem input iSeller lebih cepat (template, auto-fill) atau pre-input sehari sebelumnya → estimasi hemat ~${Math.round(adminProc*0.2)}s/rider = <b>${fmt(Math.round(adminProc*0.2)*cfg.riders)} total</b> untuk ${cfg.riders} rider`
+  });
+
+  // Late riders
+  const lateRiders=done.filter(r=>r.totalTime>cfg.target*60);
+  if(lateRiders.length>0){
+    document.getElementById('rpt-late-note').textContent=`${lateRiders.length} rider terlambat`;
+  }
+
+
+  // ── Transit leg breakdown ──────────────────────────────────────────────
+  const legDefs=[
+    {key:'leg_admin',     distKey:'motor_to_satpam',    label:'🅿 Parkir → 🛡 Satpam masuk'},
+    {key:'leg_admin',     distKey:'satpam_to_queue',    label:'🛡 Satpam → 📋 Area antri'},
+    {key:'leg_cart',      distKey:'admin_to_cart',      label:'📋 Loket → 🛒 Parkir cart'},
+    {key:'leg_cold',      distKey:'cart_to_cold',       label:'🛒 Cart → ❄ Cold room'},
+    {key:'leg_satpam_out',distKey:'cold_to_satpam_out', label:'❄ Cold room → 🛡 Satpam keluar'},
+  ];
+  // Calc avg per leg from completed riders
+  let transitHTML='<div style="display:flex;flex-direction:column;gap:4px;">';
+  let totalDistM=0;
+  for(const leg of legDefs){
+    const distM=cfg.distances[leg.distKey]||0;
+    const expected=distM/cfg.walkSpeed;
+    totalDistM+=distM;
+    const vals=done.map(r=>r.times[leg.key]||0).filter(v=>v>0);
+    const avgSec=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:expected;
+    transitHTML+=`<div style="display:grid;grid-template-columns:1fr 55px 55px;gap:8px;align-items:center;
+      padding:6px 10px;background:var(--bg3);border-radius:5px;font-size:10px;border:1px solid var(--border);">
+      <span>${leg.label}</span>
+      <span style="text-align:right;color:var(--muted);">${distM}m</span>
+      <span style="text-align:right;font-weight:600;color:var(--blue2);">~${Math.round(avgSec)}s</span>
+    </div>`;
+  }
+  const totalTransit=done.reduce((s,r)=>s+(r.times.transit||0),0)/done.length;
+  transitHTML+=`<div style="display:grid;grid-template-columns:1fr 55px 55px;gap:8px;align-items:center;
+    padding:7px 10px;background:var(--bg4);border-radius:5px;font-size:10px;border:1px solid var(--border2);font-weight:700;">
+    <span style="color:#e8ecf4;">Total waktu jalan / rider</span>
+    <span style="text-align:right;color:var(--muted);">${totalDistM}m</span>
+    <span style="text-align:right;color:var(--green2);">~${Math.round(totalTransit)}s</span>
+  </div>`;
+  transitHTML+='</div>';
+  document.getElementById('rpt-transit').innerHTML=transitHTML;
+
+  document.getElementById('rpt-insights').innerHTML=insights.map(i=>`
+    <div class="insight-card ic-${i.type==='crit'?'crit':i.type==='good'?'good':'warn'}">
+      <span class="ic-icon">${i.icon}</span>
+      <div><div class="ic-title">${i.title}</div><div class="ic-body">${i.body}</div></div>
+    </div>`).join('');
+
+  // Per-rider table
+  const sorted=[...done].sort((a,b)=>b.totalTime-a.totalTime);
+  const adminOpen=adminOpensSec();
+  const openStr=String(cfg.startHour).padStart(2,'0')+':00';
+  const sortedByArrival=[...done].sort((a,b)=>a.spawnTime-b.spawnTime);
+  document.getElementById('rpt-riders').innerHTML=sortedByArrival.map((r,i)=>{
+    const arriveWall=wallTime(r.spawnTime);
+    const preOpen=r.spawnTime<adminOpen;
+    const timerWall=preOpen?openStr:arriveWall;
+    const late=(r.handleTime||r.totalTime)>cfg.target*60;
+
+    // Zone processing times (no antri, no pre-open satpam)
+    const sIn=r.times.satpam_in||0;
+    const qAdmin=r.waitTimes.admin||0;
+    const loket=r.times.admin||0;
+    const cart=r.times.cart||0;
+    const qCold=r.waitTimes.cold||0;
+    const cold=r.times.cold||0;
+    const sOut=r.times.satpam_out||0;
+    const jalan=r.times.transit||0;
+    const antriTotal=qAdmin+qCold;
+    // Satpam time that happened before hub opens (exclude from handling)
+    const timeBeforeOpen=preOpen?Math.min(sIn,adminOpen-r.spawnTime):0;
+    // Handling = zone processing only, no antri, no pre-open time
+    const zoneOnly=sIn+loket+cart+cold+sOut+jalan;
+    const computedHandle=Math.max(0,zoneOnly-timeBeforeOpen);
+
+    // Display helpers
+    const f0=(v)=>v>0?fmt(v):'0s';
+    const fAntri=(v,warn)=>{
+      if(v<5) return '<span style="color:var(--dim)">0s</span>';
+      const c=v>300?'#f87171':v>120?'#fbbf24':'#9ca3af';
+      return `<span style="color:${c};">${fmt(v)}</span>`;
+    };
+    const handleLabel=preOpen?
+      `<span style="font-size:8px;display:block;color:var(--dim);">-${fmt(timeBeforeOpen)} (sebelum buka)</span>`:'';
+    return`<tr class="${late?'late':'ok'}" style="vertical-align:middle;">
+      <td style="text-align:center;color:var(--dim);">${i+1}</td>
+      <td style="font-weight:600;">${r.name}</td>
+      <td>${arriveWall}${preOpen?'<span style="display:block;font-size:8px;color:#d97706;font-weight:600;">⏳ sebelum buka</span>':''}</td>
+      <td style="font-size:9px;font-weight:600;color:${preOpen?'#d97706':'#6b7280'};">${timerWall}${preOpen?' ⏱':''}</td>
+      <td>${f0(sIn)}${preOpen&&timeBeforeOpen>5?'<span style="font-size:8px;color:#d97706;display:block;">(-'+fmt(timeBeforeOpen)+')</span>':''}</td>
+      <td>${fAntri(qAdmin)}</td>
+      <td>${f0(loket)}</td>
+      <td>${f0(cart)}</td>
+      <td>${fAntri(qCold)}</td>
+      <td>${f0(cold)}</td>
+      <td>${f0(sOut)}</td>
+      <td style="color:#60a5fa;">${f0(jalan)}</td>
+      <td style="color:${antriTotal>600?'#f87171':antriTotal>300?'#fbbf24':'#9ca3af'};">${f0(antriTotal)}</td>
+      <td style="font-weight:700;color:${late?'#f87171':'#4ade80'};"
+          title="(${f0(sIn)} satpam + ${f0(loket)} loket + ${f0(cart)} cart + ${f0(cold)} cold + ${f0(sOut)} satpam keluar + ${f0(jalan)} jalan)${preOpen?' - '+fmt(timeBeforeOpen)+' sebelum buka':''}">
+        ${fmt(computedHandle)}${handleLabel}
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('report').classList.remove('hidden');
+}
+
+function closeReport(){document.getElementById('report').classList.add('hidden');}
+
+function printReport(){
+  const card=document.querySelector('.rpt-card');
+  const w=window.open('','_blank','width=820,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Hub Report</title>
+    <style>body{font-family:-apple-system,Arial,sans-serif;color:#111;background:#fff;padding:16px;font-size:11px;}
+    .rpt-card{max-width:780px;margin:0 auto;}
+    .rpt-head h2{font-size:16px;font-weight:700;margin-bottom:3px;}
+    .rpt-head p{font-size:10px;color:#666;margin-bottom:12px;}
+    .rpt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+    .rst{background:#f5f5f3;border-radius:6px;padding:10px;text-align:center;border:1px solid #e0ddd8;}
+    .rst-v{font-size:18px;font-weight:700;}.rst-l{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+    .rst.hl{background:#EFF6FF;border-color:#93C5FD;}.rst.hl .rst-v{color:#1D4ED8;}
+    .rst.warn{background:#FFFBEB;border-color:#FCD34D;}.rst.warn .rst-v{color:#D97706;}
+    .rst.good{background:#F0FDF4;border-color:#86EFAC;}.rst.good .rst-v{color:#16A34A;}
+    .rpt-stitle{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#666;padding:5px 0;border-bottom:1px solid #eee;margin-bottom:8px;}
+    .station-breakdown{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .sb-row{display:grid;grid-template-columns:130px 1fr 60px 70px;gap:8px;align-items:center;padding:6px 10px;background:#f9f7f4;border-radius:5px;font-size:10px;border:1px solid #eee;}
+    .sb-row.bottleneck{background:#FEF2F2;border-color:#FCA5A5;}.sb-row.good{background:#F0FDF4;border-color:#86EFAC;}
+    .sb-bar{height:4px;border-radius:99px;background:#3B82F6;}
+    .insight-card{display:flex;gap:8px;padding:8px 11px;border-radius:6px;margin-bottom:6px;font-size:11px;line-height:1.5;border:1px solid;}
+    .ic-crit{background:#FEF2F2;border-color:#FCA5A5;}.ic-warn{background:#FFFBEB;border-color:#FCD34D;}.ic-good{background:#F0FDF4;border-color:#86EFAC;}
+    .ic-title{font-weight:700;margin-bottom:2px;}.ic-body{color:#555;}
+    table{width:100%;border-collapse:collapse;font-size:10px;margin-top:8px;}
+    th{text-align:left;padding:4px 7px;border-bottom:1px solid #ddd;color:#888;font-size:9px;text-transform:uppercase;}
+    td{padding:4px 7px;border-bottom:1px solid #f0f0f0;}
+    tr.late td{color:#DC2626;}tr.ok td{color:#16A34A;}
+    .rpt-section{margin-bottom:14px;}
+    @page{size:A4;margin:12mm;}
+    
+.sl-wrap{display:flex;flex-direction:column;gap:0;}
+.sl-row{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+.sl-lbl{font-size:10px;color:var(--muted);min-width:155px;}
+.sl-val{font-size:11px;font-weight:700;color:var(--blue2);min-width:54px;text-align:right;}
+.sl-track{flex:1;position:relative;}
+.sl-track input[type=range]{width:100%;accent-color:var(--blue2);margin:0;}
+.tick-row{display:flex;justify-content:space-between;padding:0 1px;margin-top:1px;}
+.tk{display:flex;flex-direction:column;align-items:center;flex:0 0 0;}
+.tk-line{width:1px;height:4px;background:var(--border2);}
+.tk-line.mid{height:6px;background:var(--muted);width:1.5px;}
+.tk-label{font-size:7px;color:var(--dim);margin-top:1px;white-space:nowrap;}
+.tk-label.mid{color:var(--muted);font-weight:700;font-size:8px;}
+
+</style></head><body><div class="rpt-card">${card.innerHTML}</div>
+    <script>document.querySelector('.btn-ghost').remove();document.querySelector('.btn-blue').remove();<\/script>
+    </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+/* ═══════════════════════════════════════════════
+   WIZARD LOGIC
+═══════════════════════════════════════════════ */
+let wzStep=0;
+
+const TIMING_PARAMS=[
+  {key:'satpam_in',label:'Satpam Masuk',icon:'🛡',hint:'Isi buku absen, serahkan ID, ambil kunci cart + battery',min:30,max:120},
+  {key:'admin',label:'Loket Admin',icon:'📋',hint:'Input iSeller inventory, kasih consumables (plastik, sedotan, lid)',min:60,max:300},
+  {key:'cart',label:'Setup Cart',icon:'🛒',hint:'Taruh consumables di kompartemen cart, pasang battery',min:30,max:120},
+  {key:'cold',label:'Ambil Produk (Cold Room)',icon:'❄',hint:'Ambil produk dan es batu dari runner',min:30,max:120},
+  {key:'satpam_out',label:'Satpam Keluar',icon:'✅',hint:'Cek akhir oleh satpam sebelum keluar hub',min:15,max:60},
+];
+
+
+const DIST_DEFS=[
+  {key:'motor_to_satpam',   label:'Parkir motor → Pos satpam masuk', icon:'🅿→🛡'},
+  {key:'satpam_to_queue',   label:'Pos satpam → Area antri loket',   icon:'🛡→📋'},
+  {key:'admin_to_cart',     label:'Loket admin → Parkir cart',       icon:'📋→🛒'},
+  {key:'cart_to_cold',      label:'Parkir cart → Cold room',         icon:'🛒→❄'},
+  {key:'cold_to_satpam_out',label:'Cold room → Pos satpam keluar',   icon:'❄→🛡'},
+];
+
+function buildDistSliders(){
+  const wrap=document.getElementById('dist-grid');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(const d of DIST_DEFS){
+    const m=cfg.distances[d.key]||15;
+    const walkS=Math.round(m/cfg.walkSpeed);
+    wrap.innerHTML+=`<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+        <span style="font-size:9px;color:var(--muted);">${d.label}</span>
+        <span id="dv-${d.key}" style="font-size:12px;font-weight:700;color:var(--blue2);">${m}m</span>
+      </div>
+      <div class="sl-track">
+        <input type="range" min="0" max="100" step="5" value="${m}" id="ds-${d.key}"
+          oninput="cfg.distances['${d.key}']=parseInt(this.value);
+                   document.getElementById('dv-${d.key}').textContent=this.value+'m';
+                   document.getElementById('dt-${d.key}').textContent='~'+Math.round(parseInt(this.value)/cfg.walkSpeed)+'s';
+                   updateDistPreview()">
+        ${distTicks()}
+      </div>
+      <div style="font-size:8px;color:var(--dim);text-align:right;margin-top:2px;" id="dt-${d.key}">~${walkS}s</div>
+    </div>`;
+  }
+  updateDistPreview();
+}
+
+function updateDistPreview(){
+  const el=document.getElementById('dist-preview');
+  if(!el) return;
+  const total=Object.values(cfg.distances).reduce((s,d)=>s+d,0);
+  const tTime=total/cfg.walkSpeed;
+  const perLeg=DIST_DEFS.map(d=>{
+    const t=cfg.distances[d.key]/cfg.walkSpeed;
+    return `${d.icon}: ${cfg.distances[d.key]}m (~${Math.round(t)}s)`;
+  }).join(' · ');
+  el.innerHTML=`Total jarak: <b>${total}m</b> · Total waktu jalan: <b>~${Math.round(tTime)}s (${Math.round(tTime/60*10)/10} mnt)</b><br>
+    <span style="font-size:9px;color:var(--dim);">${perLeg}</span>`;
+}
+
+
+// Generate tick mark HTML for a slider
+// ticks: array of {label, mid} objects
+function makeTicks(ticks){
+  return '<div class="tick-row">' +
+    ticks.map(t=>`<div class="tk"><div class="tk-line${t.mid?' mid':''}"></div><span class="tk-label${t.mid?' mid':''}">${t.label}</span></div>`).join('') +
+  '</div>';
+}
+
+function timingTicks(){
+  // 1–10 minutes, highlight 5
+  const t=[];
+  for(let i=1;i<=10;i++) t.push({label:i+'m',mid:i===5});
+  return makeTicks(t);
+}
+
+function distTicks(){
+  // 0,10,20,...,100m, highlight 50
+  const t=[];
+  for(let i=0;i<=10;i++) t.push({label:(i*10)+'m',mid:i===5});
+  return makeTicks(t);
+}
+
+function buildTimingSliders(){
+  const wrap=document.getElementById('timing-grid');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(const p of TIMING_PARAMS){
+    const t=cfg.timing[p.key];
+    const valMin=(t.val/60).toFixed(1);
+    wrap.innerHTML+=`<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;">
+        <span style="font-size:10px;font-weight:600;color:#e8ecf4;">${p.icon} ${p.label}</span>
+        <span id="tv-${p.key}" style="font-size:13px;font-weight:700;color:var(--blue2);">${valMin} mnt</span>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:7px;">${p.hint}</div>
+      <div class="sl-track">
+        <input type="range" min="60" max="600" step="15" value="${t.val}" id="tr-${p.key}"
+          oninput="updateTiming('${p.key}',this.value)">
+        ${timingTicks()}
+      </div>
+      <div style="font-size:8px;color:var(--dim);margin-top:3px;text-align:right;" id="ts-${p.key}">${t.val}s</div>
+    </div>`;
+  }
+  checkTimingWarning();
+}
+
+function updateTiming(key,val){
+  const s=parseInt(val);
+  cfg.timing[key].val=s;
+  const mnt=(s/60).toFixed(1);
+  const el=document.getElementById('tv-'+key);
+  const els=document.getElementById('ts-'+key);
+  if(el) el.textContent=mnt+' mnt';
+  if(els) els.textContent=s+'s';
+  checkTimingWarning();
+}
+
+function checkTimingWarning(){
+  const total=Object.values(cfg.timing).reduce((a,b)=>a+b.val,0);
+  const warn=document.getElementById('timing-warn');
+  document.getElementById('target-time').textContent=cfg.target;
+  warn.style.display=total>cfg.target*60?'block':'none';
+}
+
+const ADJ_CFG={
+  loket:{min:2,max:5,field:'loket',icons:'📋',label:'loket'},
+  runner:{min:1,max:4,field:'runner',icons:'🧊',label:'runner'},
+  satpam:{min:1,max:3,field:'satpam',icons:'🛡',label:'satpam'},
+  target:{min:5,max:20,field:'target',step:1,label:'menit'},
+  riders:{min:10,max:200,field:'riders',step:5,label:'rider'},
+};
+
+function adj(key,delta){
+  const a=ADJ_CFG[key]; if(!a) return;
+  const step=a.step||1;
+  cfg[a.field]=Math.max(a.min,Math.min(a.max,cfg[a.field]+delta*step));
+  const numEl=document.getElementById(key+'-num');
+  if(numEl){
+    if(numEl.tagName==='INPUT') numEl.value=cfg[a.field];
+    else numEl.textContent=cfg[a.field];
+  }
+  // Update icons
+  const icons=document.getElementById(key+'-icons');
+  if(icons&&a.icons){
+    icons.innerHTML='';
+    const ic=a.icons||'●';
+    const maxIc=a.max>10?10:a.max;
+    for(let i=0;i<maxIc;i++){
+      const s=document.createElement('span');
+      s.className='cnt-ic'+(i<cfg[a.field]?' on':'');
+      s.textContent=ic;
+      icons.appendChild(s);
+    }
+  }
+}
+
+
+function fmtMinAfterOpen(min){
+  // Times relative to preopenHour (05:00), matching simulation clock
+  const h=cfg.preopenHour+Math.floor(min/60);
+  const m=min%60;
+  const hStr=String(h%24).padStart(2,'0');
+  const mStr=String(m).padStart(2,'0');
+  return '+'+min+'mnt ('+hStr+':'+mStr+')';
+}
+
+function updateTimePreview(){
+  const windowH=cfg.targetEndHour-cfg.startHour;
+  const el=document.getElementById('time-window');
+  if(el) el.textContent=`Window: ${windowH} jam untuk ${cfg.riders} rider`;
+
+  // Always fix burst window to 1 hour (05:00–06:00) and stagger start to hub open
+  cfg.burstWindowMin=60;  // fixed: 1 jam sebelum hub buka
+  cfg.staggerStartMin=(cfg.startHour-cfg.preopenHour)*60; // fixed: mulai dari jam buka
+
+  // Update stagger count display
+  const sc=Math.max(0,cfg.riders-cfg.burstCount);
+  const scEl=document.getElementById('stagger-count-v');
+  if(scEl) scEl.textContent=sc;
+
+  const prev=document.getElementById('hybrid-preview');
+  if(prev&&cfg.arrival==='hybrid'){
+    const preH=String(cfg.preopenHour).padStart(2,'0');
+    const startH=String(cfg.startHour).padStart(2,'0');
+    const endTotalMin=cfg.staggerEndMin; // minutes from preopenHour
+    const endH=Math.floor((cfg.preopenHour*60+endTotalMin)/60)%24;
+    const endM=(cfg.preopenHour*60+endTotalMin)%60;
+    const endStr=String(endH).padStart(2,'0')+':'+String(endM).padStart(2,'0');
+    prev.innerHTML=
+      `🌊 <b>${cfg.burstCount} rider</b> datang ${preH}:00 – ${startH}:00 (sebelum hub buka, antri satpam)<br>`+
+      `〰 <b>${sc} rider</b> datang bertahap ${startH}:00 – <b>${endStr}</b> (stagger)<br>`+
+      `🏁 Target semua selesai sebelum jam <b>${String(cfg.targetEndHour).padStart(2,'0')}:00</b>`;
+  }
+}
+
+function toggleHybridCfg(){
+  const panel=document.getElementById('hybrid-cfg');
+  if(panel) panel.style.display=cfg.arrival==='hybrid'?'block':'none';
+  updateTimePreview();
+}
+
+function setStaggerEnd(totalMin){
+  cfg.staggerEndMin=totalMin;
+  [180,210,240,270,300].forEach(m=>{
+    const btn=document.getElementById('se-'+m);
+    if(btn) btn.classList.toggle('sel',m===totalMin);
+  });
+  updateTimePreview();
+}
+
+function setCfg(k,v){
+  cfg[k]=v;
+  document.querySelectorAll('.radio-opt').forEach(el=>{
+    const inp=el.querySelector('input');
+    if(inp) el.classList.toggle('sel',inp.value===v);
+  });
+}
+
+function updateWzUI(){
+  ['ws0','ws1','ws2'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.toggle('active',i===wzStep);
+    el.classList.toggle('done',i<wzStep);
+  });
+  document.querySelectorAll('.step-panel').forEach((p,i)=>p.classList.toggle('active',i===wzStep));
+  document.getElementById('wz-back').style.visibility=wzStep===0?'hidden':'visible';
+  document.getElementById('wz-next').textContent=wzStep===2?'🚀 Mulai Hub!':'Lanjut →';
+  document.getElementById('wz-lbl').textContent=`Step ${wzStep+1} dari 3`;
+}
+
+function wzNext(){
+  if(wzStep===1) buildTimingSliders();
+  if(wzStep===1) setTimeout(buildDistSliders,50);
+  if(wzStep===2){launchApp();return;}
+  wzStep++;updateWzUI();
+}
+function wzBack(){if(wzStep>0){wzStep--;updateWzUI();}}
+
+function buildLoketToggle(){
+  const wrap=document.getElementById('loket-toggle');
+  wrap.innerHTML='';
+  for(let i=2;i<=5;i++){
+    const btn=document.createElement('div');
+    btn.className='lk-btn'+(i<=cfg.loket?' on':'');
+    btn.id='lk-'+i;
+    btn.textContent=i;
+    btn.onclick=()=>{
+      cfg.loket=i;
+      for(let j=2;j<=5;j++) document.getElementById('lk-'+j).classList.toggle('on',j<=cfg.loket);
+      resetSim();
+      document.getElementById('chip-loket').textContent=cfg.loket+' loket';
+    };
+    wrap.appendChild(btn);
+  }
+}
+
+function launchApp(){
+  document.getElementById('wizard').classList.add('hidden');
+  buildGrid();
+  resizeCanvas();
+  initStations();
+  computeArrivalTimes();
+  buildLoketToggle();
+  buildStageLegend();
+
+  document.getElementById('chip-riders').textContent=cfg.riders+' rider';
+  document.getElementById('chip-loket').textContent=cfg.loket+' loket';
+  document.getElementById('chip-target').textContent='Target '+cfg.target+'m';
+  document.getElementById('hub-cfg-sub').textContent=
+    `${cfg.loket} loket · ${cfg.runner} runner · ${cfg.riders} rider`;
+
+  (function idleLoop(){if(!simRunning)render();requestAnimationFrame(idleLoop);})();
+  window.addEventListener('resize',()=>{resizeCanvas();render();});
+}
+
+function buildStageLegend(){
+  const wrap=document.getElementById('stage-legend');
+  wrap.innerHTML='';
+  for(const[key,val]of Object.entries(STAGES)){
+    wrap.innerHTML+=`<div class="stage-item"><div class="stage-dot" style="background:${val.color};"></div>${val.label}</div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+// Pre-fill icon displays
+['loket','runner','satpam'].forEach(k=>adj(k,0));
+setStaggerEnd(240);  // default: rider terakhir datang 09:00
+setStaggerEnd(240);
+updateTimePreview();
+toggleHybridCfg();
+</script>
+</body>
+</html>
