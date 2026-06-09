@@ -809,7 +809,23 @@ function joinQueue(rider, stationType){
     if(qc){ rider.tx = qc.c+(rider.id%5-2)*0.7; rider.ty = qc.r+(rider.id%3-1)*0.6; }
     return;
   }
-  // Add to shared FIFO queue (if not already)
+
+  // CART & CART_LOAD: dedicated per rider, no queue — assign immediately
+  if(stationType==='cart' || stationType==='cart_load'){
+    // Find or create a dedicated slot for this rider (by rider.id modulo slot count)
+    const slots = Object.keys(stations).filter(k=>stations[k].type===stationType);
+    const slotId = slots[rider.id % slots.length];
+    if(slotId){
+      rider.stationId = slotId;
+      rider.waitTimes[stationType] = 0; // no wait — dedicated
+      const pos = stationPos(slotId);
+      if(pos){ rider.tx = pos.c; rider.ty = pos.r; }
+      beginProcessing(rider);
+    }
+    return;
+  }
+
+  // All other types: shared FIFO queue
   const sq = sharedQueues[stationType];
   if(sq && !sq.includes(rider.id)) sq.push(rider.id);
   rider.state = 'queuing_' + stationType;
@@ -877,10 +893,12 @@ function finishStation(rider){
   rider.stationId = null;
   rider.taskTimer = 0;
 
-  // Remove from shared FIFO queue and serve next
-  const sq = sharedQueues[stType];
-  if(sq){ const pos=sq.indexOf(rider.id); if(pos>=0) sq.splice(pos,1); }
-  _serveNextInQueue(stType);
+  // Remove from shared FIFO queue and serve next (skip for dedicated stations)
+  if(stType !== 'cart' && stType !== 'cart_load'){
+    const sq = sharedQueues[stType];
+    if(sq){ const pos=sq.indexOf(rider.id); if(pos>=0) sq.splice(pos,1); }
+    _serveNextInQueue(stType);
+  }
 
   // Advance rider to next stage — add transit leg between each zone
   const LEG_MAP={
@@ -1670,12 +1688,11 @@ function showReport(){
   }
 
   // ── 3. RIDER — setup cart ────────────────────────────────────────────────
-  const cartWait = stAvgWait['cart'] || 0;
-  if(cartProc > 90 || cartWait > 60){
+  const cartWait = 0; // dedicated per rider — tidak ada antrian
+  if(cartProc > 90){
     insights.push({type:'warn',icon:'🛒',
-      title:`Rider: Setup cart ${fmt(cartProc)}/rider${cartWait>60?' + antri '+fmt(cartWait):''}`,
-      body:`Proses setup cart (pasang battery, tata consumables di kompartemen) dikerjakan rider secara mandiri. `+
-           `${cartWait>60?`Antri ${fmt(cartWait)} menunjukkan cart bay kurang atau rider masuk bersamaan. `:''}`+
+      title:`Rider: Setup cart ${fmt(cartProc)}/rider — durasi tinggi`,
+      body:`Proses setup cart (pasang battery, tata consumables di kompartemen) dikerjakan rider secara mandiri ke cart masing-masing — tidak ada antrian karena cart dedicated. `+
            `<b>Cara percepat:</b> Battery sudah terisi dan terpasang sebelum jam buka oleh runner, `+
            `consumables sudah diletakkan di tray per slot — rider tinggal ambil dan taruh. `+
            `Target: kurangi dari ${fmt(cartProc)} ke ~${fmt(cartProc*0.6)}/rider.`
@@ -1683,7 +1700,7 @@ function showReport(){
   } else {
     insights.push({type:'good',icon:'🛒',
       title:`Rider: Setup cart efisien — avg ${fmt(cartProc)}/rider`,
-      body:`Proses setup cart berjalan baik. Pastikan battery selalu terisi penuh dan consumables tersedia di titik pengambilan sebelum jam buka.`
+      body:`Proses setup cart berjalan baik. Cart dedicated per rider — tidak ada antrian. Pastikan battery selalu terisi penuh dan consumables tersedia di titik pengambilan sebelum jam buka.`
     });
   }
 
@@ -1717,7 +1734,7 @@ function showReport(){
   }
 
   // ── 5. RIDER — setup produk ke cart (di cold room) ──────────────────────
-  const cloadWait = stAvgWait['cart_load'] || 0;
+  const cloadWait = 0; // dedicated per rider — tidak ada antrian
   if(cloadProc > 300){
     insights.push({type:'warn',icon:'📦',
       title:`Rider: Setup produk ke cart ${fmt(cloadProc)}/rider — perlu dioptimasi`,
@@ -1821,7 +1838,7 @@ function showReport(){
     const cartLoad=r.times.cart_load||0;
     const sOut=r.times.satpam_out||0;
     const jalan=r.times.transit||0;
-    const antriTotal=qAdmin+qCold;
+    const antriTotal=qAdmin+qCold; // cart & cart_load: dedicated, no queue
     // Satpam time that happened before hub opens (exclude from handling)
     const timeBeforeOpen=preOpen?Math.min(sIn,adminOpen-r.spawnTime):0;
     // Handling = zone processing only, no antri, no pre-open time
