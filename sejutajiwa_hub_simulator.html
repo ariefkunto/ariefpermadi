@@ -218,7 +218,7 @@ canvas{display:block;}
             <div class="cnt-icons" id="loket-icons"></div>
             <button class="cnt-btn" onclick="adj('loket',1)">+</button>
           </div>
-          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Range: 2–5 loket</div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Range: 1–5 loket</div>
         </div>
         <div class="field">
           <div class="field-label">Runner Cold Room</div>
@@ -250,7 +250,7 @@ canvas{display:block;}
             <button class="cnt-btn" onclick="adj('target',-1)">−</button>
             <button class="cnt-btn" onclick="adj('target',1)">+</button>
           </div>
-          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Default: 10 menit</div>
+          <div style="font-size:9px;color:var(--dim);margin-top:6px;">Default: 10 menit (maks 60 mnt)</div>
         </div>
       </div>
       <div class="info-box">💡 Loket admin biasanya menjadi bottleneck utama. Dengan 3 loket dan 30 rider, estimasi avg queue di loket = 1–2 menit tambahan dari processing time 3 menit.</div>
@@ -382,7 +382,7 @@ canvas{display:block;}
               <input type="range" min="0.8" max="2.0" step="0.1" value="1.2" id="walk-speed-sl"
                 oninput="cfg.walkSpeed=parseFloat(this.value);document.getElementById('walk-speed-v').textContent=parseFloat(this.value).toFixed(1)+' m/s';
                          document.querySelectorAll('[id^=dt-]').forEach(el=>{const k=el.id.replace('dt-','');const d=cfg.distances[k]||0;el.textContent='~'+Math.round(d/cfg.walkSpeed)+'s';});updateDistPreview()">
-              ${makeTicks([{label:'0.8'},{label:'1.0',mid:true},{label:'1.2'},{label:'1.4'},{label:'1.6'},{label:'1.8'},{label:'2.0'}])}
+              <div class="tick-row"><div class="tk"><div class="tk-line"></div><span class="tk-label">0.8</span></div><div class="tk"><div class="tk-line"></div><span class="tk-label">1.0</span></div><div class="tk"><div class="tk-line mid"></div><span class="tk-label mid">1.2</span></div><div class="tk"><div class="tk-line"></div><span class="tk-label">1.4</span></div><div class="tk"><div class="tk-line"></div><span class="tk-label">1.6</span></div><div class="tk"><div class="tk-line"></div><span class="tk-label">1.8</span></div><div class="tk"><div class="tk-line"></div><span class="tk-label">2.0</span></div></div>
             </div>
             <div style="font-size:8px;color:var(--dim);margin-top:1px;">Normal jalan santai 1.2–1.4 m/s</div>
           </div>
@@ -427,11 +427,11 @@ canvas{display:block;}
     <div class="rpt-section">
       <div class="rpt-stitle">Detail Per Rider <span id="rpt-late-note" style="color:var(--red);font-size:9px;font-weight:400;"></span></div>
       <table class="rpt-table"><thead><tr>
-        <th>#</th><th>Nama Rider</th><th>Tiba di Hub</th><th>Timer Mulai</th><th>Satpam Masuk</th><th>Antri Loket</th><th>Proses Loket</th><th>Setup Cart</th><th>Antri Cold</th><th>Ambil Produk</th><th>Satpam Keluar</th><th>Jalan Antar Zona</th><th>Total Antri</th><th>① Handling Time</th>
+        <th>#</th><th>Nama Rider</th><th>Tiba di Hub</th><th>Timer Mulai</th><th>Satpam Masuk</th><th>Antri Loket</th><th>Proses Loket</th><th>Setup Cart</th><th>Antri Cold</th><th>Ambil Produk</th><th>Setup Produk ke Cart</th><th>Satpam Keluar</th><th>Jalan Antar Zona</th><th>Total Antri</th><th>① Handling Time</th>
       </tr></thead><tbody id="rpt-riders"></tbody></table>
     </div>
     <div style="font-size:9px;color:#888;margin-top:8px;line-height:1.7;padding:8px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);">
-      <b>① Handling Time</b> = satpam + proses loket + cart + ambil produk + satpam keluar + jalan &minus; waktu sebelum jam buka<br>
+      <b>① Handling Time</b> = satpam + proses loket + cart setup + ambil produk + setup produk ke cart + satpam keluar + jalan &minus; waktu sebelum jam buka<br>
       <b>② Waktu di Hub</b> = jam tiba hingga keluar · termasuk antri &amp; pre-opening<br>
       <span style="color:#d97706;">⏳ sebelum buka</span> = rider tiba sebelum loket buka · satpam diproses tapi tidak dihitung ke handling time<br>
       Antri: <span style="color:#9ca3af;">abu</span>=&lt;2m · <span style="color:#fbbf24;">kuning</span>=2–5m · <span style="color:#f87171;">merah</span>=&gt;5m
@@ -461,6 +461,7 @@ canvas{display:block;}
     <div class="leg-item"><div class="leg-sq" style="background:#1a2e1a;"></div>Pos Satpam</div>
     <div class="leg-item"><div class="leg-sq" style="background:#1a1a3a;"></div>Queue & Loket</div>
     <div class="leg-item"><div class="leg-sq" style="background:#2a1e0a;"></div>Parkir Cart</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#1e4a1e;"></div>EXIT Hub</div>
     <div class="leg-item"><div class="leg-sq" style="background:#0a2a2a;"></div>Cold Room</div>
     <div style="margin-top:12px;" class="legend-title">Rider Status</div>
     <div class="stage-list" id="stage-legend"></div>
@@ -555,6 +556,7 @@ const cfg={
     satpam_in:{label:'Satpam Masuk',min:60,max:90,val:70},
     admin:{label:'Loket Admin',min:120,max:180,val:160},
     cart:{label:'Setup Cart',min:50,max:90,val:65},
+    cart_load:{label:'Setup Produk ke Cart',min:30,max:1800,val:300},
     cold:{label:'Cold Room',min:60,max:90,val:70},
     satpam_out:{label:'Satpam Keluar',min:20,max:45,val:30},
   }
@@ -575,10 +577,12 @@ const STAGES={
   queuing_cart:           {label:'Menuju cart slot',    color:'#7c3aed'},
   processing_cart:        {label:'Setup cart',          color:'#8b5cf6'},
   queuing_cold:           {label:'Antri cold room',     color:'#0e7490'},
-  processing_cold:        {label:'Ambil produk',        color:'#0d9488'},
+  processing_cold:        {label:'Ambil produk (runner)',color:'#0d9488'},
+  queuing_cart_load:      {label:'Antri setup produk',  color:'#c2410c'},
+  processing_cart_load:   {label:'Setup produk ke cart',color:'#ea580c'},
   queuing_satpam_out:     {label:'Antri satpam keluar', color:'#065f46'},
   processing_satpam_out:  {label:'Satpam keluar',       color:'#059669'},
-  departed:               {label:'Keluar hub',          color:'#374151'},
+  departed:               {label:'Keluar hub (EXIT)',   color:'#22c55e'},
 };
 
 /* ═══════════════════════════════════════════════
@@ -586,7 +590,7 @@ const STAGES={
 ═══════════════════════════════════════════════ */
 const cv=document.getElementById('cv');
 const ctx=cv.getContext('2d');
-let COLS=38,ROWS=14,CS=26;
+let COLS=44,ROWS=14,CS=26;
 
 // Zone layout (computed from config)
 const ZONES={
@@ -596,7 +600,8 @@ const ZONES={
   loket:      {fill:'#111130',stroke:'#2222aa',label:'LOKET ADMIN',    short:'LOKET'},
   cart_park:  {fill:'#1a1005',stroke:'#4a2e08',label:'PARKIR CART',    short:'CART'},
   cold_room:  {fill:'#051a1a',stroke:'#0a4a4a',label:'COLD ROOM',      short:'COLD'},
-  ice_maker:  {fill:'#051520',stroke:'#083a5a',label:'ICE + EXIT',     short:'ICE'},
+  ice_maker:  {fill:'#051a28',stroke:'#0a3a5a',label:'SATPAM KELUAR',  short:'S.KELUAR'},
+  exit_zone:  {fill:'#0f1a0a',stroke:'#1e4a1e',label:'EXIT',           short:'EXIT'},
 };
 
 let zoneGrid=[];
@@ -611,8 +616,8 @@ function buildGrid(){
   const lk=[15,24]; // loket (up to 5 × 2 cols each)
   const cp=[25,31]; // cart parking
   const cr=[32,36]; // cold room
-  const im=[37,37]; // ice maker
-  const spOut=[37,37]; // satpam exit (shared col with exit side)
+  const im=[37,39]; // satpam keluar (3 cols — cukup untuk label)
+  const ex=[40,43]; // EXIT zone
 
   for(let r=1;r<ROWS-1;r++){
     for(let c=pm[0];c<=pm[1];c++) setZ(r,c,'park_motor');
@@ -621,7 +626,8 @@ function buildGrid(){
     for(let c=lk[0];c<=lk[1];c++) setZ(r,c,'loket');
     for(let c=cp[0];c<=cp[1];c++) setZ(r,c,'cart_park');
     for(let c=cr[0];c<=cr[1];c++) setZ(r,c,'cold_room');
-    setZ(r,im[0],'ice_maker');
+    for(let c=im[0];c<=im[1];c++) setZ(r,c,'ice_maker');
+    for(let c=ex[0];c<=ex[1];c++) setZ(r,c,'exit_zone');
   }
 
   // Compute bounds
@@ -667,22 +673,24 @@ let elapsed=0,spawnTimer=0,riderId=0;
 let completedRiders=[];
 let metrics={done:0,totalTime:0,onTime:0,blocked:0,handleTotal:0};
 
-const STATION_TYPES=['satpam_in','admin','cart','cold','satpam_out'];
+const STATION_TYPES=['satpam_in','admin','cart','cold','cart_load','satpam_out'];
 const STATION_COLORS={
-  satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',satpam_out:'#059669'
+  satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',cart_load:'#ea580c',satpam_out:'#059669'
 };
 
 function initStations(){
   stations={};
-  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],satpam_out:[]};
+  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],cart_load:[],satpam_out:[]};
   // satpam_in: satpam count stations
   for(let i=0;i<cfg.satpam;i++) stations[`satpam_in_${i}`]={type:'satpam_in',busy:false,queue:[],processed:0,totalWait:0};
   // admin: loket count
   for(let i=0;i<cfg.loket;i++) stations[`admin_${i}`]={type:'admin',busy:false,queue:[],processed:0,totalWait:0};
   // cart bays: parallel (riders can setup cart simultaneously)
   for(let i=0;i<8;i++) stations[`cart_${i}`]={type:'cart',busy:false,queue:[],processed:0,totalWait:0};
-  // cold room runners
+  // cold room runners — shared for cold AND cart_load (sequential in cold room)
   for(let i=0;i<cfg.runner;i++) stations[`cold_${i}`]={type:'cold',busy:false,queue:[],processed:0,totalWait:0};
+  // cart_load: rider-side setup, unlimited parallel slots (each rider does it themselves)
+  for(let i=0;i<50;i++) stations[`cart_load_${i}`]={type:'cart_load',busy:false,queue:[],processed:0,totalWait:0};
   // satpam_out: exit check
   for(let i=0;i<cfg.satpam;i++) stations[`satpam_out_${i}`]={type:'satpam_out',busy:false,queue:[],processed:0,totalWait:0};
 }
@@ -774,6 +782,11 @@ function _joinNextStage(rider, next){
     const cPos=stationPos('cart_0');
     if(cPos){rider.tx=cPos.c+(rider.id%4);rider.ty=cPos.r;}
     joinQueue(rider,'cart');
+  } else if(next==='cart_load'){
+    // stays in cold_room zone, no transit
+    const cc=zoneCentroid('cold_room');
+    if(cc){rider.tx=cc.c+(rider.id%3-1)*0.8;rider.ty=cc.r+(rider.id%2-.5)*0.8;}
+    joinQueue(rider,'cart_load');
   } else {
     if(next==='admin'){
       const qc=zoneCentroid('queue');
@@ -874,12 +887,13 @@ function finishStation(rider){
     satpam_in:'satpam_to_queue',   // satpam → antri loket
     admin:'admin_to_cart',          // loket → parkir cart
     cart:'cart_to_cold',            // cart → cold room
-    cold:'cold_to_satpam_out',      // cold room → satpam keluar
+    cold:null,                      // cold → cart_load (same zone, no transit)
+    cart_load:'cold_to_satpam_out', // cold room → satpam keluar
   };
   const DEST_ZONE={
-    admin:'queue', cart:'cart_park', cold:'cold_room', satpam_out:'satpam',
+    admin:'queue', cart:'cart_park', cold:'cold_room', cart_load:'cold_room', satpam_out:'satpam',
   };
-  const flow = ['satpam_in','admin','cart','cold','satpam_out'];
+  const flow = ['satpam_in','admin','cart','cold','cart_load','satpam_out'];
   const idx = flow.indexOf(stType);
   if(idx >= 0 && idx < flow.length - 1){
     const next = flow[idx + 1];
@@ -899,9 +913,15 @@ function finishStation(rider){
       _joinNextStage(rider, next);
     }
   } else if(idx === flow.length - 1){
-    // All done
+    // Move to EXIT zone
     rider.state = 'departed';
-    rider.tx = -2; rider.ty = rider.py;
+    const exitB=zoneBounds['exit_zone'];
+    if(exitB){
+      rider.tx=exitB.c0+0.5+(rider.id%3);
+      rider.ty=exitB.r0+1+(Math.floor(rider.id/3)%(exitB.r1-exitB.r0));
+    } else {
+      rider.tx = -2; rider.ty = rider.py;
+    }
     const total = elapsed - rider.spawnTime;                    // waktu di hub (tiba→keluar)
     const timerStart = Math.max(rider.spawnTime, adminOpensSec());
 
@@ -910,10 +930,11 @@ function finishStation(rider){
     const _loket= rider.times.admin||0;
     const _cart = rider.times.cart||0;
     const _cold = rider.times.cold||0;
+    const _cload= rider.times.cart_load||0;
     const _sOut = rider.times.satpam_out||0;
     const _jln  = rider.times.transit||0;
     const _tbf  = rider.spawnTime<adminOpensSec()?Math.min(_sIn,adminOpensSec()-rider.spawnTime):0;
-    const zoneOnly = Math.max(0, _sIn+_loket+_cart+_cold+_sOut+_jln-_tbf);
+    const zoneOnly = Math.max(0, _sIn+_loket+_cart+_cold+_cload+_sOut+_jln-_tbf);
 
     completedRiders.push(Object.assign({}, rider, {
       totalTime:  total,
@@ -946,8 +967,8 @@ function spawnRider(){
     spawnTime:elapsed,
     trail:[],
     // Per-station times
-    times:{satpam_in:0,admin:0,cart:0,cold:0,satpam_out:0},
-    waitTimes:{satpam_in:0,admin:0,cart:0,cold:0,satpam_out:0},
+    times:{satpam_in:0,admin:0,cart:0,cold:0,cart_load:0,satpam_out:0},
+    waitTimes:{satpam_in:0,admin:0,cart:0,cold:0,cart_load:0,satpam_out:0},
     stateEnterTime:elapsed,
   });
 }
@@ -1053,9 +1074,13 @@ function stationPos(stId){
     const b=zoneBounds['cold_room'];
     return b?{c:b.c0+1+idx*1.5,r:(b.r0+b.r1)/2}:null;
   }
+  if(stId.startsWith('cart_load')){
+    const b=zoneBounds['cold_room'];
+    return b?{c:b.c0+0.5+(idx%3)*1.2,r:b.r0+1+Math.floor(idx/3)*1.5}:null;
+  }
   if(stId.startsWith('satpam_out')){
     const b=zoneBounds['ice_maker'];
-    return b?{c:b.c0,r:b.r0+1+idx*2}:null;
+    return b?{c:(b.c0+b.c1)/2,r:b.r0+1+idx*2}:null;
   }
   return null;
 }
@@ -1096,7 +1121,7 @@ function simStep(dt){
 
   // Update
   for(const r of riders) if(r.state!=='departed') updateRider(r,sdt);
-  riders=riders.filter(r=>!(r.state==='departed'&&r.px<-0.5));
+  // Keep departed riders in EXIT zone — don't remove them
 
   updateUI();
 }
@@ -1215,8 +1240,10 @@ function instantResult(){
       }
     }
 
-    // Remove departed riders
+    // Remove departed riders (keep them for exit zone rendering)
     riders=riders.filter(r=>r.state!=='departed');
+    // Add completed riders back at exit positions for rendering
+    completedRiders.forEach(r=>{ if(!riders.find(x=>x.id===r.id)) riders.push(r); });
   }
 
   // Done — update UI and show report
@@ -1232,7 +1259,7 @@ function instantResult(){
 function resetSim(){
   simRunning=false;cancelAnimationFrame(rafId);
   riders=[];completedRiders=[];riderId=0;spawnTimer=0;elapsed=0;
-  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],satpam_out:[]};
+  sharedQueues={satpam_in:[],admin:[],cart:[],cold:[],cart_load:[],satpam_out:[]};
   computeArrivalTimes();
   metrics={done:0,totalTime:0,onTime:0,blocked:0,handleTotal:0};
   initStations();
@@ -1240,6 +1267,7 @@ function resetSim(){
   document.getElementById('sim-btn').className='bigbtn bb-go';
   document.getElementById('rider-log').innerHTML='';
   document.getElementById('sim-prog').textContent='—';
+  document.getElementById('tb-clock').style.color='';
   updateUI();render();
 }
 
@@ -1328,7 +1356,39 @@ function render(){
   for(let r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*C);ctx.lineTo(cv.width,r*C);ctx.stroke();}
 
   // Riders
-  for(const r of riders){
+  const activeRiders=riders.filter(r=>r.state!=='departed');
+  const departedRiders=riders.filter(r=>r.state==='departed');
+
+  // Draw departed riders in EXIT zone as small green squares
+  for(const r of departedRiders){
+    moveTo(r, 0.016); // animate movement to exit zone
+    const cx=r.px*C+C/2,cy=r.py*C+C/2;
+    const rad=C*0.18;
+    ctx.fillStyle='#22c55e';
+    ctx.globalAlpha=0.7;
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  // Draw exit zone counter overlay
+  if(departedRiders.length>0){
+    const exitB=zoneBounds['exit_zone'];
+    if(exitB){
+      const ex=(exitB.c0)*C, ey=(exitB.r0)*C;
+      const ew=(exitB.c1-exitB.c0+1)*C, eh=C*1.3;
+      ctx.fillStyle='rgba(22,163,74,0.85)';
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(ex+2,ey+2,ew-4,eh,4);
+      else ctx.rect(ex+2,ey+2,ew-4,eh);
+      ctx.fill();
+      ctx.fillStyle='#fff';
+      ctx.font=`700 ${Math.max(8,C*0.38)}px -apple-system,sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(`✓ ${departedRiders.length} KELUAR`,ex+ew/2,ey+eh/2+2);
+    }
+  }
+
+  for(const r of activeRiders){
     // Trail
     if(r.trail.length>1){
       ctx.save();
@@ -1358,7 +1418,6 @@ function render(){
     }
   }
 }
-
 /* ═══════════════════════════════════════════════
    UI UPDATES
 ═══════════════════════════════════════════════ */
@@ -1388,8 +1447,8 @@ function updateUI(){
   document.getElementById('sim-prog').textContent=`${metrics.done}/${cfg.riders}`;
 
   // Station bars
-  const stationGroups=['satpam_in','admin','cart','cold','satpam_out'];
-  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Cold Room',satpam_out:'Satpam Keluar'};
+  const stationGroups=['satpam_in','admin','cart','cold','cart_load','satpam_out'];
+  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Ambil Produk',cart_load:'Setup Produk ke Cart',satpam_out:'Satpam Keluar'};
   let barsHTML='';
   for(const type of stationGroups){
     const keys=Object.keys(stations).filter(k=>stations[k].type===type);
@@ -1430,10 +1489,11 @@ function showReport(){
     const loket=r.times.admin||0;
     const cart=r.times.cart||0;
     const cold=r.times.cold||0;
+    const cartLoad=r.times.cart_load||0;
     const sOut=r.times.satpam_out||0;
     const jalan=r.times.transit||0;
     const tbf=r.spawnTime<adminOpensSec()?Math.min(sIn,adminOpensSec()-r.spawnTime):0;
-    return Math.max(0,sIn+loket+cart+cold+sOut+jalan-tbf);
+    return Math.max(0,sIn+loket+cart+cold+cartLoad+sOut+jalan-tbf);
   };
   const hTimes=done.map(r=>computeHandleOf(r));
   const avg=hTimes.reduce((a,b)=>a+b,0)/hTimes.length;
@@ -1506,9 +1566,9 @@ function showReport(){
   document.getElementById('rpt-timeline').innerHTML=timeSectionHTML;
 
   // Station breakdown
-  const stTypes=['satpam_in','admin','cart','cold','satpam_out'];
-  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Cold Room',satpam_out:'Satpam Keluar'};
-  const stColors={satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',satpam_out:'#059669'};
+  const stTypes=['satpam_in','admin','cart','cold','cart_load','satpam_out'];
+  const stLabels={satpam_in:'Satpam Masuk',admin:'Loket Admin',cart:'Cart Setup',cold:'Ambil Produk (Runner)',cart_load:'Setup Produk ke Cart',satpam_out:'Satpam Keluar'};
+  const stColors={satpam_in:'#2563EB',admin:'#d97706',cart:'#7c3aed',cold:'#0d9488',cart_load:'#ea580c',satpam_out:'#059669'};
 
   // Per-station averages from completed riders
   const stAvgProcess={},stAvgWait={};
@@ -1537,85 +1597,161 @@ function showReport(){
   }
   document.getElementById('rpt-stations').innerHTML=stHTML;
 
-  // Insights
+  // ── INSIGHTS ENGINE ──────────────────────────────────────────────────────
   const insights=[];
-  if(avg>cfg.target*60){
-    insights.push({type:'crit',icon:'⚠',title:`Avg time ${fmt(avg)} melebihi target ${cfg.target} menit`,
-      body:`${pct}% rider selesai tepat waktu. Perlu optimasi untuk memenuhi target operasional.`});
+
+  // Data shortcuts
+  const adminProc  = stAvgProcess['admin']    || cfg.timing.admin.val;
+  const adminWait  = stAvgWait['admin']        || 0;
+  const cartProc   = stAvgProcess['cart']      || cfg.timing.cart.val;
+  const coldProc   = stAvgProcess['cold']      || cfg.timing.cold.val;
+  const coldWait   = stAvgWait['cold']         || 0;
+  const cloadProc  = stAvgProcess['cart_load'] || cfg.timing.cart_load.val;
+  const burstN     = cfg.arrival==='hybrid' ? Math.min(cfg.burstCount,cfg.riders)
+                   : cfg.arrival==='burst'  ? cfg.riders
+                   : Math.ceil(cfg.riders/4);
+
+  // ── 1. Overall performance ───────────────────────────────────────────────
+  if(avg > cfg.target*60){
+    insights.push({type:'crit',icon:'⚠',
+      title:`Overall: Avg handling ${fmt(avg)} — melebihi target ${cfg.target} menit`,
+      body:`Hanya <b>${pct}%</b> rider selesai tepat waktu dari total ${cfg.riders} rider. `+
+           `Gap rata-rata: <b>${fmt(avg - cfg.target*60)}</b> di atas target. Fokus perbaikan di bawah.`});
   } else {
-    insights.push({type:'good',icon:'✓',title:`Rata-rata ${fmt(avg)} — dalam target ${cfg.target} menit`,
-      body:`${pct}% rider selesai on-time. Setup ini memenuhi target operasional.`});
+    insights.push({type:'good',icon:'✓',
+      title:`Overall: Avg handling ${fmt(avg)} — dalam target ${cfg.target} menit`,
+      body:`<b>${pct}%</b> rider selesai on-time (${metrics.onTime} dari ${cfg.riders} rider). `+
+           `Setup saat ini sudah memenuhi target operasional.`});
   }
 
-  // Bottleneck
-  const bottleWait=stAvgWait[bottleneckType];
-  const bottleTotal=stAvgProcess[bottleneckType]+bottleWait;
-  if(bottleWait>30){
-    const rec=bottleneckType==='admin'?
-      `Tambah loket admin dari ${cfg.loket} ke ${cfg.loket+1} — estimasi kurangi avg antri ~${fmt(bottleWait*cfg.loket/(cfg.loket+1))}`:
-      bottleneckType==='cold'?
-      `Tambah runner cold room dari ${cfg.runner} ke ${cfg.runner+1} — estimasi kurangi antri cold room ~${fmt(bottleWait*0.4)}`:
-      `Tambah satpam untuk percepat proses di ${stLabels[bottleneckType]}`;
-    insights.push({type:'crit',icon:'🔴',title:`Bottleneck: ${stLabels[bottleneckType]} — avg antri ${fmt(bottleWait)}`,body:rec});
-  }
+  // ── 2. ADMIN — proses loket (input iSeller + serah consumables) ──────────
+  const cap1loket      = Math.floor(600/adminProc);           // rider per 10 mnt per loket
+  const capTotal       = cap1loket * cfg.loket;               // total kapasitas 10 mnt
+  const adminProc20    = Math.round(adminProc * 0.8);         // target −20%
+  const capEfficiency  = Math.floor(600/adminProc20)*cfg.loket;
+  const maxRealistisLoket = Math.min(3, cfg.loket+2);
 
-  // Admin loket analysis — realistic capacity check
-  const adminWait=stAvgWait['admin'];
-  const adminProcess=stAvgProcess['admin']||160;
-  const maxQueueWait=600; // target max 10 mnt antri sebelum loket
-  const burstN=cfg.arrival==='hybrid'?Math.min(cfg.burstCount,cfg.riders):
-                cfg.arrival==='burst'?cfg.riders:
-                Math.ceil(cfg.riders/4); // stagger: peak ~25% di awal
-  const serveableIn10min=Math.floor(cfg.loket*maxQueueWait/adminProcess);
+  if(adminWait > 300){
+    // Antri loket signifikan
+    const loketNeeded   = Math.min(3, Math.ceil(burstN * adminProc / 600));
+    const loketAdd      = Math.min(3, cfg.loket+1);
+    const capIfAdd      = Math.floor(600/adminProc) * loketAdd;
+    const capIfEffic    = Math.floor(600/adminProc20) * cfg.loket;
 
-  if(adminWait>maxQueueWait){
-    // Queue exceeds 10 min target
-    const loketFor10min=Math.ceil(burstN*adminProcess/maxQueueWait);
-    const altBurst=Math.floor(cfg.loket*maxQueueWait/adminProcess);
     insights.push({type:'crit',icon:'📋',
-      title:`Antri loket ${fmt(adminWait)} — melebihi target 10 menit`,
-      body:`Dengan ${cfg.loket} loket (${Math.round(adminProcess)}s/rider), hanya bisa layani `+
-        `<b>${serveableIn10min} rider</b> dalam 10 menit. Burst ${burstN} rider berarti sisa `+
-        `${Math.max(0,burstN-serveableIn10min)} rider menunggu lebih dari 10 menit. `+
-        `<br><b>Opsi 1:</b> Tambah loket ke <b>${loketFor10min}</b> untuk handle burst ${burstN} rider dalam 10 menit. `+
-        `<br><b>Opsi 2:</b> Kurangi burst count ke <b>${altBurst} rider</b> (sisanya staggered), loket cukup ${cfg.loket}.`});
-  } else if(adminWait>300){
-    // Between 5-10 min - warn
-    const addLoket=cfg.loket+1;
-    const newCapacity=Math.floor(addLoket*maxQueueWait/adminProcess);
+      title:`Admin: Antri loket ${fmt(adminWait)} — kapasitas tidak cukup untuk ${burstN} rider burst`,
+      body:`Dengan <b>${cfg.loket} admin</b> (avg ${fmt(adminProc)}/rider), kapasitas 10 menit pertama hanya <b>${capTotal} rider</b>. `+
+           `Sisa <b>${Math.max(0,burstN-capTotal)} rider</b> menunggu lebih dari 10 menit.<br>`+
+           `<b>Opsi A — Tambah admin</b> ${cfg.loket<3?`(jadi ${loketAdd}, maks realistis 3)`:''}: `+
+             (cfg.loket<3
+               ? `kapasitas naik ke <b>${capIfAdd} rider/10mnt</b>. Pertimbangkan labor cost tambahan 1 admin vs waktu idle setelah rush hour selesai.`
+               : `sudah di batas 3 admin — penambahan tidak disarankan dari sisi labor cost.`)+`<br>`+
+           `<b>Opsi B — Efisiensi proses admin</b> (tanpa tambah orang): `+
+             `Jika avg handling dipercepat ${fmt(adminProc)} → ${fmt(adminProc20)} per rider (−20%), `+
+             `kapasitas naik ke <b>${capIfEffic} rider/10mnt</b> dengan jumlah admin yang sama.<br>`+
+           `<i>Cara efisiensi: pre-input iSeller sehari sebelumnya (data rider, menu), siapkan consumables per batch di meja, `+
+           `standarisasi urutan serah terima (SOP checklist admin).</i>`
+    });
+  } else if(adminWait > 60){
     insights.push({type:'warn',icon:'📋',
-      title:`Antri loket ${fmt(adminWait)} — mendekati batas 10 menit`,
-      body:`Masih dalam toleransi, tapi padat. Dengan <b>+1 loket (jadi ${addLoket})</b>, `+
-        `bisa layani ${newCapacity} rider dalam 10 menit (naik dari ${serveableIn10min}).`});
+      title:`Admin: Antri loket ${fmt(adminWait)} — masih terkendali, tapi perlu diawasi`,
+      body:`${cfg.loket} admin cukup untuk kondisi ini (kapasitas ${capTotal} rider/10mnt). `+
+           `Jika burst count naik atau ada admin tidak hadir, antri bisa meningkat signifikan.<br>`+
+           `<b>Prioritas:</b> Tingkatkan efisiensi proses admin — standarisasi urutan serah consumables, `+
+           `siapkan bundle per rider (plastik, sedotan, lid sudah terbungkus) sebelum jam buka. `+
+           `Target: kurangi avg dari ${fmt(adminProc)} ke ${fmt(adminProc20)} per rider.`
+    });
   } else {
-    insights.push({type:'good',icon:'✅',
-      title:`Loket admin efisien — avg antri ${fmt(adminWait)}`,
-      body:`${cfg.loket} loket cukup untuk handle pola kedatangan ini. `+
-        `Kapasitas 10 menit: ${serveableIn10min} rider. `+
-        `${serveableIn10min>=burstN?'Aman untuk burst '+burstN+' rider.':'Perhatikan jika burst meningkat.'}`});
+    insights.push({type:'good',icon:'📋',
+      title:`Admin: Loket berjalan lancar — avg antri ${fmt(adminWait)}`,
+      body:`${cfg.loket} admin (avg ${fmt(adminProc)}/rider) mampu handle ${cfg.riders} rider dengan baik. `+
+           `Kapasitas tersedia: ${capTotal} rider/10mnt. Pertahankan SOP serah consumables yang sudah berjalan.`
+    });
   }
 
-  // Cold room
-  if(stAvgWait['cold']>45){
-    insights.push({type:'warn',icon:'❄',title:`Cold room waiting time tinggi (avg ${fmt(stAvgWait['cold'])})`,
-      body:`${cfg.runner} runner untuk ${cfg.riders} rider menyebabkan antrian. Tambah 1 runner atau siapkan produk lebih awal (pre-staging) untuk mengurangi waktu ambil.`});
+  // ── 3. RIDER — setup cart ────────────────────────────────────────────────
+  const cartWait = stAvgWait['cart'] || 0;
+  if(cartProc > 90 || cartWait > 60){
+    insights.push({type:'warn',icon:'🛒',
+      title:`Rider: Setup cart ${fmt(cartProc)}/rider${cartWait>60?' + antri '+fmt(cartWait):''}`,
+      body:`Proses setup cart (pasang battery, tata consumables di kompartemen) dikerjakan rider secara mandiri. `+
+           `${cartWait>60?`Antri ${fmt(cartWait)} menunjukkan cart bay kurang atau rider masuk bersamaan. `:''}`+
+           `<b>Cara percepat:</b> Battery sudah terisi dan terpasang sebelum jam buka oleh runner, `+
+           `consumables sudah diletakkan di tray per slot — rider tinggal ambil dan taruh. `+
+           `Target: kurangi dari ${fmt(cartProc)} ke ~${fmt(cartProc*0.6)}/rider.`
+    });
+  } else {
+    insights.push({type:'good',icon:'🛒',
+      title:`Rider: Setup cart efisien — avg ${fmt(cartProc)}/rider`,
+      body:`Proses setup cart berjalan baik. Pastikan battery selalu terisi penuh dan consumables tersedia di titik pengambilan sebelum jam buka.`
+    });
   }
 
-  // Performance improvement recommendation
-  const adminProc=stAvgProcess['admin']||160;
-  const coldProc=stAvgProcess['cold']||70;
-  const cartProc=stAvgProcess['cart']||65;
-  const perfImpact=(adminProc*0.2+coldProc*0.15+cartProc*0.1).toFixed(0);
-  const newAdminProc=Math.round(adminProc*0.8);
-  const newCapacity=Math.floor(cfg.loket*600/newAdminProc);
-  const currentCapacity=Math.floor(cfg.loket*600/adminProc);
-  insights.push({type:'warn',icon:'⚡',
-    title:'Rekomendasi: Tingkatkan kecepatan handling tim',
-    body:`Selain menambah loket/manpower, pertimbangkan meningkatkan <b>kecepatan proses per rider</b>:<br>`+
-      `• <b>Loket admin</b>: avg ${fmt(adminProc)}/rider → target ${fmt(newAdminProc)}/rider (−20%) → kapasitas naik dari ${currentCapacity} ke ${newCapacity} rider/10mnt<br>`+
-      `• <b>Cold room</b>: pre-staging produk sebelum jam buka (rak sudah siap per nama rider) → kurangi waktu ambil dari avg ${fmt(coldProc)} ke ~${fmt(coldProc*0.6)}<br>`+
-      `• <b>Loket</b>: sistem input iSeller lebih cepat (template, auto-fill) atau pre-input sehari sebelumnya → estimasi hemat ~${Math.round(adminProc*0.2)}s/rider = <b>${fmt(Math.round(adminProc*0.2)*cfg.riders)} total</b> untuk ${cfg.riders} rider`
-  });
+  // ── 4. RUNNER — ambil produk cold room ──────────────────────────────────
+  if(coldWait > 60){
+    const runnerNeeded = Math.ceil(burstN / (600 / coldProc));
+    insights.push({type:'crit',icon:'❄',
+      title:`Runner: Antri cold room ${fmt(coldWait)} — ${cfg.runner} runner tidak cukup`,
+      body:`Dengan avg ${fmt(coldProc)}/rider, ${cfg.runner} runner hanya bisa layani `+
+           `<b>${Math.floor(600/coldProc)*cfg.runner} rider/10mnt</b>. `+
+           `Untuk burst ${burstN} rider, butuh minimal <b>${runnerNeeded} runner</b>.<br>`+
+           `<b>Opsi A — Tambah runner</b>: dari ${cfg.runner} ke ${cfg.runner+1} runner. `+
+           `Pertimbangkan apakah runner tambahan bisa diambil dari fungsi lain (runner multipurpose) untuk efisiensi labor cost.<br>`+
+           `<b>Opsi B — Pre-staging produk</b>: produk sudah dikelompokkan per rider sebelum jam buka `+
+           `(rak berlabel nama/kode rider) → runner tinggal ambil dan serahkan, `+
+           `estimasi kurangi waktu ambil dari ${fmt(coldProc)} ke ~${fmt(coldProc*0.5)}/rider.`
+    });
+  } else if(coldWait > 20){
+    insights.push({type:'warn',icon:'❄',
+      title:`Runner: Antri cold room ${fmt(coldWait)} — masih aman, tapi perlu pre-staging`,
+      body:`${cfg.runner} runner cukup untuk kondisi ini. Untuk optimalkan lebih lanjut tanpa tambah runner: `+
+           `pre-staging produk per rider sebelum jam buka. Runner tinggal konfirmasi dan serahkan — `+
+           `estimasi kurangi handling cold room dari ${fmt(coldProc)} ke ~${fmt(coldProc*0.6)}/rider.`
+    });
+  } else {
+    insights.push({type:'good',icon:'❄',
+      title:`Runner: Cold room efisien — avg antri ${fmt(coldWait)}`,
+      body:`${cfg.runner} runner mampu layani ${cfg.riders} rider tanpa bottleneck berarti. `+
+           `Pertahankan pre-staging produk dan koordinasi runner-rider yang sudah berjalan.`
+    });
+  }
+
+  // ── 5. RIDER — setup produk ke cart (di cold room) ──────────────────────
+  const cloadWait = stAvgWait['cart_load'] || 0;
+  if(cloadProc > 300){
+    insights.push({type:'warn',icon:'📦',
+      title:`Rider: Setup produk ke cart ${fmt(cloadProc)}/rider — perlu dioptimasi`,
+      body:`Proses muat produk ke cart dikerjakan rider sendiri dan tidak bisa di-scale dengan tambah orang. `+
+           `Durasi ${fmt(cloadProc)}/rider adalah kontributor signifikan ke total handling time.<br>`+
+           `<b>Cara percepat:</b><br>`+
+           `• Produk sudah di-grouping per jenis sebelum jam buka (runner pre-staging) → rider tinggal muat per kategori<br>`+
+           `• Standarisasi posisi produk di cart (SOP layout cart) → rider tidak perlu mikir penempatan<br>`+
+           `• Runner assist 1 orang di area loading saat rush hour — bantu angkat/tata produk berat<br>`+
+           `Target: kurangi dari ${fmt(cloadProc)} ke ~${fmt(cloadProc*0.65)}/rider`
+    });
+  } else {
+    insights.push({type:'good',icon:'📦',
+      title:`Rider: Setup produk ke cart efisien — avg ${fmt(cloadProc)}/rider`,
+      body:`Durasi muat produk ke cart masih dalam batas wajar. `+
+           `Pastikan layout cart dan pengelompokan produk konsisten setiap hari untuk mempertahankan kecepatan ini.`
+    });
+  }
+
+  // ── 6. Ringkasan prioritas aksi ─────────────────────────────────────────
+  const critCount = insights.filter(i=>i.type==='crit').length;
+  if(critCount > 0){
+    const topFix = adminWait>300
+      ? `Prioritas utama: <b>efisiensi proses admin</b> (pre-input iSeller, bundle consumables) ${cfg.loket<3?`atau tambah 1 admin (jadi ${Math.min(3,cfg.loket+1)})`:''}. `
+      : coldWait>60
+      ? `Prioritas utama: <b>pre-staging produk di cold room</b> oleh runner sebelum jam buka. `
+      : `Prioritas utama: lihat bottleneck di atas. `;
+    insights.push({type:'warn',icon:'🎯',
+      title:`Ringkasan: ${critCount} area kritis perlu tindakan`,
+      body: topFix +
+            `Rekomendasi umum tanpa tambah headcount: standarisasi SOP per stasiun, pre-prep sebelum jam buka, `+
+            `dan monitor avg handling time per subjek (admin, rider, runner) setiap opening session.`
+    });
+  }
 
   // Late riders
   const lateRiders=done.filter(r=>r.totalTime>cfg.target*60);
@@ -1682,13 +1818,14 @@ function showReport(){
     const cart=r.times.cart||0;
     const qCold=r.waitTimes.cold||0;
     const cold=r.times.cold||0;
+    const cartLoad=r.times.cart_load||0;
     const sOut=r.times.satpam_out||0;
     const jalan=r.times.transit||0;
     const antriTotal=qAdmin+qCold;
     // Satpam time that happened before hub opens (exclude from handling)
     const timeBeforeOpen=preOpen?Math.min(sIn,adminOpen-r.spawnTime):0;
     // Handling = zone processing only, no antri, no pre-open time
-    const zoneOnly=sIn+loket+cart+cold+sOut+jalan;
+    const zoneOnly=sIn+loket+cart+cold+cartLoad+sOut+jalan;
     const computedHandle=Math.max(0,zoneOnly-timeBeforeOpen);
 
     // Display helpers
@@ -1711,11 +1848,12 @@ function showReport(){
       <td>${f0(cart)}</td>
       <td>${fAntri(qCold)}</td>
       <td>${f0(cold)}</td>
+      <td style="color:#ea580c;">${f0(cartLoad)}</td>
       <td>${f0(sOut)}</td>
       <td style="color:#60a5fa;">${f0(jalan)}</td>
       <td style="color:${antriTotal>600?'#f87171':antriTotal>300?'#fbbf24':'#9ca3af'};">${f0(antriTotal)}</td>
       <td style="font-weight:700;color:${late?'#f87171':'#4ade80'};"
-          title="(${f0(sIn)} satpam + ${f0(loket)} loket + ${f0(cart)} cart + ${f0(cold)} cold + ${f0(sOut)} satpam keluar + ${f0(jalan)} jalan)${preOpen?' - '+fmt(timeBeforeOpen)+' sebelum buka':''}">
+          title="(${f0(sIn)} satpam + ${f0(loket)} loket + ${f0(cart)} cart + ${f0(cold)} cold + ${f0(cartLoad)} setup produk + ${f0(sOut)} satpam keluar + ${f0(jalan)} jalan)${preOpen?' - '+fmt(timeBeforeOpen)+' sebelum buka':''}">
         ${fmt(computedHandle)}${handleLabel}
       </td>
     </tr>`;
@@ -1785,6 +1923,7 @@ const TIMING_PARAMS=[
   {key:'admin',label:'Loket Admin',icon:'📋',hint:'Input iSeller inventory, kasih consumables (plastik, sedotan, lid)',min:60,max:300},
   {key:'cart',label:'Setup Cart',icon:'🛒',hint:'Taruh consumables di kompartemen cart, pasang battery',min:30,max:120},
   {key:'cold',label:'Ambil Produk (Cold Room)',icon:'❄',hint:'Ambil produk dan es batu dari runner',min:30,max:120},
+  {key:'cart_load',label:'Setup Produk ke Cart',icon:'📦',hint:'Muat produk dari cold room ke cart, atur posisi, cek kelengkapan',min:30,max:1800},
   {key:'satpam_out',label:'Satpam Keluar',icon:'✅',hint:'Cek akhir oleh satpam sebelum keluar hub',min:15,max:60},
 ];
 
@@ -1866,21 +2005,40 @@ function buildTimingSliders(){
   for(const p of TIMING_PARAMS){
     const t=cfg.timing[p.key];
     const valMin=(t.val/60).toFixed(1);
+    const isCartLoad=p.key==='cart_load';
+    const slMin=isCartLoad?30:30;
+    const slMax=isCartLoad?1800:Math.max(p.max,600);
+    // Generate ticks for this slider
+    const ticksHtml=buildTimingTicks(slMin,slMax,t.val);
     wrap.innerHTML+=`<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;">
-        <span style="font-size:10px;font-weight:600;color:#e8ecf4;">${p.icon} ${p.label}</span>
+        <span style="font-size:10px;font-weight:600;color:#e8ecf4;">${p.icon} ${p.label}${isCartLoad?'<span style="font-size:8px;color:var(--amber2);margin-left:6px;">maks 30 mnt</span>':''}</span>
         <span id="tv-${p.key}" style="font-size:13px;font-weight:700;color:var(--blue2);">${valMin} mnt</span>
       </div>
       <div style="font-size:9px;color:var(--muted);margin-bottom:7px;">${p.hint}</div>
       <div class="sl-track">
-        <input type="range" min="60" max="600" step="15" value="${t.val}" id="tr-${p.key}"
+        <input type="range" min="${slMin}" max="${slMax}" step="30" value="${t.val}" id="tr-${p.key}"
           oninput="updateTiming('${p.key}',this.value)">
-        ${timingTicks()}
+        ${ticksHtml}
       </div>
       <div style="font-size:8px;color:var(--dim);margin-top:3px;text-align:right;" id="ts-${p.key}">${t.val}s</div>
     </div>`;
   }
   checkTimingWarning();
+}
+
+function buildTimingTicks(minS, maxS, curVal){
+  // Show 5 evenly spaced ticks
+  const steps=5;
+  const span=maxS-minS;
+  const ticks=[];
+  for(let i=0;i<=steps;i++){
+    const s=minS+Math.round((span*i/steps)/30)*30;
+    const m=(s/60);
+    const lbl=Number.isInteger(m)?m+'m':(m).toFixed(1)+'m';
+    ticks.push({label:lbl,mid:i===Math.floor(steps/2)});
+  }
+  return makeTicks(ticks);
 }
 
 function updateTiming(key,val){
@@ -1890,7 +2048,7 @@ function updateTiming(key,val){
   const el=document.getElementById('tv-'+key);
   const els=document.getElementById('ts-'+key);
   if(el) el.textContent=mnt+' mnt';
-  if(els) els.textContent=s+'s';
+  if(els) els.textContent=s+'s ('+mnt+' mnt)';
   checkTimingWarning();
 }
 
@@ -1902,10 +2060,10 @@ function checkTimingWarning(){
 }
 
 const ADJ_CFG={
-  loket:{min:2,max:5,field:'loket',icons:'📋',label:'loket'},
+  loket:{min:1,max:5,field:'loket',icons:'📋',label:'loket'},
   runner:{min:1,max:4,field:'runner',icons:'🧊',label:'runner'},
   satpam:{min:1,max:3,field:'satpam',icons:'🛡',label:'satpam'},
-  target:{min:5,max:20,field:'target',step:1,label:'menit'},
+  target:{min:5,max:60,field:'target',step:1,label:'menit'},
   riders:{min:10,max:200,field:'riders',step:5,label:'rider'},
 };
 
@@ -2018,14 +2176,14 @@ function wzBack(){if(wzStep>0){wzStep--;updateWzUI();}}
 function buildLoketToggle(){
   const wrap=document.getElementById('loket-toggle');
   wrap.innerHTML='';
-  for(let i=2;i<=5;i++){
+  for(let i=1;i<=5;i++){
     const btn=document.createElement('div');
     btn.className='lk-btn'+(i<=cfg.loket?' on':'');
     btn.id='lk-'+i;
     btn.textContent=i;
     btn.onclick=()=>{
       cfg.loket=i;
-      for(let j=2;j<=5;j++) document.getElementById('lk-'+j).classList.toggle('on',j<=cfg.loket);
+      for(let j=1;j<=5;j++) document.getElementById('lk-'+j).classList.toggle('on',j<=cfg.loket);
       resetSim();
       document.getElementById('chip-loket').textContent=cfg.loket+' loket';
     };
